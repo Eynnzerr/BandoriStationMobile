@@ -27,4 +27,5 @@ sealed class HomeIntent: UIEvent {
 sealed class HomeEffect: UIEffect {
     data class NavigateToScreen(val destination: Screen): HomeEffect()
     data class CopyRoomNumber(val roomNumber: String): HomeEffect()
+    class ScrollToFirst: HomeEffect()
 }

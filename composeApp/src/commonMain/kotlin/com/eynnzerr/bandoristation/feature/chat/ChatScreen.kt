@@ -210,9 +210,7 @@ fun ChatScreen(
             ) {
                 FloatingActionButton(
                     onClick = {
-                        coroutineScope.launch {
-                            viewModel.sendEffect(ChatEffect.ScrollToLatest())
-                        }
+                        viewModel.sendEffect(ChatEffect.ScrollToLatest())
                     }
                 ) {
                     Icon(
