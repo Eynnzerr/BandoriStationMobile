@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">邦邦移动车站</string>
+    <string name="placeholder">找不到字符串</string>
+
+    <!--  主页  -->
+    <string name="home_screen_title">主页</string>
+    <string name="copy_room_snackbar">已将车牌复制到剪切板。</string>
+
+    <!--  聊天页  -->
+    <string name="chat_screen_title">聊天</string>
+    <string name="clear_chats_snackbar">已清空全部聊天记录。</string>
+
+    <!--  用户页  -->
+    <string name="account_screen_title">账户</string>
+</resources>

@@ -1,0 +1,49 @@
+package com.eynnzerr.bandoristation.ui.component
+
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.default_avatar
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.CachePolicy
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.eynnzerr.bandoristation.data.remote.NetworkUrl
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+@Composable
+fun UserAvatar(
+    avatarName: String,
+    size: Dp = 32.dp
+) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalPlatformContext.current)
+            .data(NetworkUrl.AVATAR + avatarName)
+            .crossfade(true)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .build(),
+        error = painterResource(Res.drawable.default_avatar),
+        fallback = painterResource(Res.drawable.default_avatar),
+        contentDescription = "uploader avatar",
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(size)
+            .clip(CircleShape),
+    )
+}
+
+@Preview
+@Composable
+private fun UserAvatarPreview() {
+    val avatarName = "c2faea61dafc38e8ca2b6de329289d81.png"
+    UserAvatar(avatarName)
+}

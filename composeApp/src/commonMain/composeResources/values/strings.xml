@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">BandoriSationM</string>
+    <string name="placeholder">Cannot Find String</string>
+
+    <!--  Home  -->
+    <string name="home_screen_title">Home</string>
+    <string name="copy_room_snackbar">Successfully copied room number to clipboard.</string>
+
+    <!--  Chat  -->
+    <string name="chat_screen_title">Chat</string>
+    <string name="clear_chats_snackbar">Successfully cleared all chat messages.</string>
+
+    <!--  Account  -->
+    <string name="account_screen_title">Account</string>
+
+</resources>
