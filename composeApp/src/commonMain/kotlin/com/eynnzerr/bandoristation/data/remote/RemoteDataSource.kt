@@ -2,6 +2,7 @@ package com.eynnzerr.bandoristation.data.remote
 
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -25,6 +26,7 @@ interface RemoteDataSource {
     suspend fun setAccessPermission(token: String)
     suspend fun initializeChatRoom()
     suspend fun checkUnreadChat()
+    suspend fun uploadRoom(params: RoomUploadInfo)
 
     // HTTP API related
 }

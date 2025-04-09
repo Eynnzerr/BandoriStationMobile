@@ -2,6 +2,7 @@ package com.eynnzerr.bandoristation.data.remote
 
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
 
@@ -69,6 +70,12 @@ class RemoteDataSourceImpl(
         = webSocketClient.sendRequestWithRetry(
             action = "checkUnreadChat",
             data = Unit,
+        )
+
+    override suspend fun uploadRoom(params: RoomUploadInfo)
+        = webSocketClient.sendRequestWithRetry(
+            action = "sendRoomNumber",
+            data = params,
         )
 }
 

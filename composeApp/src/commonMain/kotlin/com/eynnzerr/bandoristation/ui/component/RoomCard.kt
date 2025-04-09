@@ -1,6 +1,10 @@
 package com.eynnzerr.bandoristation.ui.component
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,12 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.outlined.DirectionsBus
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,11 +35,12 @@ import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.utils.AppLogger
+import com.eynnzerr.bandoristation.utils.formatTimeDifference
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.Clock.System
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalFoundationApi::class)
 @Composable
 fun RoomCard(
     roomInfo: RoomInfo,
@@ -41,16 +48,16 @@ fun RoomCard(
     onJoin: (Boolean) -> Unit,
     isJoined: Boolean,
     currentTimeMillis: Long = System.now().toEpochMilliseconds(),
+    modifier: Modifier = Modifier,
 ) {
     OutlinedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = { onCopy(roomInfo.number ?: "") }
-                )
-            },
+            .combinedClickable(
+                onClick = {  },
+                onLongClick = { onCopy(roomInfo.number ?: "") },
+            )
     ) {
         Row(
             modifier = Modifier
@@ -107,22 +114,12 @@ fun RoomCard(
             modifier = Modifier.padding(start = 12.dp)
         )
 
-        // 添加相对时间显示
-        val timeDiffMillis = currentTimeMillis - (roomInfo.time ?: currentTimeMillis)
-        val timeDiffSeconds = (timeDiffMillis / 1000).toInt()
-
-        val timeText = if (timeDiffSeconds < 60) {
-            "${timeDiffSeconds}秒前"
-        } else {
-            "${(timeDiffSeconds / 60)}分钟前"
-        }
-
         Row(
             modifier = Modifier.padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = timeText,
+                text = formatTimeDifference(currentTimeMillis, roomInfo.time ?: currentTimeMillis) + "前",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(end = 8.dp)

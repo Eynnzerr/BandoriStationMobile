@@ -191,10 +191,12 @@ fun ChatScreen(
                         "$timestampPart-$contentPart-$userPart"
                     }
                 ) { index, chatMessage ->
-                    ChatPiece(
-                        chatMessage = chatMessage,
-                        isMyMessage = chatMessage.userInfo.userId == state.selfId
-                    )
+                    Row(Modifier.animateItem()) {
+                        ChatPiece(
+                            chatMessage = chatMessage,
+                            isMyMessage = chatMessage.userInfo.userId == state.selfId
+                        )
+                    }
                 }
             }
 

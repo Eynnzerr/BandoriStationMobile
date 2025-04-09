@@ -20,5 +20,4 @@ data class RoomInfo(
     @SerialName("type") val type: String? = null,
     @SerialName("time") val time: Long? = null,
     @SerialName("user_info") val userInfo: UserInfo? = UserInfo()
-    // TODO 缺一个bandori_player_brief_info
 )

@@ -2,6 +2,7 @@ package com.eynnzerr.bandoristation.data
 
 import com.eynnzerr.bandoristation.data.remote.RemoteDataSource
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.RoomUploadInfo
 
 class AppRepository(
     private val remoteDataSource: RemoteDataSource
@@ -20,4 +21,5 @@ class AppRepository(
 
     suspend fun initializeChatRoom() = remoteDataSource.initializeChatRoom()
     suspend fun checkUnreadChat() = remoteDataSource.checkUnreadChat()
+    suspend fun uploadRoom(params: RoomUploadInfo) = remoteDataSource.uploadRoom(params)
 }

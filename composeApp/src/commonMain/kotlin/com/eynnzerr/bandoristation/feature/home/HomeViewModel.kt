@@ -1,16 +1,23 @@
 package com.eynnzerr.bandoristation.feature.home
 
 import androidx.lifecycle.viewModelScope
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.join_room_snackbar
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
+import com.eynnzerr.bandoristation.business.UploadRoomUseCase
+import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.utils.AppLogger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock.System
 
 class HomeViewModel(
     private val setUpClientUseCase: SetUpClientUseCase,
@@ -18,6 +25,7 @@ class HomeViewModel(
     private val getRoomListUseCase: GetRoomListUseCase,
     private val updateTimestampUseCase: UpdateTimestampUseCase,
     private val checkUnreadChatUseCase: CheckUnreadChatUseCase,
+    private val uploadRoomUseCase: UploadRoomUseCase,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial() // TODO 缓存最近X条房间信息
 ) {
@@ -88,7 +96,21 @@ class HomeViewModel(
             }
 
             is HomeIntent.UpdateTimestamp -> {
-                state.value.copy(timestampMillis = event.timestampMillis) to null
+                state.value.copy(localTimestampMillis = event.timestampMillis) to null
+            }
+
+            is HomeIntent.JoinRoom -> {
+                state.value.copy(
+                    selectedRoom = event.room,
+                    joinedTimestampMillis = System.now().toEpochMilliseconds(),
+                ) to event.room?.let { ShowSnackbar(Res.string.join_room_snackbar) }
+            }
+
+            is HomeIntent.UploadRoom -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    uploadRoomUseCase(event.room)
+                }
+                state.value to ShowSnackbar(Res.string.join_room_snackbar)
             }
         }
     }

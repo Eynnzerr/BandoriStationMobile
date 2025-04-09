@@ -5,9 +5,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,36 +30,36 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import bandoristationm.composeapp.generated.resources.home_screen_title
-import com.eynnzerr.bandoristation.feature.chat.ChatEffect
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
+import com.eynnzerr.bandoristation.ui.component.CurrentRoomHeader
 import com.eynnzerr.bandoristation.ui.component.RoomCard
+import com.eynnzerr.bandoristation.ui.component.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
-import com.eynnzerr.bandoristation.utils.mockRoomList
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     navController: NavHostController,
@@ -75,6 +73,7 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
     val coroutineScope = rememberCoroutineScope()
+    var showSendRoomDialog by remember { mutableStateOf(false) }
 
     // Determine if the first item is visible
     val isFirstItemVisible by remember {
@@ -108,9 +107,27 @@ fun HomeScreen(
                         lazyListState.animateScrollToItem(0)
                     }
                 }
+
+                is HomeEffect.ShowSnackbar -> {
+                    coroutineScope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = getString(action.textRes),
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+
+                is HomeEffect.OpenSendRoomDialog -> showSendRoomDialog = true
+                is HomeEffect.CloseSendRoomDialog -> showSendRoomDialog = false
             }
         }
     }
+
+    SendRoomDialog(
+        isVisible = showSendRoomDialog,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseSendRoomDialog()) },
+        onSendClick = { roomInfo -> viewModel.sendEvent(UploadRoom(roomInfo)) },
+    )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
@@ -185,7 +202,7 @@ fun HomeScreen(
 
                 FloatingActionButton(
                     onClick = {
-                        // TODO 发送车牌
+                        viewModel.sendEffect(HomeEffect.OpenSendRoomDialog())
                     }
                 ) {
                     Icon(Icons.Filled.Add, "add student menu")
@@ -200,6 +217,26 @@ fun HomeScreen(
                 .padding(16.dp),
             state = lazyListState,
         ) {
+            state.selectedRoom?.let {
+                stickyHeader(key = -1) {
+                    CurrentRoomHeader(
+                        roomInfo = state.selectedRoom!!,
+                        currentTimeMillis = state.localTimestampMillis,
+                        startTimeMillis = state.joinedTimestampMillis,
+                        onCopy = { roomNumber ->
+                            viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
+                        },
+                        onPublish = {
+                            // 快捷发车
+                        },
+                        onLeave = {
+                            viewModel.sendEvent(JoinRoom(null))
+                        },
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+            }
+
             itemsIndexed(
                 items = state.rooms,
                 key = { index, item ->
@@ -211,9 +248,12 @@ fun HomeScreen(
                     onCopy = { roomNumber ->
                         viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
                     },
-                    onJoin = {},
-                    isJoined = false,
-                    currentTimeMillis = state.timestampMillis
+                    onJoin = { joined ->
+                        viewModel.sendEvent(JoinRoom(if (joined) roomInfo else null))
+                    },
+                    isJoined = roomInfo == state.selectedRoom,
+                    currentTimeMillis = state.localTimestampMillis,
+                    modifier = Modifier.animateItem()
                 )
             }
         }

@@ -6,6 +6,7 @@ import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.InitializeChatRoomUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
+import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -47,6 +48,13 @@ fun provideUseCaseModule() = module {
 
     single {
         CheckUnreadChatUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+        )
+    }
+
+    single {
+        UploadRoomUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )
