@@ -15,6 +15,7 @@ data class HomeState(
     val selectedRoom: RoomInfo? = null,
     val localTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val joinedTimestampMillis: Long = System.now().toEpochMilliseconds(),
+    val presetWords: Set<String> = emptySet()
 ) : UIState {
     companion object {
         fun initial() = HomeState()
@@ -28,6 +29,9 @@ sealed class HomeIntent: UIEvent {
     data class UpdateMessageBadge(val hasUnReadMessages: Boolean): HomeIntent()
     data class JoinRoom(val room: RoomInfo?): HomeIntent()
     data class UploadRoom(val room: RoomUploadInfo): HomeIntent()
+    data class UpdatePresetWords(val words: Set<String>): HomeIntent()
+    data class AddPresetWord(val word: String): HomeIntent()
+    data class RemovePresetWord(val word: String): HomeIntent()
 }
 
 sealed class HomeEffect: UIEffect {

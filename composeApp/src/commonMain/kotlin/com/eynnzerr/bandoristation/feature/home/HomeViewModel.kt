@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.feature.home
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.join_room_snackbar
+import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
@@ -10,9 +11,12 @@ import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
+import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
+import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -26,6 +30,8 @@ class HomeViewModel(
     private val updateTimestampUseCase: UpdateTimestampUseCase,
     private val checkUnreadChatUseCase: CheckUnreadChatUseCase,
     private val uploadRoomUseCase: UploadRoomUseCase,
+    private val setPreferenceUseCase: SetPreferenceUseCase,
+    private val stringSetPreferenceUseCase: GetPreferenceUseCase<Set<String>>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial() // TODO 缓存最近X条房间信息
 ) {
@@ -59,6 +65,21 @@ class HomeViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            stringSetPreferenceUseCase.invoke(GetPreferenceUseCase.Params(PreferenceKeys.PRESET_WORDS, emptySet()))
+                .collect { result ->
+                    when (result) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            AppLogger.d(TAG, result.error.message ?: "")
+                        }
+                        is UseCaseResult.Success -> {
+                            sendEvent(HomeIntent.UpdatePresetWords(result.data ?: emptySet()))
+                        }
+                    }
+                }
+        }
     }
 
     override suspend fun onStartStateFlow() {
@@ -80,7 +101,7 @@ class HomeViewModel(
         }
     }
 
-    override fun reduce(event: HomeIntent): Pair<HomeState, HomeEffect?> {
+    override fun reduce(event: HomeIntent): Pair<HomeState?, HomeEffect?> {
         return when (event) {
             is HomeIntent.UpdateRoomList -> {
                 state.value.copy(rooms = event.rooms) to null
@@ -110,7 +131,29 @@ class HomeViewModel(
                 viewModelScope.launch(Dispatchers.IO) {
                     uploadRoomUseCase(event.room)
                 }
-                state.value to ShowSnackbar(Res.string.join_room_snackbar)
+                null to ShowSnackbar(Res.string.upload_room_snackbar)
+            }
+
+            is HomeIntent.AddPresetWord -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    setPreferenceUseCase(SetPreferenceUseCase.Params(
+                        key = PreferenceKeys.PRESET_WORDS,
+                        value = state.value.presetWords.toMutableSet().apply { add(event.word) }
+                    ))
+                }
+                null to null
+            }
+            is HomeIntent.RemovePresetWord -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    setPreferenceUseCase(SetPreferenceUseCase.Params(
+                        key = PreferenceKeys.PRESET_WORDS,
+                        value = state.value.presetWords.toMutableSet().apply { remove(event.word) }
+                    ))
+                }
+                null to null
+            }
+            is HomeIntent.UpdatePresetWords -> {
+                state.value.copy(presetWords = event.words) to null
             }
         }
     }

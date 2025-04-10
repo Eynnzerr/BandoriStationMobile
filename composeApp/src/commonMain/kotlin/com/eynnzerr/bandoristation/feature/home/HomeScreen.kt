@@ -127,6 +127,9 @@ fun HomeScreen(
         isVisible = showSendRoomDialog,
         onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseSendRoomDialog()) },
         onSendClick = { roomInfo -> viewModel.sendEvent(UploadRoom(roomInfo)) },
+        onAddPresetWord = { viewModel.sendEvent(AddPresetWord(it)) },
+        onDeletePresetWord = { viewModel.sendEvent(RemovePresetWord(it)) },
+        presetWords = state.presetWords,
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

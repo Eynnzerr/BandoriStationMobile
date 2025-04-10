@@ -55,12 +55,14 @@ abstract class BaseViewModel<State : UIState, Event: UIEvent, Effect: UIEffect>(
     }
 
     // process the input event and produce new state along with possible effect.
-    abstract fun reduce(event: Event): Pair<State, Effect?>
+    abstract fun reduce(event: Event): Pair<State?, Effect?>
 
     fun sendEvent(event: Event) {
         val (newState, effect) = reduce(event)
 
-        _state.tryEmit(newState)
+        newState?.let {
+            _state.tryEmit(it)
+        }
         effect?.let {
             sendEffect(it)
         }

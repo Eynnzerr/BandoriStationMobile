@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.ui.component
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Publish
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,13 +32,15 @@ import com.eynnzerr.bandoristation.model.RoomUploadInfo
 @Composable
 fun SendRoomDialog(
     isVisible: Boolean,
+    presetWords: Set<String>,
     onDismissRequest: () -> Unit,
-    onSendClick: (uploadInfo: RoomUploadInfo) -> Unit
+    onSendClick: (uploadInfo: RoomUploadInfo) -> Unit,
+    onAddPresetWord: (String) -> Unit,
+    onDeletePresetWord: (String) -> Unit,
 ) {
     if (isVisible) {
         var roomNumber by remember { mutableStateOf("") }
         var description by remember { mutableStateOf("") }
-        var presetWords by remember { mutableStateOf(listOf<String>()) }
         var newPresetWord by remember { mutableStateOf("") }
         var isPresetWordsExpanded by remember { mutableStateOf(false) }
         var isAddWordsExpanded by remember { mutableStateOf(false) }
@@ -49,7 +53,7 @@ fun SendRoomDialog(
                     contentDescription = "send room"
                 )
             },
-            title = { Text("发送房间信息") },
+            title = { Text("上传房间信息") },
             text = {
                 Column(
                     modifier = Modifier
@@ -119,7 +123,8 @@ fun SendRoomDialog(
                                 // 预选词列表
                                 Row(
                                     modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     FilledTonalIconToggleButton(
                                         checked = isAddWordsExpanded,
@@ -133,13 +138,23 @@ fun SendRoomDialog(
                                         )
                                     }
 
+                                    if (presetWords.isEmpty()) {
+                                        Text("暂无预选词。")
+                                    }
+
                                     presetWords.forEach { word ->
                                         InputChip(
                                             selected = false,
-                                            onClick = {},
+                                            onClick = {
+                                                description += word
+                                            },
                                             label = { Text(word) },
                                             trailingIcon = {
-                                                Icon(Icons.Default.Close, contentDescription = null)
+                                                Icon(
+                                                    imageVector = Icons.Default.Close,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.clickable { onDeletePresetWord(word) }
+                                                )
                                             }
                                         )
                                     }
@@ -161,7 +176,7 @@ fun SendRoomDialog(
                                             TextButton(
                                                 onClick = {
                                                     if (newPresetWord.isNotBlank()) {
-                                                        presetWords = presetWords + newPresetWord
+                                                        onAddPresetWord(newPresetWord)
                                                         newPresetWord = ""
                                                     }
                                                 },
