@@ -24,9 +24,11 @@ interface RemoteDataSource {
     // concrete business
     suspend fun setWebSocketApiClient(params: ClientSetInfo)
     suspend fun setAccessPermission(token: String)
+    suspend fun getFirstRoomList()
     suspend fun initializeChatRoom()
     suspend fun checkUnreadChat()
     suspend fun uploadRoom(params: RoomUploadInfo)
+    suspend fun sendChat(message: String)
 
     // HTTP API related
 }

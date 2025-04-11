@@ -15,7 +15,7 @@ class GetChatUseCase(
 ) : FlowUseCase<Unit, List<ChatMessage>, List<ChatMessage>>(dispatcher) {
 
     override fun execute(parameters: Unit): Flow<UseCaseResult<List<ChatMessage>, List<ChatMessage>>> {
-        return repository.listenWebSocketForActions(listOf("sendRoomNumberList"))
+        return repository.listenWebSocketForActions(listOf("sendChat"))
             .map { response ->
                 val newMessageList = WebSocketHelper.parseWebSocketResponse<List<ChatMessage>>(response)
                 newMessageList?.let { UseCaseResult.Success(it) } ?: UseCaseResult.Error(emptyList())

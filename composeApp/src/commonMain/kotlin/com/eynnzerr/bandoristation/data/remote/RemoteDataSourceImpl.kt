@@ -60,6 +60,12 @@ class RemoteDataSourceImpl(
             data = mapOf("token" to token)
         )
 
+    override suspend fun getFirstRoomList()
+        = webSocketClient.sendRequestWithRetry(
+            action = "getRoomNumberList",
+            data = Unit,
+        )
+
     override suspend fun initializeChatRoom()
         = webSocketClient.sendRequestWithRetry(
             action = "initializeChatRoom",
@@ -76,6 +82,12 @@ class RemoteDataSourceImpl(
         = webSocketClient.sendRequestWithRetry(
             action = "sendRoomNumber",
             data = params,
+        )
+
+    override suspend fun sendChat(message: String)
+        = webSocketClient.sendRequestWithRetry(
+            action = "sendChat",
+            data = mapOf("message" to message)
         )
 }
 

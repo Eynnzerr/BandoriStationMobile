@@ -34,7 +34,7 @@ abstract class BaseViewModel<State : UIState, Event: UIEvent, Effect: UIEffect>(
             }
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
+            started = SharingStarted.WhileSubscribed(),
             initialValue = initialState
         )
     }

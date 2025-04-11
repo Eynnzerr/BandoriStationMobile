@@ -37,10 +37,12 @@ fun SendRoomDialog(
     onSendClick: (uploadInfo: RoomUploadInfo) -> Unit,
     onAddPresetWord: (String) -> Unit,
     onDeletePresetWord: (String) -> Unit,
+    prefillRoomNumber: String = "",
+    prefillDescription: String = "",
 ) {
     if (isVisible) {
-        var roomNumber by remember { mutableStateOf("") }
-        var description by remember { mutableStateOf("") }
+        var roomNumber by remember(prefillRoomNumber) { mutableStateOf(prefillRoomNumber) }
+        var description by remember(prefillDescription) { mutableStateOf(prefillDescription) }
         var newPresetWord by remember { mutableStateOf("") }
         var isPresetWordsExpanded by remember { mutableStateOf(false) }
         var isAddWordsExpanded by remember { mutableStateOf(false) }

@@ -11,6 +11,8 @@ data class ChatState(
     val chats: List<ChatMessage> = emptyList(),
     val hasMore: Boolean = false,
     val selfId: Long = 0,
+    val initialized: Boolean = false,
+    val unreadCount: Int = 0,
 ) : UIState {
     companion object {
         fun initial() = ChatState()
@@ -21,6 +23,9 @@ sealed class ChatIntent : UIEvent {
     data class LoadInitial(val initialData: ChatInitResponse): ChatIntent()
     data class LoadMore(val chats: List<ChatMessage>): ChatIntent()
     class ClearAll(): ChatIntent()
+    data class AppendNewChats(val chats: List<ChatMessage>): ChatIntent()
+    data class SendChat(val message: String): ChatIntent()
+    class ClearUnreadCount(): ChatIntent()
 }
 
 sealed class ChatEffect: UIEffect {

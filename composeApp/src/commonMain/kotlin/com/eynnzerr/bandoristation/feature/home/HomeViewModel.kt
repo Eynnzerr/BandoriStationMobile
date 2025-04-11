@@ -20,6 +20,7 @@ import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock.System
 
@@ -33,7 +34,7 @@ class HomeViewModel(
     private val setPreferenceUseCase: SetPreferenceUseCase,
     private val stringSetPreferenceUseCase: GetPreferenceUseCase<Set<String>>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
-    initialState = HomeState.initial() // TODO 缓存最近X条房间信息
+    initialState = HomeState.initial()
 ) {
 
     override suspend fun loadInitialData() {
@@ -83,8 +84,6 @@ class HomeViewModel(
     }
 
     override suspend fun onStartStateFlow() {
-        AppLogger.d(TAG, "onStartStateFlow: set websocket client.")
-
         setUpClientUseCase(ClientSetInfo(
             client = "BandoriStation Mobile",
             sendRoomNumber = true,
@@ -92,6 +91,7 @@ class HomeViewModel(
         ))
 
         // TODO BUG: 与设置访问权限请求异步。必须尽快解决不能批量发送ws action的问题，即改造泛型为密封类
+        delay(2000L)
         when (val checkResult = checkUnreadChatUseCase(Unit)) {
             is UseCaseResult.Error -> Unit
             is UseCaseResult.Loading -> Unit
@@ -109,7 +109,7 @@ class HomeViewModel(
 
             is HomeIntent.AppendRoomList -> {
                 val originalList = state.value.rooms
-                state.value.copy(rooms = event.rooms + originalList) to null
+                state.value.copy(rooms = originalList + event.rooms) to null
             }
 
             is HomeIntent.UpdateMessageBadge -> {

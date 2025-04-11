@@ -39,6 +39,9 @@ sealed class HomeEffect: UIEffect {
     data class CopyRoomNumber(val roomNumber: String): HomeEffect()
     data class ShowSnackbar(val textRes: StringResource): HomeEffect()
     class ScrollToFirst: HomeEffect()
-    class OpenSendRoomDialog(): HomeEffect()
+    data class OpenSendRoomDialog(
+        val prefillRoomNumber: String = "",
+        val prefillDescription: String = "",
+    ): HomeEffect()
     class CloseSendRoomDialog(): HomeEffect()
 }

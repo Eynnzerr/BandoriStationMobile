@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -73,12 +74,28 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
     val coroutineScope = rememberCoroutineScope()
+    var wasAtTop by remember { mutableStateOf(true) }
     var showSendRoomDialog by remember { mutableStateOf(false) }
+
+    var prefillRoomNumber by remember { mutableStateOf("") }
+    var prefillDescription by remember { mutableStateOf("") }
 
     // Determine if the first item is visible
     val isFirstItemVisible by remember {
         derivedStateOf {
             lazyListState.firstVisibleItemIndex == 0
+        }
+    }
+
+    // record previous list location, before reacting to list change.
+    LaunchedEffect(isFirstItemVisible) {
+        wasAtTop = isFirstItemVisible
+    }
+
+    // Automatically keeping at top when new rooms arrive, if was already at top.
+    LaunchedEffect(state.rooms) {
+        if (wasAtTop) {
+            viewModel.sendEffect(HomeEffect.ScrollToFirst())
         }
     }
 
@@ -117,8 +134,16 @@ fun HomeScreen(
                     }
                 }
 
-                is HomeEffect.OpenSendRoomDialog -> showSendRoomDialog = true
-                is HomeEffect.CloseSendRoomDialog -> showSendRoomDialog = false
+                is HomeEffect.OpenSendRoomDialog -> {
+                    prefillRoomNumber = action.prefillRoomNumber
+                    prefillDescription = action.prefillDescription
+                    showSendRoomDialog = true
+                }
+                is HomeEffect.CloseSendRoomDialog -> {
+                    showSendRoomDialog = false
+                    prefillRoomNumber = ""
+                    prefillDescription = ""
+                }
             }
         }
     }
@@ -130,6 +155,8 @@ fun HomeScreen(
         onAddPresetWord = { viewModel.sendEvent(AddPresetWord(it)) },
         onDeletePresetWord = { viewModel.sendEvent(RemovePresetWord(it)) },
         presetWords = state.presetWords,
+        prefillRoomNumber = prefillRoomNumber,
+        prefillDescription = prefillDescription,
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -139,6 +166,18 @@ fun HomeScreen(
             AppTopBar(
                 title = stringResource(Res.string.home_screen_title),
                 scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            // TODO Navigate to settings
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = ""
+                        )
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {
@@ -230,7 +269,14 @@ fun HomeScreen(
                             viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
                         },
                         onPublish = {
-                            // 快捷发车
+                            state.selectedRoom?.let { selectedRoom ->
+                                viewModel.sendEffect(
+                                    HomeEffect.OpenSendRoomDialog(
+                                        prefillRoomNumber = selectedRoom.number ?: "",
+                                        prefillDescription = selectedRoom.rawMessage ?: ""
+                                    )
+                                )
+                            }
                         },
                         onLeave = {
                             viewModel.sendEvent(JoinRoom(null))
@@ -241,9 +287,9 @@ fun HomeScreen(
             }
 
             itemsIndexed(
-                items = state.rooms,
+                items = state.rooms.asReversed(),
                 key = { index, item ->
-                    state.rooms.size - index // reverse index
+                    state.rooms.size - 1 - index // reverse index
                 }
             ) { index, roomInfo ->
                 RoomCard(
@@ -262,3 +308,5 @@ fun HomeScreen(
         }
     }
 }
+
+private const val TAG = "HomeScreen"

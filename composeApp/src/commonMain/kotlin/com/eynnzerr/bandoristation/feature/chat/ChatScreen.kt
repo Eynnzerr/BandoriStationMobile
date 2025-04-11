@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -51,7 +52,9 @@ import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
+import com.eynnzerr.bandoristation.ui.component.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.ChatPiece
+import com.eynnzerr.bandoristation.ui.component.UnreadBubble
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
@@ -95,6 +98,23 @@ fun ChatScreen(
         }
     }
 
+    // automatically scroll to bottom after chat connection initialization.
+    LaunchedEffect(state.initialized) {
+        if (state.initialized) {
+            viewModel.sendEffect(ChatEffect.ScrollToLatest())
+        }
+    }
+
+    // automatically scroll to bottom if last chat is self sent.
+    LaunchedEffect(state.chats) {
+        val lastChat = state.chats.lastOrNull()
+        lastChat?.let {
+            if (it.userInfo.userId == state.selfId) {
+                viewModel.sendEffect(ChatEffect.ScrollToLatest())
+            }
+        }
+    }
+
     // Check if the list is at the bottom
     val isAtBottom by remember {
         derivedStateOf {
@@ -109,6 +129,13 @@ fun ChatScreen(
         }
     }
 
+    // Remove unread bubble if scrolled to bottom
+    LaunchedEffect(isAtBottom) {
+        if (state.initialized) {
+            viewModel.sendEvent(ChatIntent.ClearUnreadCount())
+        }
+    }
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = Modifier.appBarScroll(true, scrollBehavior),
@@ -116,6 +143,18 @@ fun ChatScreen(
             AppTopBar(
                 title = stringResource(Res.string.chat_screen_title),
                 scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            // TODO Navigate to settings
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = ""
+                        )
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {
@@ -151,7 +190,7 @@ fun ChatScreen(
                         onClick = {
                             // Handle send message
                             if (messageText.isNotBlank()) {
-                                // TODO: Add logic to send the message
+                                viewModel.sendEvent(ChatIntent.SendChat(messageText))
                                 messageText = ""
                             }
                         },
@@ -200,7 +239,26 @@ fun ChatScreen(
                 }
             }
 
-            // Floating action button moved here
+            AnimatedVisibility(
+                visible = state.unreadCount > 0,
+                enter = fadeIn() + slideInVertically { it },
+                exit = fadeOut() + slideOutVertically { it },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        start = 24.dp,
+                        bottom = innerPadding.calculateBottomPadding() + 32.dp
+                    )
+                    .zIndex(1f)
+            ) {
+                UnreadBubble(
+                    text = state.unreadCount.toString(),
+                    isArrowOnTop = false,
+                    arrowPosition = ArrowHorizontalPosition.END,
+                )
+            }
+
+
             AnimatedVisibility(
                 visible = !isAtBottom,
                 enter = fadeIn() + slideInVertically { it },
