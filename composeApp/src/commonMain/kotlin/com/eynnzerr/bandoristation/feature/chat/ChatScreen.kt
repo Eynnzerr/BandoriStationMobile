@@ -30,6 +30,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -54,6 +55,7 @@ import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.ChatPiece
+import com.eynnzerr.bandoristation.ui.component.TimePiece
 import com.eynnzerr.bandoristation.ui.component.UnreadBubble
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
@@ -203,7 +205,6 @@ fun ChatScreen(
                     }
                 }
 
-                // Navigation bar
                 AppNavBar(
                     screens = Screen.bottomScreenList,
                     currentDestination = navBackStackEntry?.destination,
@@ -213,28 +214,45 @@ fun ChatScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(16.dp),
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+        ) {
+            PullToRefreshBox(
+                isRefreshing = state.isLoading,
+                onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) },
             ) {
-                itemsIndexed(
-                    items = state.chats,
-                    key = { index, item ->
-                        val timestampPart = item.timestamp
-                        val contentPart = item.content.hashCode()
-                        val userPart = item.userInfo.hashCode()
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .padding(16.dp),
+                ) {
+                    itemsIndexed(
+                        items = state.chats,
+                        key = { index, item ->
+                            val timestampPart = item.timestamp
+                            val contentPart = item.content.hashCode()
+                            val userPart = item.userInfo.hashCode()
 
-                        "$timestampPart-$contentPart-$userPart"
-                    }
-                ) { index, chatMessage ->
-                    Row(Modifier.animateItem()) {
-                        ChatPiece(
-                            chatMessage = chatMessage,
-                            isMyMessage = chatMessage.userInfo.userId == state.selfId
-                        )
+                            "$timestampPart-$contentPart-$userPart"
+                        }
+                    ) { index, chatMessage ->
+                        Row(
+                            modifier = Modifier.animateItem()
+                        ) {
+                            if (chatMessage.userInfo.userId == null) {
+                                // System Message like date separator
+                                TimePiece(
+                                    chatMessage = chatMessage,
+                                )
+                            } else {
+                                // User Message
+                                ChatPiece(
+                                    chatMessage = chatMessage,
+                                    isMyMessage = chatMessage.userInfo.userId == state.selfId
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -258,14 +276,13 @@ fun ChatScreen(
                 )
             }
 
-
             AnimatedVisibility(
                 visible = !isAtBottom,
                 enter = fadeIn() + slideInVertically { it },
                 exit = fadeOut() + slideOutVertically { it },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = innerPadding.calculateBottomPadding() + 32.dp)
+                    .padding(bottom = 16.dp)
                     .zIndex(1f)
             ) {
                 FloatingActionButton(

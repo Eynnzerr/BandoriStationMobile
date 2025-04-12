@@ -17,7 +17,7 @@ fun NavController.navigateTo(
     AppLogger.d("navigation", "navigateTo: ${screen.route}")
 
     navigate(route) {
-        AppLogger.d("navigation", "findStartDestination: ${graph.findStartDestination()}")
+        // AppLogger.d("navigation", "findStartDestination: ${graph.findStartDestination()}")
 
         // Pop up to the start destination of the graph to
         // avoid building up a large stack of destinations

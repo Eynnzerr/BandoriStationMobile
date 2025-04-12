@@ -24,4 +24,5 @@ class AppRepository(
     suspend fun uploadRoom(params: RoomUploadInfo) = remoteDataSource.uploadRoom(params)
     suspend fun sendChat(message: String) = remoteDataSource.sendChat(message)
     suspend fun getFirstRoomList() = remoteDataSource.getFirstRoomList()
+    suspend fun loadChatHistory(lastTimestamp: Long) = remoteDataSource.loadChatHistory(lastTimestamp)
 }

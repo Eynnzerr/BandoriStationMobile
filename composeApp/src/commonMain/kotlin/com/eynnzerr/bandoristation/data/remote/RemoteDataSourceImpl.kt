@@ -18,7 +18,6 @@ class RemoteDataSourceImpl(
     override suspend fun connectWebSocket()
         = webSocketClient.connect()
 
-    // TODO BUG：非reified导致T的类型被丢失，无法传给reified函数sendRequest，导致Serializer报空指针
     override suspend fun <T> sendWebSocketRequest(action: String, data: T?)
         = webSocketClient.sendRequest(action, data)
 
@@ -28,7 +27,7 @@ class RemoteDataSourceImpl(
         retryAttempts: Int
     ) {
         if (webSocketConnectionState.value is WebSocketClient.ConnectionState.Connected) {
-            AppLogger.d(TAG, "Ready to send $action. Current retry attempts: $retryAttempts")
+            // AppLogger.d(TAG, "Ready to send $action. Current retry attempts: $retryAttempts")
             webSocketClient.sendRequest(action, data)
         } else if (retryAttempts >= maxResendAttempts) {
             return
@@ -88,6 +87,12 @@ class RemoteDataSourceImpl(
         = webSocketClient.sendRequestWithRetry(
             action = "sendChat",
             data = mapOf("message" to message)
+        )
+
+    override suspend fun loadChatHistory(lastTimestamp: Long)
+        = webSocketClient.sendRequestWithRetry(
+            action = "loadChatLog",
+            data = mapOf("timestamp" to lastTimestamp),
         )
 }
 

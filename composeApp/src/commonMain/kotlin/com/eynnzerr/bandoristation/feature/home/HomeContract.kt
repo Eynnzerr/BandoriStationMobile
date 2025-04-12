@@ -32,6 +32,7 @@ sealed class HomeIntent: UIEvent {
     data class UpdatePresetWords(val words: Set<String>): HomeIntent()
     data class AddPresetWord(val word: String): HomeIntent()
     data class RemovePresetWord(val word: String): HomeIntent()
+    class ClearRooms(): HomeIntent()
 }
 
 sealed class HomeEffect: UIEffect {

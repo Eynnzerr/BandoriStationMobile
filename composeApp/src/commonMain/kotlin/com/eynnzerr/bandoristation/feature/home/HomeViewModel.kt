@@ -6,6 +6,7 @@ import bandoristationm.composeapp.generated.resources.join_room_snackbar
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
+import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
@@ -13,6 +14,7 @@ import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
+import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.*
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
@@ -25,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock.System
 
 class HomeViewModel(
+    private val connectWebSocketUseCase: ConnectWebSocketUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
     private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val getRoomListUseCase: GetRoomListUseCase,
@@ -39,6 +42,8 @@ class HomeViewModel(
 
     override suspend fun loadInitialData() {
         AppLogger.d(TAG, "loadInitialData: Initialize HomeViewModel!")
+
+        connectWebSocketUseCase(Unit)
 
         viewModelScope.launch {
             updateTimestampUseCase.invoke(Unit).collect { result ->
@@ -136,24 +141,32 @@ class HomeViewModel(
 
             is HomeIntent.AddPresetWord -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    setPreferenceUseCase(SetPreferenceUseCase.Params(
-                        key = PreferenceKeys.PRESET_WORDS,
-                        value = state.value.presetWords.toMutableSet().apply { add(event.word) }
-                    ))
+                    setPreferenceUseCase(
+                        Params(
+                            key = PreferenceKeys.PRESET_WORDS,
+                            value = state.value.presetWords.toMutableSet().apply { add(event.word) }
+                        ))
                 }
                 null to null
             }
             is HomeIntent.RemovePresetWord -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    setPreferenceUseCase(SetPreferenceUseCase.Params(
-                        key = PreferenceKeys.PRESET_WORDS,
-                        value = state.value.presetWords.toMutableSet().apply { remove(event.word) }
-                    ))
+                    setPreferenceUseCase(
+                        Params(
+                            key = PreferenceKeys.PRESET_WORDS,
+                            value = state.value.presetWords.toMutableSet().apply { remove(event.word) }
+                        ))
                 }
                 null to null
             }
             is HomeIntent.UpdatePresetWords -> {
                 state.value.copy(presetWords = event.words) to null
+            }
+
+            is HomeIntent.ClearRooms -> {
+                state.value.copy(
+                    rooms = emptyList()
+                ) to null
             }
         }
     }

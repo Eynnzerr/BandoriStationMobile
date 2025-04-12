@@ -9,6 +9,7 @@ import org.koin.dsl.module
 fun provideViewModelModule() = module {
     factory {
         HomeViewModel(
+            connectWebSocketUseCase = get(),
             setUpClientUseCase = get(),
             disconnectWebSocketUseCase = get(),
             getRoomListUseCase = get(),

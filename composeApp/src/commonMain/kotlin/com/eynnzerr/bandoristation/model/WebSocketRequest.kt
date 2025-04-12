@@ -26,3 +26,18 @@ data class WebSocketResponse<T>(
     val action: String,
     val response: T
 )
+
+/**
+ * 新版Websocket Request
+ */
+sealed class WSRequest(
+    val action: String = "",
+)
+
+/**
+ * 新版Websocket Response
+ */
+sealed class WSResponse(
+    val status: String = "success",
+    val action: String = "",
+)

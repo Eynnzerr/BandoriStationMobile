@@ -1,22 +1,30 @@
 package com.eynnzerr.bandoristation.di
 
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
+import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetChatUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.InitializeChatRoomUseCase
+import com.eynnzerr.bandoristation.business.ReceiveHistoryChatUseCase
+import com.eynnzerr.bandoristation.business.RequestHistoryChatUseCase
 import com.eynnzerr.bandoristation.business.SendChatUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
-import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 fun provideUseCaseModule() = module {
     single {
         SetUpClientUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+        )
+    }
+
+    single {
+        ConnectWebSocketUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
             dataStore = get(),
@@ -79,37 +87,16 @@ fun provideUseCaseModule() = module {
     }
 
     single {
-        SetPreferenceUseCase(
-            dataStore = get(),
+        RequestHistoryChatUseCase(
+            repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )
     }
 
-    single(named("stringPreferenceUseCase")) {
-        GetPreferenceUseCase<String>(
-            dataStore = get(),
-            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER))
-        )
-    }
-
-    single(named("intPreferenceUseCase")) {
-        GetPreferenceUseCase<Int>(
-            dataStore = get(),
-            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER))
-        )
-    }
-
-    single(named("booleanPreferenceUseCase")) {
-        GetPreferenceUseCase<Boolean>(
-            dataStore = get(),
-            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER))
-        )
-    }
-
-    single(named("stringSetPreferenceUseCase")) {
-        GetPreferenceUseCase<Set<String>>(
-            dataStore = get(),
-            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER))
+    single {
+        ReceiveHistoryChatUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )
     }
 }
