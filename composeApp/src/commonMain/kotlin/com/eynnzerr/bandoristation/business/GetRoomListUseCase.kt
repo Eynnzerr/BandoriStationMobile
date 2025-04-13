@@ -2,7 +2,7 @@ package com.eynnzerr.bandoristation.business
 
 import com.eynnzerr.bandoristation.business.base.FlowUseCase
 import com.eynnzerr.bandoristation.data.AppRepository
-import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketHelper
+import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
 import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,7 +22,7 @@ class GetRoomListUseCase(
                 repository.getFirstRoomList()
             }
             .map { response ->
-                val roomList = WebSocketHelper.parseWebSocketResponse<List<RoomInfo>>(response)
+                val roomList = NetResponseHelper.parseWebSocketResponse<List<RoomInfo>>(response)
                 roomList?.let { UseCaseResult.Success(it) } ?: UseCaseResult.Error(emptyList())
             }
     }

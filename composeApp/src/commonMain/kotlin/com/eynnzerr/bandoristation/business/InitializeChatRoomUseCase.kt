@@ -2,7 +2,7 @@ package com.eynnzerr.bandoristation.business
 
 import com.eynnzerr.bandoristation.business.base.UseCase
 import com.eynnzerr.bandoristation.data.AppRepository
-import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketHelper
+import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
 import com.eynnzerr.bandoristation.model.ChatLoadResponse
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,7 +20,7 @@ class InitializeChatRoomUseCase(
 
         return repository.listenWebSocketForActions(listOf("initializeChatRoom"))
             .map { response ->
-                val initResponse = WebSocketHelper.parseWebSocketResponse<ChatLoadResponse>(response)
+                val initResponse = NetResponseHelper.parseWebSocketResponse<ChatLoadResponse>(response)
                 initResponse?.let { UseCaseResult.Success(it) } ?: UseCaseResult.Error(ChatLoadResponse())
             }.first()
     }

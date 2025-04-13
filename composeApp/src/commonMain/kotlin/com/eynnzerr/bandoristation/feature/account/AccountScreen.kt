@@ -9,37 +9,96 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import bandoristationm.composeapp.generated.resources.Res
-import bandoristationm.composeapp.generated.resources.default_avatar
-import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
-import coil3.request.ImageRequest
-import coil3.request.crossfade
+import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.AppNavBar
+import com.eynnzerr.bandoristation.ui.component.LoginDialog
+import com.eynnzerr.bandoristation.ui.component.LoginScreenState
 import com.eynnzerr.bandoristation.ui.component.SimpleRoomCard
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
-import com.eynnzerr.bandoristation.utils.mockRoomList
-import org.jetbrains.compose.resources.painterResource
+import com.eynnzerr.bandoristation.ui.component.UserBannerImage
+import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: AccountViewModel = koinViewModel<AccountViewModel>()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val effect = rememberFlowWithLifecycle(viewModel.effect)
+
     val tabs = listOf("发布历史", "玩家信息")
+    val clipboardManager = LocalClipboardManager.current
     var selectedTabIndex by remember { mutableStateOf(0) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(effect) {
+        effect.collect { action ->
+            when (action) {
+                is AccountEffect.ShowSnackbar -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = action.text,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+
+                is AccountEffect.CopyRoomNumber -> {
+                    clipboardManager.setText(AnnotatedString(action.roomNumber))
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = getString(Res.string.copy_room_snackbar),
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+                
+                is AccountEffect.NavigateToScreen -> {
+                    navController.navigateTo(action.destination)
+                }
+            }
+        }
+    }
+
+    LoginDialog(
+        isVisible = state.isTokenValid,
+        onDismissRequest = {},
+        onLoginWithToken = { token ->
+            // 用这个token发起请求
+        },
+        onLoginWithPassword = { username, password ->
+            // 发起Login请求
+        },
+        onRegister = { username, password, email ->
+            // 发起注册请求
+        },
+        onSendVerificationCode = { email ->
+            // 发送验证码
+        },
+        onVerifyCode = { email, code ->
+            // 验证验证码
+        }
+    )
 
     Scaffold(
         bottomBar = {
@@ -49,135 +108,145 @@ fun AccountScreen(
                 onNavigateTo = navController::navigateTo,
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
+        if (state.isLoading) {
+            // 在中央显示一个
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(150.dp)
+                        .fillMaxSize()
+                        .padding(paddingValues)
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalPlatformContext.current)
-                        .data("")
-                        .crossfade(true)
-                        .build(),
-                    error = painterResource(Res.drawable.default_avatar),
-                    fallback = painterResource(Res.drawable.default_avatar),
-                    contentDescription = "uploader avatar",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
-
-            // 用户信息区域
-            Row(
+        } else {
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // 用户头像
-                    UserAvatar(
-                        avatarName = "",
-                        size = 64.dp
-                    )
+                UserBannerImage(
+                    bannerName = state.accountInfo.summary.banner,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                )
 
-                    // 用户信息
-                    Column(
-                        modifier = Modifier
-                            .padding(start = 12.dp)
-                            .padding(top = 4.dp)
-                    ) {
-                        Text(
-                            text = "eynnzerr",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
+                // 用户信息区域
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // 用户头像
+                        UserAvatar(
+                            avatarName = state.accountInfo.summary.avatar,
+                            size = 64.dp
                         )
-                        Text(
-                            text = "UID: 10864",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(top = 4.dp),
-                        )
-                        Row(
-                            modifier = Modifier.padding(top = 0.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+
+                        // 用户信息
+                        Column(
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .padding(top = 4.dp)
                         ) {
                             Text(
-                                text = "0 关注",
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 14.sp
+                                text = state.accountInfo.summary.username,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 20.sp
                             )
                             Text(
-                                text = "0 关注者",
+                                text = "UID: ${state.accountInfo.summary.userId}",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(top = 4.dp),
                             )
+                            Row(
+                                modifier = Modifier.padding(top = 0.dp),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            ) {
+                                Text(
+                                    text = "${state.accountInfo.summary.following} 关注",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 14.sp
+                                )
+                                Text(
+                                    text = "${state.accountInfo.summary.follower} 关注者",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 14.sp
+                                )
+                            }
                         }
+                    }
+
+                    // 编辑资料按钮
+                    Button(
+                        onClick = { /* 编辑资料 */ },
+                        shape = MaterialTheme.shapes.medium
+                    ) {
+                        Text("编辑资料")
                     }
                 }
 
-                // 编辑资料按钮
-                Button(
-                    onClick = { /* 编辑资料 */ },
-                    shape = MaterialTheme.shapes.medium
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // 标签页
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary
                 ) {
-                    Text("编辑资料")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 标签页
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary
-            ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(title) }
-                    )
-                }
-            }
-
-            // 标签页内容
-            when (selectedTabIndex) {
-                0 -> {
-                    // 发布历史
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(8.dp)
-                    ) {
-                        itemsIndexed(mockRoomList) { index, roomInfo ->
-                            SimpleRoomCard(
-                                roomInfo = roomInfo,
-                                onCopy = {},
-                            )
-                        }
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title) }
+                        )
                     }
                 }
-                1 -> {
-                    // 玩家信息
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "暂无玩家信息",
-                            color = Color.Gray
-                        )
+
+                // 标签页内容
+                when (selectedTabIndex) {
+                    0 -> {
+                        // 发布历史
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(8.dp)
+                        ) {
+                            itemsIndexed(state.accountInfo.roomNumberHistory) { index, roomInfo ->
+                                SimpleRoomCard(
+                                    number = roomInfo.number,
+                                    rawMessage = roomInfo.rawMessage,
+                                    timestamp = roomInfo.time,
+                                    sourceName = roomInfo.sourceName,
+                                    avatarName = state.accountInfo.summary.avatar,
+                                    userName = state.accountInfo.summary.username,
+                                    onCopy = { roomNumber ->
+                                        viewModel.sendEffect(AccountEffect.CopyRoomNumber(roomNumber))
+                                    },
+                                )
+                            }
+                        }
+                    }
+                    1 -> {
+                        // 玩家信息
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "即将推出",
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
             }

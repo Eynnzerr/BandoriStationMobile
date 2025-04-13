@@ -1,6 +1,7 @@
 package com.eynnzerr.bandoristation.data
 
 import com.eynnzerr.bandoristation.data.remote.RemoteDataSource
+import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
 
@@ -25,4 +26,10 @@ class AppRepository(
     suspend fun sendChat(message: String) = remoteDataSource.sendChat(message)
     suspend fun getFirstRoomList() = remoteDataSource.getFirstRoomList()
     suspend fun loadChatHistory(lastTimestamp: Long) = remoteDataSource.loadChatHistory(lastTimestamp)
+
+    // HTTPS
+    suspend fun sendHttpsRequest(
+        request: ApiRequest,
+        needAuthentication: Boolean = false,
+    ) = remoteDataSource.sendHttpsRequest(request, needAuthentication)
 }

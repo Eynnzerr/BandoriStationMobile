@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.di
 
+import com.eynnzerr.bandoristation.feature.account.AccountViewModel
 import com.eynnzerr.bandoristation.feature.chat.ChatViewModel
 import com.eynnzerr.bandoristation.feature.home.HomeViewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -20,6 +21,6 @@ fun provideViewModelModule() = module {
             stringSetPreferenceUseCase = get(named("stringSetPreferenceUseCase"))
         )
     }
-    // viewModelOf(::HomeViewModel)
     viewModelOf(::ChatViewModel)
+    viewModelOf(::AccountViewModel)
 }

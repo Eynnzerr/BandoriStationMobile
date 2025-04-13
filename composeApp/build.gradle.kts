@@ -84,6 +84,7 @@ kotlin {
             implementation(libs.ktor.client.cio)
             implementation(libs.ktor.serialization.json)
             implementation(libs.ktor.client.websockets)
+            implementation(libs.ktor.client.logging)
 
             implementation(libs.materialKolor)
         }

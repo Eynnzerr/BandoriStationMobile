@@ -1,13 +1,17 @@
 package com.eynnzerr.bandoristation.data.remote
 
+import com.eynnzerr.bandoristation.data.remote.https.HttpsClient
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
+import com.eynnzerr.bandoristation.model.ApiRequest
+import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
 
 class RemoteDataSourceImpl(
-    private val webSocketClient: WebSocketClient, // Injected
+    private val webSocketClient: WebSocketClient,
+    private val httpsClient: HttpsClient,
 ): RemoteDataSource {
     override val webSocketConnectionState = webSocketClient.connectionState
     override val webSocketResponseFlow = webSocketClient.responseFlow
@@ -27,7 +31,6 @@ class RemoteDataSourceImpl(
         retryAttempts: Int
     ) {
         if (webSocketConnectionState.value is WebSocketClient.ConnectionState.Connected) {
-            // AppLogger.d(TAG, "Ready to send $action. Current retry attempts: $retryAttempts")
             webSocketClient.sendRequest(action, data)
         } else if (retryAttempts >= maxResendAttempts) {
             return
@@ -94,6 +97,18 @@ class RemoteDataSourceImpl(
             action = "loadChatLog",
             data = mapOf("timestamp" to lastTimestamp),
         )
+
+    override suspend fun sendHttpsRequest(
+        request: ApiRequest,
+        needAuthentication: Boolean
+    ): ApiResponse {
+        AppLogger.d(TAG, "Send https request ${request.group}:${request.function} to server.")
+        return if (needAuthentication) {
+            httpsClient.sendAuthenticatedRequest(request)
+        } else {
+            httpsClient.sendRequest(request)
+        }
+    }
 }
 
 private const val TAG = "RemoteDataSourceImpl"

@@ -2,7 +2,7 @@ package com.eynnzerr.bandoristation.business
 
 import com.eynnzerr.bandoristation.business.base.FlowUseCase
 import com.eynnzerr.bandoristation.data.AppRepository
-import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketHelper
+import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
 import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.utils.AppLogger
@@ -21,7 +21,7 @@ class GetChatUseCase(
 
         return repository.listenWebSocketForActions(listOf("sendChat"))
             .map { response ->
-                val newMessageList = WebSocketHelper.parseWebSocketResponse<List<ChatMessage>>(response)
+                val newMessageList = NetResponseHelper.parseWebSocketResponse<List<ChatMessage>>(response)
                 AppLogger.d("GetChatUseCase", "Receive new message list. Size: ${newMessageList?.size}")
                 newMessageList?.let { UseCaseResult.Success(it) } ?: UseCaseResult.Error(emptyList<ChatMessage>())
             }.onCompletion {
