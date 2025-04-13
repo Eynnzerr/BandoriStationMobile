@@ -1,6 +1,7 @@
 package com.eynnzerr.bandoristation.ui.component
 
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,40 +12,31 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.eynnzerr.bandoristation.model.RoomInfo
-import kotlin.time.Clock.System
+import com.eynnzerr.bandoristation.utils.formatTimestamp
 import kotlin.time.ExperimentalTime
 
-@OptIn(ExperimentalTime::class)
+@OptIn(ExperimentalTime::class, ExperimentalFoundationApi::class)
 @Composable
 fun SimpleRoomCard(
-    roomInfo: RoomInfo,
+    number: String = "",
+    rawMessage: String = "",
+    timestamp: Long = 0,
+    sourceName: String = "",
+    avatarName: String = "",
+    userName: String = "",
     onCopy: (String) -> Unit,
-    currentTimeMillis: Long = System.now().toEpochMilliseconds(),
 ) {
-    // 添加相对时间显示
-    val timeDiffMillis = currentTimeMillis - (roomInfo.time ?: currentTimeMillis)
-    val timeDiffSeconds = (timeDiffMillis / 1000).toInt()
-
-    val timeText = if (timeDiffSeconds < 60) {
-        "${timeDiffSeconds}秒前"
-    } else {
-        "${(timeDiffSeconds / 60)}分钟前"
-    }
-
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = { onCopy(roomInfo.number ?: "") }
-                )
-            },
+            .combinedClickable(
+                onClick = {  },
+                onLongClick = { onCopy(number) },
+            )
     ) {
         Row(
             modifier = Modifier
@@ -53,7 +45,7 @@ fun SimpleRoomCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             UserAvatar(
-                avatarName = roomInfo.userInfo?.avatar ?: "",
+                avatarName = avatarName,
                 size = 48.dp
             )
             Column(
@@ -65,14 +57,14 @@ fun SimpleRoomCard(
                     verticalAlignment = Alignment.Bottom
                 ) {
                     Text(
-                        text = roomInfo.userInfo?.username ?: "???",
+                        text = userName,
                         style = MaterialTheme.typography.titleSmall,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 18.sp,
                     )
                     Text(
-                        text = (if (roomInfo.sourceInfo?.name == "Tsugu") "来自茨菇" else "来自本站") + timeText,
+                        text = (if (sourceName == "BandoriStation") "来自本站  " else "来自Bot  ") + formatTimestamp(timestamp),
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -81,7 +73,7 @@ fun SimpleRoomCard(
                     )
                 }
                 Text(
-                    text = roomInfo.number ?: "000000",
+                    text = number,
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -91,7 +83,7 @@ fun SimpleRoomCard(
         }
 
         Text(
-            text = roomInfo.rawMessage ?: "",
+            text = rawMessage,
             style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
             fontSize = 16.sp,

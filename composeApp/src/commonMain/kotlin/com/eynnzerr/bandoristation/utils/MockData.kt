@@ -5,7 +5,7 @@ import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 
-val testToken = "wVpDGe+kD4kIIVXVxGU+COchjrJ7kj25gsdWk1WYJMXU9z+B8O/e1GlyrULo+Vj9736xO7OD6Mg8NpFf9MgMmL5m7w4KQgQrDM4ukaPZojs="
+const val testToken = "wVpDGe+kD4kIIVXVxGU+COchjrJ7kj25gsdWk1WYJMXU9z+B8O/e1GlyrULo+Vj9736xO7OD6Mg8NpFf9MgMmL5m7w4KQgQrDM4ukaPZojs="
 
 val mockRoomList = listOf(
     RoomInfo(

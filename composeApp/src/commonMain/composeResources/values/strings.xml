@@ -5,10 +5,14 @@
     <!--  Home  -->
     <string name="home_screen_title">Home</string>
     <string name="copy_room_snackbar">Successfully copied room number to clipboard.</string>
+    <string name="join_room_snackbar">Marked as joining the selected room.</string>
+    <string name="upload_room_snackbar">Successfully upload room information.</string>
+    <string name="joined">Joined</string>
 
     <!--  Chat  -->
     <string name="chat_screen_title">Chat</string>
     <string name="clear_chats_snackbar">Successfully cleared all chat messages.</string>
+    <string name="load_all_snackbar">All chat history has benn loaded.</string>
 
     <!--  Account  -->
     <string name="account_screen_title">Account</string>

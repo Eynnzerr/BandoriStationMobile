@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.data.remote.websocket
 
+import com.eynnzerr.bandoristation.model.WSRequest
 import com.eynnzerr.bandoristation.model.WebSocketRequest
 import com.eynnzerr.bandoristation.model.WebSocketResponse
 import com.eynnzerr.bandoristation.utils.AppLogger
@@ -49,7 +50,10 @@ class WebSocketClient(
     private val reconnectDelayMillis = 5000L
 
     suspend fun connect() {
-        if (_connectionState.value is ConnectionState.Connected) return
+        if (_connectionState.value is ConnectionState.Connected) {
+            AppLogger.d(TAG, "connect: Websocket has already been connected. Return.")
+            return
+        }
 
         try {
             _connectionState.value = ConnectionState.Connecting
@@ -78,14 +82,32 @@ class WebSocketClient(
 
                 try {
                     for (frame in incoming) {
-                        frame as? Frame.Text ?: continue
-                        val text = frame.readText()
-                        try {
-                            val response = json.decodeFromString<WebSocketResponse<JsonElement>>(text)
-                            AppLogger.d(TAG, "received from websocket: $text")
-                            _responseFlow.emit(response)
-                        } catch (e: Exception) {
-                            AppLogger.d(TAG, "WebSocketClient Parse Error: $e")
+                        when (frame) {
+                            is Frame.Text -> {
+                                val text = frame.readText()
+                                try {
+                                    val response = json.decodeFromString<WebSocketResponse<JsonElement>>(text)
+                                    AppLogger.d(TAG, "received from websocket: $text")
+                                    _responseFlow.emit(response)
+                                } catch (e: Exception) {
+                                    AppLogger.d(TAG, "WebSocketClient Parse Error: $e")
+                                }
+                            }
+                            is Frame.Close -> {
+                                AppLogger.d(TAG, "received close from websocket. Ignore.")
+                            }
+                            is Frame.Binary -> {
+                                AppLogger.d(TAG, "received binary from websocket. Ignore.")
+                            }
+                            is Frame.Ping -> {
+                                AppLogger.d(TAG, "received ping from websocket. Ignore.")
+                            }
+                            is Frame.Pong -> {
+                                AppLogger.d(TAG, "received pong from websocket. Ignore.")
+                            }
+                            else -> {
+                                AppLogger.d(TAG, "received other type of frame from websocket. Ignore.")
+                            }
                         }
                     }
                 } catch (e: Exception) {
@@ -134,12 +156,11 @@ class WebSocketClient(
             }
         }
 
-        AppLogger.d("WebSocketClient", "Ready to send $action. Current retry attempts: $retryCount")
+        // AppLogger.d("WebSocketClient", "Ready to send $action. Current retry attempts: $retryCount")
         sendRequest(action, data)
     }
 
-    // A workaround before we reconstruct generic type to sealed class.
-    suspend fun sendRequestsInJson(actions: List<WebSocketRequest<JsonElement>>) {
+    suspend fun sendRequests(actions: List<WSRequest>) {
         val jsonString = json.encodeToString(actions)
         AppLogger.d("WebSocketClient", "sending to websocket with payload: $jsonString")
         session?.send(Frame.Text(jsonString))

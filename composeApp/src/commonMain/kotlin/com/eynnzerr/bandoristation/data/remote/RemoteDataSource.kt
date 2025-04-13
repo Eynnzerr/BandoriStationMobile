@@ -1,7 +1,10 @@
 package com.eynnzerr.bandoristation.data.remote
 
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
+import com.eynnzerr.bandoristation.model.ApiRequest
+import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -10,7 +13,7 @@ import kotlinx.serialization.json.JsonElement
 
 interface RemoteDataSource {
 
-    // websocket related
+    // websocket basic operation
     val webSocketConnectionState: StateFlow<WebSocketClient.ConnectionState>
     val webSocketResponseFlow: SharedFlow<WebSocketResponse<JsonElement>>
     suspend fun connectWebSocket()
@@ -20,11 +23,16 @@ interface RemoteDataSource {
     fun listenForAll(): Flow<WebSocketResponse<JsonElement>>
     fun disconnectWebSocket()
 
-    // concrete business
+    // websocket concrete business
     suspend fun setWebSocketApiClient(params: ClientSetInfo)
     suspend fun setAccessPermission(token: String)
+    suspend fun getFirstRoomList()
+    suspend fun uploadRoom(params: RoomUploadInfo)
     suspend fun initializeChatRoom()
     suspend fun checkUnreadChat()
+    suspend fun sendChat(message: String)
+    suspend fun loadChatHistory(lastTimestamp: Long)
 
-    // HTTP API related
+    // HTTPS API basic operation
+    suspend fun sendHttpsRequest(request: ApiRequest, needAuthentication: Boolean): ApiResponse
 }

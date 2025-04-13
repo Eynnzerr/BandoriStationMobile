@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -29,6 +30,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -51,7 +53,10 @@ import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
+import com.eynnzerr.bandoristation.ui.component.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.ChatPiece
+import com.eynnzerr.bandoristation.ui.component.TimePiece
+import com.eynnzerr.bandoristation.ui.component.UnreadBubble
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
@@ -95,6 +100,23 @@ fun ChatScreen(
         }
     }
 
+    // automatically scroll to bottom after chat connection initialization.
+    LaunchedEffect(state.initialized) {
+        if (state.initialized) {
+            viewModel.sendEffect(ChatEffect.ScrollToLatest())
+        }
+    }
+
+    // automatically scroll to bottom if last chat is self sent.
+    LaunchedEffect(state.chats) {
+        val lastChat = state.chats.lastOrNull()
+        lastChat?.let {
+            if (it.userInfo.userId == state.selfId) {
+                viewModel.sendEffect(ChatEffect.ScrollToLatest())
+            }
+        }
+    }
+
     // Check if the list is at the bottom
     val isAtBottom by remember {
         derivedStateOf {
@@ -109,6 +131,13 @@ fun ChatScreen(
         }
     }
 
+    // Remove unread bubble if scrolled to bottom
+    LaunchedEffect(isAtBottom) {
+        if (state.initialized) {
+            viewModel.sendEvent(ChatIntent.ClearUnreadCount())
+        }
+    }
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = Modifier.appBarScroll(true, scrollBehavior),
@@ -116,6 +145,18 @@ fun ChatScreen(
             AppTopBar(
                 title = stringResource(Res.string.chat_screen_title),
                 scrollBehavior = scrollBehavior,
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            // TODO Navigate to settings
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = ""
+                        )
+                    }
+                },
                 actions = {
                     IconButton(
                         onClick = {
@@ -151,7 +192,7 @@ fun ChatScreen(
                         onClick = {
                             // Handle send message
                             if (messageText.isNotBlank()) {
-                                // TODO: Add logic to send the message
+                                viewModel.sendEvent(ChatIntent.SendChat(messageText))
                                 messageText = ""
                             }
                         },
@@ -164,7 +205,6 @@ fun ChatScreen(
                     }
                 }
 
-                // Navigation bar
                 AppNavBar(
                     screens = Screen.bottomScreenList,
                     currentDestination = navBackStackEntry?.destination,
@@ -174,45 +214,80 @@ fun ChatScreen(
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
-                state = lazyListState,
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(16.dp),
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+        ) {
+            PullToRefreshBox(
+                isRefreshing = state.isLoading,
+                onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) },
             ) {
-                itemsIndexed(
-                    items = state.chats,
-                    key = { index, item ->
-                        val timestampPart = item.timestamp
-                        val contentPart = item.content.hashCode()
-                        val userPart = item.userInfo.hashCode()
+                LazyColumn(
+                    state = lazyListState,
+                    modifier = Modifier
+                        .padding(16.dp),
+                ) {
+                    itemsIndexed(
+                        items = state.chats,
+                        key = { index, item ->
+                            val timestampPart = item.timestamp
+                            val contentPart = item.content.hashCode()
+                            val userPart = item.userInfo.hashCode()
 
-                        "$timestampPart-$contentPart-$userPart"
+                            "$timestampPart-$contentPart-$userPart"
+                        }
+                    ) { index, chatMessage ->
+                        Row(
+                            modifier = Modifier.animateItem()
+                        ) {
+                            if (chatMessage.userInfo.userId == null) {
+                                // System Message like date separator
+                                TimePiece(
+                                    chatMessage = chatMessage,
+                                )
+                            } else {
+                                // User Message
+                                ChatPiece(
+                                    chatMessage = chatMessage,
+                                    isMyMessage = chatMessage.userInfo.userId == state.selfId
+                                )
+                            }
+                        }
                     }
-                ) { index, chatMessage ->
-                    ChatPiece(
-                        chatMessage = chatMessage,
-                        isMyMessage = chatMessage.userInfo.userId == state.selfId
-                    )
                 }
             }
 
-            // Floating action button moved here
+            AnimatedVisibility(
+                visible = state.unreadCount > 0,
+                enter = fadeIn() + slideInVertically { it },
+                exit = fadeOut() + slideOutVertically { it },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(
+                        start = 24.dp,
+                        bottom = innerPadding.calculateBottomPadding() + 32.dp
+                    )
+                    .zIndex(1f)
+            ) {
+                UnreadBubble(
+                    text = state.unreadCount.toString(),
+                    isArrowOnTop = false,
+                    arrowPosition = ArrowHorizontalPosition.END,
+                )
+            }
+
             AnimatedVisibility(
                 visible = !isAtBottom,
                 enter = fadeIn() + slideInVertically { it },
                 exit = fadeOut() + slideOutVertically { it },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = innerPadding.calculateBottomPadding() + 32.dp)
+                    .padding(bottom = 16.dp)
                     .zIndex(1f)
             ) {
                 FloatingActionButton(
                     onClick = {
-                        coroutineScope.launch {
-                            viewModel.sendEffect(ChatEffect.ScrollToLatest())
-                        }
+                        viewModel.sendEffect(ChatEffect.ScrollToLatest())
                     }
                 ) {
                     Icon(

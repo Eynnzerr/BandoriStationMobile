@@ -5,10 +5,14 @@
     <!--  主页  -->
     <string name="home_screen_title">主页</string>
     <string name="copy_room_snackbar">已将车牌复制到剪切板。</string>
+    <string name="join_room_snackbar">已标记上车。</string>
+    <string name="joined">在车</string>
+    <string name="upload_room_snackbar">已上传房间信息到车站。</string>
 
     <!--  聊天页  -->
     <string name="chat_screen_title">聊天</string>
     <string name="clear_chats_snackbar">已清空全部聊天记录。</string>
+    <string name="load_all_snackbar">已加载全部历史聊天记录。</string>
 
     <!--  用户页  -->
     <string name="account_screen_title">账户</string>
