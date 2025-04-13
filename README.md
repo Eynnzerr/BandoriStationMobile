@@ -1,14 +1,26 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop.
+# BandoriStation Mobile
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+**NOTICE: This app is still under development and not ready for daily use.**
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## What's This App?
+This is a Multiplatform client app targeting Android, iOS, Desktop, designed for [BandoriStation](https://github.com/maborosh/BandoriStation), the room number data collection platform of *Band Dream! Girls Band Party!* mobile game. Bandori Station only supports browser, which is oftentimes inconvenient for players to use, when they're in the mobile game participating activities. Therefore, this project is inspired.
 
+*BandoriStation Mobile* is based on **Compose Multiplatform**, with a MVI clean architecture, conforming to Material3 design style. It shares the same server with [BandoriStation](https://github.com/maborosh/BandoriStation).
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+## Features
+
+- Same experience as the [website of BandoriStation](bandoristation.com).
+- More in WIP...
+
+## Previews
+
+<div align="center">
+  <img src="./imgs/img-1.jpg" width="256"/>
+  <img src="./imgs/img-2.jpg" width="256"/>
+  <img src="./imgs/img-3.jpg" width="256"/>
+  <img src="./imgs/img-4.jpg" width="256"/>
+</div>
+
+## Credits
+
+[BandoriStation](https://github.com/maborosh/BandoriStation) for providing such a brilliant platform for players to find teammates and communicate.
