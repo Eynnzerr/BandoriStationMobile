@@ -23,8 +23,8 @@ import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.AppNavBar
-import com.eynnzerr.bandoristation.ui.component.LoginDialog
-import com.eynnzerr.bandoristation.ui.component.LoginScreenState
+import com.eynnzerr.bandoristation.ui.component.EditAccountButton
+import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
 import com.eynnzerr.bandoristation.ui.component.SimpleRoomCard
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
 import com.eynnzerr.bandoristation.ui.component.UserBannerImage
@@ -48,6 +48,7 @@ fun AccountScreen(
     val tabs = listOf("发布历史", "玩家信息")
     val clipboardManager = LocalClipboardManager.current
     var selectedTabIndex by remember { mutableStateOf(0) }
+    var showLoginDialog by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -76,18 +77,22 @@ fun AccountScreen(
                 is AccountEffect.NavigateToScreen -> {
                     navController.navigateTo(action.destination)
                 }
+
+                is AccountEffect.ControlLoginDialog -> {
+                    showLoginDialog = action.visible
+                }
             }
         }
     }
 
     LoginDialog(
-        isVisible = state.isTokenValid,
-        onDismissRequest = {},
+        isVisible = showLoginDialog,
+        onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(false)) },
         onLoginWithToken = { token ->
-            // 用这个token发起请求
+            viewModel.sendEvent(AccountIntent.GetUserInfo(token))
         },
         onLoginWithPassword = { username, password ->
-            // 发起Login请求
+            viewModel.sendEvent(AccountIntent.Login(username, password))
         },
         onRegister = { username, password, email ->
             // 发起注册请求
@@ -185,13 +190,13 @@ fun AccountScreen(
                         }
                     }
 
-                    // 编辑资料按钮
-                    Button(
-                        onClick = { /* 编辑资料 */ },
-                        shape = MaterialTheme.shapes.medium
-                    ) {
-                        Text("编辑资料")
-                    }
+                    EditAccountButton(
+                        isLoggedIn = state.isLoggedIn,
+                        onLogIn = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(true)) },
+                        onEditAccount = {
+                            // TODO 打开资料编辑对话框 或者 模态框
+                        },
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))

@@ -11,10 +11,6 @@ sealed class UseCaseResult<out D, out E> {
     data class Error<out E>(val error: E) : UseCaseResult<Nothing, E>()
     data object Loading : UseCaseResult<Nothing, Nothing>()
 
-    fun isSuccessful() = this is Success
-    fun hasFailed() = this is Error<*>
-    fun isLoading() = this is Loading
-
     override fun toString(): String {
         return when (this) {
             is Success<*> -> "Success[data=$data]"

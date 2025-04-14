@@ -17,7 +17,7 @@ sealed class ApiRequest(
     @SerialName("function") val function: String,
 ) {
     @Serializable
-    class InitializeAccountSetting() : ApiRequest(
+    class InitializeAccountSetting : ApiRequest(
         group = "MainAction",
         function = "initializeAccountSetting"
     )
@@ -28,6 +28,43 @@ sealed class ApiRequest(
     ) : ApiRequest(
         group = "MainAction",
         function = "getUserInfo"
+    )
+
+    @Serializable
+    data class Login(
+        val username: String,
+        val password: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "login",
+    )
+
+    @Serializable
+    class Logout : ApiRequest(
+        group = "UserLogin",
+        function = "logout",
+    )
+
+    @Serializable
+    data class Signup(
+        val username: String,
+        val password: String,
+        val email: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "signup",
+    )
+
+    @Serializable
+    class SendEmailVerificationCode : ApiRequest(
+        group = "UserLogin",
+        function = "sendEmailVerificationCode",
+    )
+
+    @Serializable
+    class VerifyEmail : ApiRequest(
+        group = "UserLogin",
+        function = "verifyEmail",
     )
 }
 

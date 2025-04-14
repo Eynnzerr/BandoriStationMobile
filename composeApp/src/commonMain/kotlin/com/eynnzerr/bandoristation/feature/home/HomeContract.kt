@@ -20,7 +20,6 @@ data class HomeState(
 ) : UIState {
     companion object {
         fun initial() = HomeState(
-            rooms = mockRoomList
         )
     }
 }

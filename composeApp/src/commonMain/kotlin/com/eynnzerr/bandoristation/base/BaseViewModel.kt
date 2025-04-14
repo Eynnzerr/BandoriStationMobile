@@ -71,4 +71,8 @@ abstract class BaseViewModel<State : UIState, Event: UIEvent, Effect: UIEffect>(
     fun sendEffect(effect: Effect) {
         _effects.trySend(effect)
     }
+
+    fun sendState(state: State) {
+        _state.tryEmit(state)
+    }
 }

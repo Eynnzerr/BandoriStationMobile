@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.model
+package com.eynnzerr.bandoristation.model.account
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName

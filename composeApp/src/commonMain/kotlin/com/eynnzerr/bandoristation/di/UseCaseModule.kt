@@ -13,6 +13,7 @@ import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
+import com.eynnzerr.bandoristation.business.account.LoginUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -105,6 +106,14 @@ fun provideUseCaseModule() = module {
         GetUserInfoUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+        )
+    }
+
+    single {
+        LoginUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
         )
     }
 }

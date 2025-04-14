@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.map
 class HttpsClient(
     private val apiUrl: String,
     private val client: HttpClient, // Injected
-    private val dataStore: DataStore<Preferences>, // Injected
+    // private val dataStore: DataStore<Preferences>, // Injected
 ) {
     /**
      * 发送不需要认证的API请求
@@ -45,8 +45,8 @@ class HttpsClient(
      * @param request 请求对象
      * @return 响应对象
      */
-    suspend fun sendAuthenticatedRequest(request: ApiRequest): ApiResponse {
-        val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: testToken }.first()
+    suspend fun sendAuthenticatedRequest(request: ApiRequest, token: String): ApiResponse {
+        // val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: testToken }.first()
         AppLogger.d(TAG, "use token: $token")
 
         val response: HttpResponse = client.post(apiUrl) {

@@ -52,7 +52,7 @@ import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.CurrentRoomHeader
 import com.eynnzerr.bandoristation.ui.component.RoomCard
-import com.eynnzerr.bandoristation.ui.component.SendRoomDialog
+import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch

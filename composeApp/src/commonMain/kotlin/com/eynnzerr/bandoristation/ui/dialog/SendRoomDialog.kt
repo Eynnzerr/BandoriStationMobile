@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.ui.component
+package com.eynnzerr.bandoristation.ui.dialog
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically

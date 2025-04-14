@@ -28,8 +28,9 @@ class AppRepository(
     suspend fun loadChatHistory(lastTimestamp: Long) = remoteDataSource.loadChatHistory(lastTimestamp)
 
     // HTTPS
-    suspend fun sendHttpsRequest(
+    suspend fun sendHttpsRequest(request: ApiRequest) = remoteDataSource.sendHttpsRequest(request)
+    suspend fun sendAuthenticHttpsRequest(
         request: ApiRequest,
-        needAuthentication: Boolean = false,
-    ) = remoteDataSource.sendHttpsRequest(request, needAuthentication)
+        token: String
+    ) = remoteDataSource.sendAuthenticHttpsRequest(request, token)
 }

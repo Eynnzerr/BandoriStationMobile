@@ -1,9 +1,9 @@
-package com.eynnzerr.bandoristation.ui.component
+package com.eynnzerr.bandoristation.ui.dialog
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.Help
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Token
 import androidx.compose.material.icons.outlined.HighlightOff
@@ -14,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.login_help
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class LoginScreenState {
@@ -92,7 +95,7 @@ fun LoginDialog(
                                 IconButton(onClick = {
                                     currentScreen = LoginScreenState.HELP
                                 }) {
-                                    Icon(Icons.AutoMirrored.Outlined.Help, contentDescription = "Help")
+                                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Help")
                                 }
                                 IconButton(
                                     onClick = onDismissRequest
@@ -143,7 +146,7 @@ fun LoginDialog(
                                         modifier = Modifier.size(ButtonDefaults.IconSize)
                                     )
                                     Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text("使用Token")
+                                    Text("令牌登录")
                                 }
                             }
                         }
@@ -318,7 +321,7 @@ fun LoginDialog(
                         }
 
                         LoginScreenState.HELP -> {
-                            Text("帮助文本")
+                            Text(stringResource(Res.string.login_help))
                         }
                     }
                 }

@@ -21,6 +21,15 @@ fun provideViewModelModule() = module {
             stringSetPreferenceUseCase = get(named("stringSetPreferenceUseCase"))
         )
     }
+
     viewModelOf(::ChatViewModel)
-    viewModelOf(::AccountViewModel)
+
+    factory {
+        AccountViewModel(
+            loginUseCase = get(),
+            getUserInfoUseCase = get(),
+            stringPreferenceUseCase = get(named("stringPreferenceUseCase")),
+            setPreferenceUseCase = get(),
+        )
+    }
 }
