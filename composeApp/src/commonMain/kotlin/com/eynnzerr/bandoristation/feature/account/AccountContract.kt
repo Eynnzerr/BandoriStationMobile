@@ -4,7 +4,6 @@ import com.eynnzerr.bandoristation.base.UIEffect
 import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
 import com.eynnzerr.bandoristation.model.account.AccountInfo
-import com.eynnzerr.bandoristation.model.account.LoginParams
 import com.eynnzerr.bandoristation.navigation.Screen
 
 data class AccountState(
@@ -22,11 +21,13 @@ sealed class AccountIntent: UIEvent {
     data class NotifyUpdateInfoFailed(val reason: String): AccountIntent()
     data class GetUserInfo(val token: String): AccountIntent()
     data class Login(val username: String, val password: String): AccountIntent()
+    class Logout(): AccountIntent()
 }
 
 sealed class AccountEffect: UIEffect {
     data class ShowSnackbar(val text: String): AccountEffect()
     data class NavigateToScreen(val destination: Screen): AccountEffect()
     data class CopyRoomNumber(val roomNumber: String): AccountEffect()
-    class ControlLoginDialog(val visible: Boolean): AccountEffect()
+    data class ControlLoginDialog(val visible: Boolean): AccountEffect()
+    data class ControlDrawer(val visible: Boolean): AccountEffect()
 }

@@ -75,6 +75,7 @@ fun ChatScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var messageText by remember { mutableStateOf("") }
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -138,7 +139,6 @@ fun ChatScreen(
         }
     }
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
         modifier = Modifier.appBarScroll(true, scrollBehavior),
         topBar = {

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.business.account.LoginUseCase
+import com.eynnzerr.bandoristation.business.account.LogoutUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.Params
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 
 class AccountViewModel(
     private val loginUseCase: LoginUseCase,
+    private val logoutUseCase: LogoutUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val setPreferenceUseCase: SetPreferenceUseCase,
     private val stringPreferenceUseCase: GetPreferenceUseCase<String>,
@@ -50,7 +52,7 @@ class AccountViewModel(
                AccountState(
                    isLoading = false,
                    accountInfo = event.accountInfo,
-                   isLoggedIn = true,
+                   isLoggedIn = event.accountInfo.isSelf,
                ) to ControlLoginDialog(visible = false)
            }
 
@@ -85,7 +87,7 @@ class AccountViewModel(
                null to null
            }
 
-           is Login ->{
+           is Login -> {
                viewModelScope.launch(Dispatchers.IO) {
                    val params = LoginParams(
                        username = event.username,
@@ -106,6 +108,23 @@ class AccountViewModel(
                        }
                        is UseCaseResult.Success -> {
                            sendEvent(UpdateAccountInfo(loginResult.data))
+                       }
+                   }
+               }
+               null to null
+           }
+
+           is Logout -> {
+               viewModelScope.launch(Dispatchers.IO) {
+                   val logoutResult = logoutUseCase.invoke(Unit)
+                   when (logoutResult) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(logoutResult.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEvent(UpdateAccountInfo(AccountInfo()))
+                           sendEffect(ControlDrawer(false))
                        }
                    }
                }

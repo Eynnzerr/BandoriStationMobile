@@ -30,6 +30,7 @@ fun provideViewModelModule() = module {
             getUserInfoUseCase = get(),
             stringPreferenceUseCase = get(named("stringPreferenceUseCase")),
             setPreferenceUseCase = get(),
+            logoutUseCase = get()
         )
     }
 }

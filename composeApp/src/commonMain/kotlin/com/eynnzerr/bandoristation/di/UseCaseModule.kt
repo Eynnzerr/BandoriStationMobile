@@ -14,6 +14,7 @@ import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.business.account.LoginUseCase
+import com.eynnzerr.bandoristation.business.account.LogoutUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -111,6 +112,14 @@ fun provideUseCaseModule() = module {
 
     single {
         LoginUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        LogoutUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
             dataStore = get(),
