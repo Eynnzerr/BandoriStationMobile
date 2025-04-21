@@ -98,17 +98,20 @@ class RemoteDataSourceImpl(
             data = mapOf("timestamp" to lastTimestamp),
         )
 
-    override suspend fun sendHttpsRequest(
-        request: ApiRequest,
-        needAuthentication: Boolean
-    ): ApiResponse {
+    override suspend fun sendHttpsRequest(request: ApiRequest): ApiResponse {
         AppLogger.d(TAG, "Send https request ${request.group}:${request.function} to server.")
-        return if (needAuthentication) {
-            httpsClient.sendAuthenticatedRequest(request)
-        } else {
-            httpsClient.sendRequest(request)
-        }
+        return httpsClient.sendRequest(request)
     }
+
+    override suspend fun sendAuthenticHttpsRequest(
+        request: ApiRequest,
+        token: String
+    ): ApiResponse {
+        AppLogger.d(TAG, "Send https request ${request.group}:${request.function} to server with token: $token")
+        return httpsClient.sendAuthenticatedRequest(request, token)
+    }
+
+
 }
 
 private const val TAG = "RemoteDataSourceImpl"

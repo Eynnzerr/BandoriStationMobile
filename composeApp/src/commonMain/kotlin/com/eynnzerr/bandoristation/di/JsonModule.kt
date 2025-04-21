@@ -6,9 +6,9 @@ import org.koin.dsl.module
 fun provideJsonModule() = module {
     single {
         Json {
-            isLenient = true
-            ignoreUnknownKeys = true
-            coerceInputValues = true
+            isLenient = true  // 宽松模式
+            ignoreUnknownKeys = true  // 忽略多余键值对
+            coerceInputValues = true  // 强制类型转换
         }
     }
 }

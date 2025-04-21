@@ -34,5 +34,6 @@ interface RemoteDataSource {
     suspend fun loadChatHistory(lastTimestamp: Long)
 
     // HTTPS API basic operation
-    suspend fun sendHttpsRequest(request: ApiRequest, needAuthentication: Boolean): ApiResponse
+    suspend fun sendHttpsRequest(request: ApiRequest): ApiResponse
+    suspend fun sendAuthenticHttpsRequest(request: ApiRequest, token: String): ApiResponse
 }

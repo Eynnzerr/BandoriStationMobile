@@ -1,12 +1,10 @@
 package com.eynnzerr.bandoristation.business.account
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import com.eynnzerr.bandoristation.business.base.UseCase
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
-import com.eynnzerr.bandoristation.model.AccountInfo
-import com.eynnzerr.bandoristation.model.AccountSettings
+import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.model.account.AccountSettings
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.utils.AppLogger
@@ -15,12 +13,12 @@ import kotlinx.coroutines.CoroutineDispatcher
 class GetUserInfoUseCase(
     private val repository: AppRepository,
     private val dispatcher: CoroutineDispatcher,
-): UseCase<Unit, AccountInfo, String>(dispatcher) {
+): UseCase<String, AccountInfo, String>(dispatcher) {
 
-    override suspend fun execute(parameters: Unit): UseCaseResult<AccountInfo, String> {
-        repository.sendHttpsRequest(
+    override suspend fun execute(token: String): UseCaseResult<AccountInfo, String> {
+        repository.sendAuthenticHttpsRequest(
             request = ApiRequest.InitializeAccountSetting(),
-            needAuthentication = true
+            token = token,
         ).handle(
             onSuccess = { usrSettingsContent ->
                 val userSettings = NetResponseHelper.parseApiResponse<AccountSettings>(usrSettingsContent)
@@ -28,9 +26,9 @@ class GetUserInfoUseCase(
                     // using the fetched user_id to get full user information.
                     val userId = userSettings.usedId
                     AppLogger.d("GetUserInfoUseCase", "fetched used id: $userId")
-                    repository.sendHttpsRequest(
+                    repository.sendAuthenticHttpsRequest(
                         request = ApiRequest.GetUserInfo(id = userId),
-                        needAuthentication = true
+                        token = token,
                     ).handle(
                         onSuccess = { userInfoContent ->
                             // successfully fetched user information.

@@ -12,6 +12,7 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.account_screen_title
 import bandoristationm.composeapp.generated.resources.chat_screen_title
 import bandoristationm.composeapp.generated.resources.home_screen_title
+import bandoristationm.composeapp.generated.resources.settings_screen_title
 import org.jetbrains.compose.resources.StringResource
 
 sealed class Screen(
@@ -48,6 +49,11 @@ sealed class Screen(
         title = Res.string.account_screen_title,
         selectedIcon = Icons.Filled.Person,
         unselectedIcon = Icons.Outlined.Person,
+    )
+
+    object Settings: Screen(
+        route = Destinations.SETTINGS_ROUTE,
+        title = Res.string.settings_screen_title,
     )
 
     companion object {

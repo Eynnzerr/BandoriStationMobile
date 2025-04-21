@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import com.eynnzerr.bandoristation.feature.account.AccountScreen
 import com.eynnzerr.bandoristation.feature.chat.ChatScreen
 import com.eynnzerr.bandoristation.feature.home.HomeScreen
+import com.eynnzerr.bandoristation.feature.settings.SettingScreen
 import com.eynnzerr.bandoristation.navigation.ext.animatedComposable
 
 @Composable
@@ -15,7 +16,7 @@ fun RootNavGraph (
 ) {
     NavHost(
         navController = navController,
-        route = "bottom_host",
+        route = "host",
         startDestination = startDestination.route,
     ) {
         animatedComposable(Destinations.HOME_ROUTE) {
@@ -26,6 +27,9 @@ fun RootNavGraph (
         }
         animatedComposable(Destinations.ACCOUNT_ROUTE) {
             AccountScreen(navController)
+        }
+        animatedComposable(Destinations.SETTINGS_ROUTE) {
+            SettingScreen(navController)
         }
     }
 }

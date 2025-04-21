@@ -17,15 +17,15 @@ kotlin = "2.1.10"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.8.0"
 kotlinx-dateTime = "0.6.0"
-koin = "4.0.0-RC1"
+koin = "4.0.4"
 room = "2.7.0-rc03"
 ksp = "2.1.10-1.0.30"
 sqlite = "2.5.0-rc03"
-navigation = "2.8.0-rc01"
+navigation = "2.8.0-alpha10"
 datastore = "1.1.4"
 coil3 = "3.1.0"
 ktor = "3.1.2"
-materialKolor = "1.7.0"
+materialKolor = "2.1.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

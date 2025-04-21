@@ -6,7 +6,6 @@ import com.eynnzerr.bandoristation.base.UIState
 import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.navigation.Screen
-import com.eynnzerr.bandoristation.utils.mockRoomList
 import kotlinx.datetime.Clock.System
 import org.jetbrains.compose.resources.StringResource
 
@@ -20,7 +19,6 @@ data class HomeState(
 ) : UIState {
     companion object {
         fun initial() = HomeState(
-            rooms = mockRoomList
         )
     }
 }

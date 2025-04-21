@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.model
+package com.eynnzerr.bandoristation.model.account
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
@@ -10,7 +10,7 @@ data class AccountInfo(
     @SerialName("room_number_history") val roomNumberHistory: ArrayList<RoomNumberHistory> = arrayListOf(),
     @SerialName("room_number_history_append_flag") val roomNumberHistoryAppendFlag: Boolean = false,
     // @SerialName("bandori_profile") val bandoriProfile: BandoriProfile = BandoriProfile(),
-    @SerialName("is_self") val isSelf: Boolean = true,
+    @SerialName("is_self") val isSelf: Boolean = false,
 )
 
 @Serializable

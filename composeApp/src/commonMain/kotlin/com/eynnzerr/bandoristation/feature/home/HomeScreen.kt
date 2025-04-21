@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,7 +27,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -40,19 +43,23 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import bandoristationm.composeapp.generated.resources.home_screen_title
+import bandoristationm.composeapp.generated.resources.placeholder
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
+import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.CurrentRoomHeader
 import com.eynnzerr.bandoristation.ui.component.RoomCard
-import com.eynnzerr.bandoristation.ui.component.SendRoomDialog
+import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
+import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
@@ -70,6 +77,7 @@ fun HomeScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
@@ -160,8 +168,13 @@ fun HomeScreen(
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
-        modifier = Modifier.appBarScroll(true, scrollBehavior),
+    SuiteScaffold(
+        scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
+        isExpanded = isExpanded,
+        screens = Screen.bottomScreenList,
+        showBadges = listOf(false, state.hasUnReadMessages, false),
+        currentDestination = navBackStackEntry?.destination,
+        onNavigateTo = { viewModel.sendEffect(HomeEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
                 title = stringResource(Res.string.home_screen_title),
@@ -169,7 +182,7 @@ fun HomeScreen(
                 navigationIcon = {
                     IconButton(
                         onClick = {
-                            // TODO Navigate to settings
+                            viewModel.sendEffect(HomeEffect.NavigateToScreen(Screen.Settings))
                         }
                     ) {
                         Icon(
@@ -214,14 +227,7 @@ fun HomeScreen(
                 }
             )
         },
-        bottomBar = {
-            AppNavBar(
-                screens = Screen.bottomScreenList,
-                showBadges = listOf(false, state.hasUnReadMessages, false),
-                currentDestination = navBackStackEntry?.destination,
-                onNavigateTo = { viewModel.sendEffect(HomeEffect.NavigateToScreen(it)) },
-            )
-        },
+        bottomBar = {},
         floatingActionButton = {
             Column {
                 AnimatedVisibility(

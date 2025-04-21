@@ -9,7 +9,7 @@ fun provideHttpsClientModule() = module {
         HttpsClient(
             apiUrl = NetworkUrl.HTTPS_SERVER,
             client = get(),
-            dataStore = get(),
+            // dataStore = get(),
         )
     }
 }
