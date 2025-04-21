@@ -17,4 +17,9 @@
     <!--  Account  -->
     <string name="account_screen_title">Account</string>
     <string name="login_help">BandoriStation Mobile offers two ways of login. If you have logged in on the website: 1. Token: You can open the control panel by F12, choose console, and type document.cookie. Copy the token part in the cookie to the input field and confirm. 2. Password: You have to log out on the website. Then, type your username or email, and your password and confirm.</string>
+
+    <!--  Settings  -->
+    <string name="settings_screen_title">Settings</string>
+    <string name="theme">Theme</string>
+    <string name="theme_desc">app appearance, colors, palette</string>
 </resources>

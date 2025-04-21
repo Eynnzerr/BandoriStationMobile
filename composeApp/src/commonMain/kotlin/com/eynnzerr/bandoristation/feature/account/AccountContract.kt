@@ -5,11 +5,13 @@ import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.navigation.Screen
+import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 
 data class AccountState(
     val isLoading: Boolean = true,
     val accountInfo: AccountInfo = AccountInfo(),
     val isLoggedIn: Boolean = false,
+    val countDown: Int = 0,
 ) : UIState {
     companion object {
         fun initial() = AccountState()
@@ -22,6 +24,14 @@ sealed class AccountIntent: UIEvent {
     data class GetUserInfo(val token: String): AccountIntent()
     data class Login(val username: String, val password: String): AccountIntent()
     class Logout(): AccountIntent()
+    data class Signup(
+        val username: String,
+        val password: String,
+        val email: String,
+    ) : AccountIntent()
+    class SendVerificationCode(): AccountIntent()
+    data class VerifyEmail(val code: String): AccountIntent()
+    data class UpdateCountDown(val value: Int): AccountIntent()
 }
 
 sealed class AccountEffect: UIEffect {
@@ -30,4 +40,6 @@ sealed class AccountEffect: UIEffect {
     data class CopyRoomNumber(val roomNumber: String): AccountEffect()
     data class ControlLoginDialog(val visible: Boolean): AccountEffect()
     data class ControlDrawer(val visible: Boolean): AccountEffect()
+    data class ControlLoginDialogScreen(val destination: LoginScreenState): AccountEffect()
+    class PopBackLoginDialog(): AccountEffect()
 }

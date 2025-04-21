@@ -25,21 +25,30 @@ enum class LoginScreenState {
     PASSWORD_LOGIN,
     TOKEN_LOGIN,
     REGISTER,
-    FORGOT_PASSWORD
+    FORGOT_PASSWORD,
+    VERIFY_EMAIL,
 }
 
 @Composable
 fun LoginDialog(
     isVisible: Boolean,
-    onDismissRequest: () -> Unit,
+    currentScreen: LoginScreenState = LoginScreenState.INITIAL,
+    onPopBack: () -> Unit = {},
+    onDismissRequest: () -> Unit = {},
+    onHelp: () -> Unit = {},
+    onEnterLogin: () -> Unit = {},
+    onEnterToken: () -> Unit = {},
+    onEnterRegister: () -> Unit = {},
+    onEnterForgot: () -> Unit = {},
     onLoginWithPassword: (username: String, password: String) -> Unit = { _, _ -> },
     onLoginWithToken: (token: String) -> Unit = { _ -> },
     onRegister: (username: String, password: String, email: String) -> Unit = { _, _, _ -> },
-    onSendVerificationCode: (email: String) -> Unit = { _ -> },
-    onVerifyCode: (email: String, code: String) -> Unit = { _, _ -> },
+    onSendVerificationCode: () -> Unit = {},
+    onVerifyCode: (code: String) -> Unit = { _ -> },
+    sendCountDown: Int = 0,
 ) {
     if (isVisible) {
-        var currentScreen by remember { mutableStateOf(LoginScreenState.INITIAL) }
+        // var currentScreen by remember { mutableStateOf(LoginScreenState.INITIAL) }
 
         // Form fields
         var username by remember { mutableStateOf("") }
@@ -68,12 +77,7 @@ fun LoginDialog(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (currentScreen != LoginScreenState.INITIAL) {
-                                IconButton(onClick = {
-                                    currentScreen = when (currentScreen) {
-                                        LoginScreenState.REGISTER, LoginScreenState.FORGOT_PASSWORD -> LoginScreenState.PASSWORD_LOGIN
-                                        else -> LoginScreenState.INITIAL
-                                    }
-                                }) {
+                                IconButton(onClick = onPopBack) {
                                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                                 }
                             }
@@ -85,6 +89,7 @@ fun LoginDialog(
                                     LoginScreenState.REGISTER -> "注册账号"
                                     LoginScreenState.FORGOT_PASSWORD -> "找回密码"
                                     LoginScreenState.HELP -> "帮助"
+                                    LoginScreenState.VERIFY_EMAIL -> "验证邮箱"
                                 },
                                 style = MaterialTheme.typography.titleLarge
                             )
@@ -92,9 +97,7 @@ fun LoginDialog(
 
                         if (currentScreen == LoginScreenState.INITIAL) {
                             Row {
-                                IconButton(onClick = {
-                                    currentScreen = LoginScreenState.HELP
-                                }) {
+                                IconButton(onClick = onHelp) {
                                     Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Help")
                                 }
                                 IconButton(
@@ -122,7 +125,7 @@ fun LoginDialog(
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Button(
-                                    onClick = { currentScreen = LoginScreenState.PASSWORD_LOGIN },
+                                    onClick = onEnterLogin,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Icon(
@@ -137,7 +140,7 @@ fun LoginDialog(
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 OutlinedButton(
-                                    onClick = { currentScreen = LoginScreenState.TOKEN_LOGIN },
+                                    onClick = onEnterToken,
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Icon(
@@ -175,7 +178,8 @@ fun LoginDialog(
 
                                 Button(
                                     onClick = { onLoginWithPassword(username, password) },
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = username.isNotBlank() && password.isNotBlank()
                                 ) {
                                     Text("登录")
                                 }
@@ -186,11 +190,11 @@ fun LoginDialog(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    TextButton(onClick = { currentScreen = LoginScreenState.REGISTER }) {
+                                    TextButton(onClick = onEnterRegister) {
                                         Text("注册账号")
                                     }
 
-                                    TextButton(onClick = { currentScreen = LoginScreenState.FORGOT_PASSWORD }) {
+                                    TextButton(onClick = onEnterForgot) {
                                         Text("忘记密码")
                                     }
                                 }
@@ -198,7 +202,6 @@ fun LoginDialog(
                         }
 
                         LoginScreenState.TOKEN_LOGIN -> {
-                            // Token login form
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 OutlinedTextField(
                                     value = token,
@@ -211,6 +214,7 @@ fun LoginDialog(
 
                                 Button(
                                     onClick = { onLoginWithToken(token) },
+                                    enabled = token.isNotBlank(),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text("登录")
@@ -219,7 +223,6 @@ fun LoginDialog(
                         }
 
                         LoginScreenState.REGISTER -> {
-                            // Registration form
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 OutlinedTextField(
                                     value = username,
@@ -274,7 +277,6 @@ fun LoginDialog(
                         }
 
                         LoginScreenState.FORGOT_PASSWORD -> {
-                            // Forgot password form
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 OutlinedTextField(
                                     value = email,
@@ -300,7 +302,9 @@ fun LoginDialog(
                                     Spacer(modifier = Modifier.width(8.dp))
 
                                     Button(
-                                        onClick = { onSendVerificationCode(email) },
+                                        onClick = {
+                                            // TODO 找回密码-发送验证码
+                                        },
                                         enabled = email.isNotEmpty(),
                                         shape = MaterialTheme.shapes.medium
                                     ) {
@@ -311,7 +315,7 @@ fun LoginDialog(
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 Button(
-                                    onClick = { onVerifyCode(email, verificationCode) },
+                                    onClick = { onVerifyCode(verificationCode) },
                                     modifier = Modifier.fillMaxWidth(),
                                     enabled = email.isNotEmpty() && verificationCode.isNotEmpty()
                                 ) {
@@ -322,6 +326,54 @@ fun LoginDialog(
 
                         LoginScreenState.HELP -> {
                             Text(stringResource(Res.string.login_help))
+                        }
+
+                        LoginScreenState.VERIFY_EMAIL -> {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                Button(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = {
+                                        // TODO 修改邮箱地址
+                                    },
+                                    shape = MaterialTheme.shapes.medium
+                                ) {
+                                    Text("修改邮箱地址")
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    OutlinedTextField(
+                                        value = verificationCode,
+                                        onValueChange = { verificationCode = it },
+                                        label = { Text("验证码") },
+                                        modifier = Modifier.weight(1f)
+                                    )
+
+                                    Button(
+                                        modifier = Modifier.padding(start = 12.dp),
+                                        onClick = onSendVerificationCode,
+                                        shape = MaterialTheme.shapes.medium,
+                                        enabled = sendCountDown <= 0
+                                    ) {
+                                        Text(text = if (sendCountDown <= 0) "发送验证码" else "${sendCountDown}s")
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Button(
+                                    onClick = { onVerifyCode(verificationCode) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = verificationCode.isNotEmpty()
+                                ) {
+                                    Text("验证")
+                                }
+                            }
                         }
                     }
                 }
@@ -336,5 +388,6 @@ fun LoginDialogPreview() {
     LoginDialog(
         isVisible = true,
         onDismissRequest = {},
+        onPopBack = {},
     )
 }

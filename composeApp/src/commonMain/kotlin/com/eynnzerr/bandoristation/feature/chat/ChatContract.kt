@@ -5,6 +5,7 @@ import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
 import com.eynnzerr.bandoristation.model.ChatLoadResponse
 import com.eynnzerr.bandoristation.model.ChatMessage
+import com.eynnzerr.bandoristation.navigation.Screen
 import org.jetbrains.compose.resources.StringResource
 
 data class ChatState(
@@ -36,4 +37,5 @@ sealed class ChatIntent : UIEvent {
 sealed class ChatEffect: UIEffect {
     class ScrollToLatest: ChatEffect()
     data class ShowSnackbar(val textRes: StringResource): ChatEffect()
+    data class NavigateToScreen(val destination: Screen): ChatEffect()
 }

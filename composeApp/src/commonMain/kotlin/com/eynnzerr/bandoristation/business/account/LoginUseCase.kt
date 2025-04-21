@@ -33,6 +33,7 @@ class LoginUseCase(
                     AppLogger.d("LoginInfoUseCase", "user id: ${loginResult.userId}, token: ${loginResult.token}")
                     if (loginResult.userId < 0) {
                         // need to verify email and token is temporary.
+                        dataStore.edit { p -> p[PreferenceKeys.TEMP_TOKEN] = loginResult.token }
                         return UseCaseResult.Error(LoginError.NeedVerification(token = loginResult.token))
                     }
 

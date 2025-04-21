@@ -31,7 +31,7 @@ class ConnectWebSocketUseCase(
             }
 
             // TODO token失效时返回错误
-            val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: testToken }.first()
+            val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: "" }.first()
             setAccessPermission(token)
         }
 

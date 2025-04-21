@@ -51,10 +51,12 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.chat_screen_title
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
+import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.ChatPiece
+import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.TimePiece
 import com.eynnzerr.bandoristation.ui.component.UnreadBubble
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
@@ -75,6 +77,7 @@ fun ChatScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var messageText by remember { mutableStateOf("") }
     val lazyListState = rememberLazyListState()
@@ -96,6 +99,10 @@ fun ChatScreen(
                             duration = SnackbarDuration.Short
                         )
                     }
+                }
+
+                is ChatEffect.NavigateToScreen -> {
+                    navController.navigateTo(action.destination)
                 }
             }
         }
@@ -139,17 +146,19 @@ fun ChatScreen(
         }
     }
 
-    Scaffold(
-        modifier = Modifier.appBarScroll(true, scrollBehavior),
+    SuiteScaffold(
+        scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
+        isExpanded = isExpanded,
+        screens = Screen.bottomScreenList,
+        currentDestination = navBackStackEntry?.destination,
+        onNavigateTo = { viewModel.sendEffect(ChatEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
                 title = stringResource(Res.string.chat_screen_title),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(
-                        onClick = {
-                            // TODO Navigate to settings
-                        }
+                        onClick = { viewModel.sendEffect(ChatEffect.NavigateToScreen(Screen.Settings)) }
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Settings,
@@ -172,44 +181,34 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = messageText,
-                        onValueChange = { messageText = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text("输入消息...") },
-                        maxLines = 3
-                    )
-                    IconButton(
-                        onClick = {
-                            // Handle send message
-                            if (messageText.isNotBlank()) {
-                                viewModel.sendEvent(ChatIntent.SendChat(messageText))
-                                messageText = ""
-                            }
-                        },
-                        modifier = Modifier.padding(start = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "发送"
-                        )
-                    }
-                }
-
-                AppNavBar(
-                    screens = Screen.bottomScreenList,
-                    currentDestination = navBackStackEntry?.destination,
-                    onNavigateTo = navController::navigateTo,
+                OutlinedTextField(
+                    value = messageText,
+                    onValueChange = { messageText = it },
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("输入消息...") },
+                    maxLines = 3
                 )
+                IconButton(
+                    onClick = {
+                        // Handle send message
+                        if (messageText.isNotBlank()) {
+                            viewModel.sendEvent(ChatIntent.SendChat(messageText))
+                            messageText = ""
+                        }
+                    },
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,
+                        contentDescription = "发送"
+                    )
+                }
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },

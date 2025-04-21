@@ -8,31 +8,28 @@ import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
-import com.eynnzerr.bandoristation.model.account.SignupParams
-import com.eynnzerr.bandoristation.model.account.SignupResult
+import com.eynnzerr.bandoristation.model.account.SendVerificationResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
-class SignupUseCase(
+class SendVerificationCodeUseCase(
     private val repository: AppRepository,
     private val dispatcher: CoroutineDispatcher,
     private val dataStore: DataStore<Preferences>,
-): UseCase<SignupParams, String, String>(dispatcher) {
+): UseCase<Unit, String, String>(dispatcher) {
 
-    override suspend fun execute(params: SignupParams): UseCaseResult<String, String> {
-        repository.sendHttpsRequest(
-            request = ApiRequest.Signup(
-                username = params.username,
-                password = params.password,
-                email = params.email,
-            ),
+    override suspend fun execute(parameters: Unit): UseCaseResult<String, String> {
+        val token = dataStore.data.map { p -> p[PreferenceKeys.TEMP_TOKEN] ?: "" }.first()
+
+        repository.sendAuthenticHttpsRequest(
+            request = ApiRequest.SendEmailVerificationCode(),
+            token = token
         ).handle(
             onSuccess = { responseContent ->
-                val signupResult = NetResponseHelper.parseApiResponse<SignupResult>(responseContent)
-                return signupResult?.let {
-                    dataStore.edit { p -> p[PreferenceKeys.TEMP_TOKEN] = it.token }
-                    UseCaseResult.Success(it.token)
-                } ?: UseCaseResult.Error("Failed to parse Signup response.")
+                val sendVerificationResult = NetResponseHelper.parseApiResponse<SendVerificationResult>(responseContent)
+                return sendVerificationResult?.let { UseCaseResult.Success(it.email) } ?: UseCaseResult.Error("Failed to parse SendVerification response.")
             },
             onFailure = {
                 return UseCaseResult.Error(it)

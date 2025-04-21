@@ -17,4 +17,9 @@
     <!--  用户页  -->
     <string name="account_screen_title">账户</string>
     <string name="login_help">BandoriStation Mobile提供两种登录方式: 1. 令牌登录: 如用户已登录网页版车站，可以在车站网页用F12打开控制台，选择console，在命令行输入document.cookie，复制其中token部分字符串，粘贴至输入框并确定，app即可免登录获取用户信息并与车站交互，直到令牌过期，使用新令牌重复以上操作。2. 密码登录: 如果已登录网页版，则需要首先在网页版退出登录，消除在服务器的登录状态，否则在app无法登录成功。像登录网页一样操作，输入密码即可。直到令牌过期，重新登录。</string>
+
+    <!--  设置页  -->
+    <string name="settings_screen_title">设置</string>
+    <string name="theme">主题</string>
+    <string name="theme_desc">应用外观、色调</string>
 </resources>

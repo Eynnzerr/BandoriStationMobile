@@ -62,7 +62,9 @@ sealed class ApiRequest(
     )
 
     @Serializable
-    class VerifyEmail : ApiRequest(
+    class VerifyEmail(
+        @SerialName("verification_code") val code: String,
+    ) : ApiRequest(
         group = "UserLogin",
         function = "verifyEmail",
     )
