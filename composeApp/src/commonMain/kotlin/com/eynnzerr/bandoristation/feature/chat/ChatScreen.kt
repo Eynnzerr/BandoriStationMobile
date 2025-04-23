@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +23,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,13 +50,13 @@ import bandoristationm.composeapp.generated.resources.chat_screen_title
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
-import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.ChatPiece
 import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.TimePiece
 import com.eynnzerr.bandoristation.ui.component.UnreadBubble
+import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
@@ -80,6 +78,7 @@ fun ChatScreen(
     val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var messageText by remember { mutableStateOf("") }
+    var showProfileDialog by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -92,7 +91,7 @@ fun ChatScreen(
                         lazyListState.animateScrollToItem(state.chats.size - 1)
                 }
 
-                is ChatEffect.ShowSnackbar -> {
+                is ChatEffect.ShowResSnackbar -> {
                     coroutineScope.launch {
                         val result = snackbarHostState.showSnackbar(
                             message = getString(action.textRes),
@@ -103,6 +102,19 @@ fun ChatScreen(
 
                 is ChatEffect.NavigateToScreen -> {
                     navController.navigateTo(action.destination)
+                }
+
+                is ChatEffect.ShowSnackbar -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = action.text,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+
+                is ChatEffect.ControlProfileDialog -> {
+                    showProfileDialog = action.visible
                 }
             }
         }
@@ -145,6 +157,14 @@ fun ChatScreen(
             viewModel.sendEvent(ChatIntent.ClearUnreadCount())
         }
     }
+
+    UserProfileDialog(
+        isVisible = showProfileDialog,
+        accountInfo = state.selectedUser,
+        onDismissRequest = { viewModel.sendEffect(ChatEffect.ControlProfileDialog(false)) },
+        onFollow = { viewModel.sendEvent(ChatIntent.FollowUser(it)) },
+        hasFollowed = state.selectedUser.accountSummary.userId in state.followingUsers,
+    )
 
     SuiteScaffold(
         scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
@@ -248,7 +268,10 @@ fun ChatScreen(
                                 // User Message
                                 ChatPiece(
                                     chatMessage = chatMessage,
-                                    isMyMessage = chatMessage.userInfo.userId == state.selfId
+                                    isMyMessage = chatMessage.userInfo.userId == state.selfId,
+                                    onClickAvatar = {
+                                        viewModel.sendEvent(ChatIntent.BrowseUser(chatMessage.userInfo.userId))
+                                    }
                                 )
                             }
                         }

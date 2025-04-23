@@ -16,20 +16,16 @@ import androidx.compose.material.icons.automirrored.outlined.Sort
 import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -43,18 +39,15 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import bandoristationm.composeapp.generated.resources.home_screen_title
-import bandoristationm.composeapp.generated.resources.placeholder
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
-import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.CurrentRoomHeader
 import com.eynnzerr.bandoristation.ui.component.RoomCard
@@ -133,7 +126,7 @@ fun HomeScreen(
                     }
                 }
 
-                is HomeEffect.ShowSnackbar -> {
+                is HomeEffect.ShowResourceSnackbar -> {
                     coroutineScope.launch {
                         val result = snackbarHostState.showSnackbar(
                             message = getString(action.textRes),
@@ -151,6 +144,15 @@ fun HomeScreen(
                     showSendRoomDialog = false
                     prefillRoomNumber = ""
                     prefillDescription = ""
+                }
+
+                is HomeEffect.ShowSnackbar -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = action.text,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
                 }
             }
         }

@@ -1,5 +1,7 @@
 package com.eynnzerr.bandoristation.feature.chat
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.clear_chats_snackbar
@@ -12,20 +14,26 @@ import com.eynnzerr.bandoristation.business.ReceiveHistoryChatUseCase
 import com.eynnzerr.bandoristation.business.RequestHistoryChatUseCase
 import com.eynnzerr.bandoristation.business.SendChatUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
+import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
+import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
+import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import com.eynnzerr.bandoristation.feature.chat.ChatEffect.*
 import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.formatTimestamp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Clock.System
 import kotlin.time.ExperimentalTime
 
 class ChatViewModel(
+    private val receiveNoticeUseCase: ReceiveNoticeUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
     private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val initializeChatRoomUseCase: InitializeChatRoomUseCase,
@@ -33,11 +41,26 @@ class ChatViewModel(
     private val sendChatUseCase: SendChatUseCase,
     private val requestHistoryChatUseCase: RequestHistoryChatUseCase,
     private val receiveHistoryChatUseCase: ReceiveHistoryChatUseCase,
+    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val followUserUseCase: FollowUserUseCase,
+    private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<ChatState, ChatIntent, ChatEffect>(
     initialState = ChatState.initial()
 ) {
 
     override suspend fun loadInitialData() {
+        viewModelScope.launch {
+            receiveNoticeUseCase.invoke(Unit).collect { result ->
+                when (result) {
+                    is UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Error -> Unit
+                    is UseCaseResult.Success -> {
+                        sendEffect(ChatEffect.ShowSnackbar(result.data))
+                    }
+                }
+            }
+        }
+
         viewModelScope.launch {
             getChatUseCase.invoke(Unit).collect { result ->
                 when (result) {
@@ -61,10 +84,20 @@ class ChatViewModel(
                         val response = result.data
                         sendEvent(ChatIntent.AppendNewChats(response.messageList, isHistory = true))
                         if (response.isEnd) {
-                            sendEffect(ShowSnackbar(Res.string.load_all_snackbar))
+                            sendEffect(ShowResSnackbar(Res.string.load_all_snackbar))
 
                         }
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            dataStore.data.collect { p ->
+                internalState.update {
+                    it.copy(
+                        followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList()
+                    )
                 }
             }
         }
@@ -77,6 +110,7 @@ class ChatViewModel(
             sendChat = true,
         ))
 
+        // 每次重新进入页面，收集消息流前，都要重置消息列表，获取在其他页面停留期间服务端新增的消息
         sendEvent(ChatIntent.Reset())
 
         when (val response = initializeChatRoomUseCase(Unit)) {
@@ -108,7 +142,7 @@ class ChatViewModel(
                     chats = emptyList(),
                     unreadCount = 0,
                     isLoading = false,
-                ) to ShowSnackbar(Res.string.clear_chats_snackbar)
+                ) to ShowResSnackbar(Res.string.clear_chats_snackbar)
             }
 
             is ChatIntent.SendChat -> {
@@ -142,6 +176,41 @@ class ChatViewModel(
             is ChatIntent.Reset -> {
                 ChatState.initial() to null
             }
+
+            is ChatIntent.BrowseUser -> {
+                viewModelScope.launch {
+                    val response = getUserInfoUseCase.invoke(event.id)
+                    when (response) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(selectedUser = response.data)
+                            }
+                            sendEffect(ControlProfileDialog(true))
+                        }
+                    }
+                }
+                null to null
+            }
+
+            is ChatIntent.FollowUser -> {
+                viewModelScope.launch {
+                    val response = followUserUseCase.invoke(event.id)
+                    when (response) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar(response.data))
+                        }
+                    }
+                }
+                null to null
+            }
         }
     }
 
@@ -150,7 +219,7 @@ class ChatViewModel(
         viewModelScope.launch { disconnectWebSocketUseCase(Unit) }
     }
 
-    fun processNewChat(newChats: List<ChatMessage>): List<ChatMessage> {
+    private fun processNewChat(newChats: List<ChatMessage>): List<ChatMessage> {
         val processedChatList = state.value.chats.toMutableList()
         for (chat in newChats) {
             val lastLatestTimestamp = if (processedChatList.isEmpty()) 0L else processedChatList.last().timestamp
@@ -167,7 +236,7 @@ class ChatViewModel(
         return processedChatList
     }
 
-    fun processHistoryChat(historyChats: List<ChatMessage>): List<ChatMessage> {
+    private fun processHistoryChat(historyChats: List<ChatMessage>): List<ChatMessage> {
         val processedChatList = mutableListOf<ChatMessage>()
         for (chat in historyChats) {
             val lastLatestTimestamp = if (processedChatList.isEmpty()) 0L else processedChatList.last().timestamp

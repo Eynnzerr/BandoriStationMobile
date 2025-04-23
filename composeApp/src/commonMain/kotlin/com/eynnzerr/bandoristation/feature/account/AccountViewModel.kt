@@ -3,7 +3,7 @@ package com.eynnzerr.bandoristation.feature.account
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
-import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
+import com.eynnzerr.bandoristation.business.account.GetSelfInfoUseCase
 import com.eynnzerr.bandoristation.business.account.LoginUseCase
 import com.eynnzerr.bandoristation.business.account.LogoutUseCase
 import com.eynnzerr.bandoristation.business.account.SendVerificationCodeUseCase
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 class AccountViewModel(
     private val loginUseCase: LoginUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val getSelfInfoUseCase: GetSelfInfoUseCase,
     private val signupUseCase: SignupUseCase,
     private val sendVerificationCodeUseCase: SendVerificationCodeUseCase,
     private val verifyEmailUseCase: VerifyEmailUseCase,
@@ -78,7 +78,7 @@ class AccountViewModel(
            is GetUserInfo -> {
                viewModelScope.launch {
                    val token = event.token
-                   val userInfoResult = getUserInfoUseCase(token)
+                   val userInfoResult = getSelfInfoUseCase(token)
                    when (userInfoResult) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {

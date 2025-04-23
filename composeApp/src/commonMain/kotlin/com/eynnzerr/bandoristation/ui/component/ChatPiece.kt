@@ -21,6 +21,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun ChatPiece(
     chatMessage: ChatMessage,
     isMyMessage: Boolean = true,
+    onClickAvatar: () -> Unit = {},
 ) {
     if (isMyMessage) {
         ChatBubble(
@@ -35,7 +36,8 @@ fun ChatPiece(
         ) {
             UserAvatar(
                 avatarName = chatMessage.userInfo.avatar ?: "",
-                size = 56.dp
+                size = 56.dp,
+                onClick = onClickAvatar,
             )
             Column(
                 modifier = Modifier.padding(start = 8.dp)

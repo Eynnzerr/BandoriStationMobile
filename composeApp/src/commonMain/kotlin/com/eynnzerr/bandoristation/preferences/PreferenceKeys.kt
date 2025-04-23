@@ -9,4 +9,5 @@ object PreferenceKeys {
     val PRESET_WORDS = stringSetPreferencesKey("preset_words") // preset words for uploading
     val TEMP_TOKEN = stringPreferencesKey("temp_token") // temporary token used for signup
     val BAND_THEME = stringPreferencesKey("default")
+    val FOLLOWING_LIST = stringSetPreferencesKey("following_list") // list of following users
 }

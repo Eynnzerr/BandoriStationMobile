@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.ui.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -24,7 +25,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun UserAvatar(
     avatarName: String,
-    size: Dp = 32.dp
+    size: Dp = 32.dp,
+    onClick: () -> Unit = {},
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalPlatformContext.current)
@@ -39,7 +41,8 @@ fun UserAvatar(
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .size(size)
-            .clip(CircleShape),
+            .clip(CircleShape)
+            .clickable(onClick = onClick),
     )
 }
 

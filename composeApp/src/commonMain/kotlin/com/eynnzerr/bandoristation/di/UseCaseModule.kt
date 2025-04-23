@@ -13,12 +13,15 @@ import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
+import com.eynnzerr.bandoristation.business.account.GetSelfInfoUseCase
 import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.business.account.LoginUseCase
 import com.eynnzerr.bandoristation.business.account.LogoutUseCase
 import com.eynnzerr.bandoristation.business.account.SendVerificationCodeUseCase
 import com.eynnzerr.bandoristation.business.account.SignupUseCase
 import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
+import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
+import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
@@ -35,6 +38,13 @@ fun provideUseCaseModule() = module {
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
             dataStore = get(),
+        )
+    }
+
+    single {
+        ReceiveNoticeUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )
     }
 
@@ -116,9 +126,17 @@ fun provideUseCaseModule() = module {
     }
 
     single {
+        GetSelfInfoUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+        )
+    }
+
+    single {
         GetUserInfoUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
         )
     }
 
@@ -156,6 +174,14 @@ fun provideUseCaseModule() = module {
 
     single {
         VerifyEmailUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        FollowUserUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
             dataStore = get(),

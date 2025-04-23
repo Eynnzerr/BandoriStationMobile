@@ -37,6 +37,11 @@ class LoginUseCase(
                         return UseCaseResult.Error(LoginError.NeedVerification(token = loginResult.token))
                     }
 
+                    // Store following account information.
+                    dataStore.edit { p ->
+                        p[PreferenceKeys.FOLLOWING_LIST] = loginResult.followingUsers.map { l -> l.toString() }.toSet()
+                    }
+
                     repository.sendAuthenticHttpsRequest(
                         request = ApiRequest.GetUserInfo(id = loginResult.userId),
                         token = loginResult.token,

@@ -2,8 +2,6 @@ package com.eynnzerr.bandoristation.feature.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,12 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -30,15 +25,11 @@ import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
-import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.EditAccountButton
 import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
-import com.eynnzerr.bandoristation.ui.component.SimpleRoomCard
 import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
-import com.eynnzerr.bandoristation.ui.component.UserAvatar
-import com.eynnzerr.bandoristation.ui.component.UserBannerImage
+import com.eynnzerr.bandoristation.ui.component.UserProfile
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
-import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -57,9 +48,7 @@ fun AccountScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
-    val tabs = listOf("发布历史", "玩家信息")
     val clipboardManager = LocalClipboardManager.current
-    var selectedTabIndex by remember { mutableStateOf(0) }
     var showLoginDialog by remember { mutableStateOf(false) }
     var loginDialogState by remember { mutableStateOf(LoginScreenState.INITIAL) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -175,7 +164,10 @@ fun AccountScreen(
                     NavigationDrawerItem(
                         icon = { Icon(Icons.Default.Token, contentDescription = null) },
                         label = { Text("重置令牌") },
-                        onClick = {  },
+                        onClick = {
+                            viewModel.sendEffect(AccountEffect.ControlLoginDialog(true))
+                            viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.TOKEN_LOGIN))
+                        },
                         selected = false,
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
@@ -208,70 +200,12 @@ fun AccountScreen(
                         )
                     }
                 } else {
-                    Column(
+                    UserProfile(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues)
-                    ) {
-                        UserBannerImage(
-                            bannerName = state.accountInfo.summary.banner,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
-                        )
-
-                        // 用户信息区域
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                // 用户头像
-                                UserAvatar(
-                                    avatarName = state.accountInfo.summary.avatar,
-                                    size = 64.dp
-                                )
-
-                                // 用户信息
-                                Column(
-                                    modifier = Modifier
-                                        .padding(start = 12.dp)
-                                        .padding(top = 4.dp)
-                                ) {
-                                    Text(
-                                        text = state.accountInfo.summary.username,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
-                                    )
-                                    Text(
-                                        text = "UID: ${state.accountInfo.summary.userId}",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 14.sp,
-                                        modifier = Modifier.padding(top = 4.dp),
-                                    )
-                                    Row(
-                                        modifier = Modifier.padding(top = 0.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        // TODO 点击打开关注列表
-                                        Text(
-                                            text = "${state.accountInfo.summary.following} 关注",
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 14.sp
-                                        )
-                                        Text(
-                                            text = "${state.accountInfo.summary.follower} 关注者",
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 14.sp
-                                        )
-                                    }
-                                }
-                            }
-
+                            .padding(paddingValues),
+                        accountInfo = state.accountInfo,
+                        sideButton = {
                             EditAccountButton(
                                 isLoggedIn = state.isLoggedIn,
                                 onLogIn = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(true)) },
@@ -280,225 +214,9 @@ fun AccountScreen(
                                 },
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // 标签页
-                        TabRow(
-                            selectedTabIndex = selectedTabIndex,
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ) {
-                            tabs.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index },
-                                    text = { Text(title) }
-                                )
-                            }
-                        }
-
-                        // 标签页内容
-                        when (selectedTabIndex) {
-                            0 -> {
-                                // 发布历史
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(8.dp)
-                                ) {
-                                    itemsIndexed(state.accountInfo.roomNumberHistory) { index, roomInfo ->
-                                        SimpleRoomCard(
-                                            number = roomInfo.number,
-                                            rawMessage = roomInfo.rawMessage,
-                                            timestamp = roomInfo.time,
-                                            sourceName = roomInfo.sourceName,
-                                            avatarName = state.accountInfo.summary.avatar,
-                                            userName = state.accountInfo.summary.username,
-                                            onCopy = { roomNumber ->
-                                                viewModel.sendEffect(AccountEffect.CopyRoomNumber(roomNumber))
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                            1 -> {
-                                // 玩家信息
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "即将推出",
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    )
                 }
             }
-
-//            Scaffold(
-//                bottomBar = {
-//                    AppNavBar(
-//                        screens = Screen.bottomScreenList,
-//                        currentDestination = navBackStackEntry?.destination,
-//                        onNavigateTo = navController::navigateTo,
-//                    )
-//                },
-//                snackbarHost = {
-//                    SnackbarHost(
-//                        hostState = snackbarHostState,
-//                        modifier = Modifier
-//                            .zIndex(Float.MAX_VALUE)
-//                            .imePadding()
-//                    )
-//                }
-//            ) { paddingValues ->
-//                if (state.isLoading) {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .padding(paddingValues)
-//                    ) {
-//                        CircularProgressIndicator(
-//                            modifier = Modifier.align(Alignment.Center)
-//                        )
-//                    }
-//                } else {
-//                    Column(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .padding(paddingValues)
-//                    ) {
-//                        UserBannerImage(
-//                            bannerName = state.accountInfo.summary.banner,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .height(150.dp)
-//                        )
-//
-//                        // 用户信息区域
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(horizontal = 16.dp)
-//                                .padding(top = 16.dp),
-//                            horizontalArrangement = Arrangement.SpaceBetween,
-//                            verticalAlignment = Alignment.Top
-//                        ) {
-//                            Row(verticalAlignment = Alignment.CenterVertically) {
-//                                // 用户头像
-//                                UserAvatar(
-//                                    avatarName = state.accountInfo.summary.avatar,
-//                                    size = 64.dp
-//                                )
-//
-//                                // 用户信息
-//                                Column(
-//                                    modifier = Modifier
-//                                        .padding(start = 12.dp)
-//                                        .padding(top = 4.dp)
-//                                ) {
-//                                    Text(
-//                                        text = state.accountInfo.summary.username,
-//                                        fontWeight = FontWeight.Bold,
-//                                        fontSize = 20.sp
-//                                    )
-//                                    Text(
-//                                        text = "UID: ${state.accountInfo.summary.userId}",
-//                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                                        fontSize = 14.sp,
-//                                        modifier = Modifier.padding(top = 4.dp),
-//                                    )
-//                                    Row(
-//                                        modifier = Modifier.padding(top = 0.dp),
-//                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-//                                    ) {
-//                                        // TODO 点击打开关注列表
-//                                        Text(
-//                                            text = "${state.accountInfo.summary.following} 关注",
-//                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                                            fontSize = 14.sp
-//                                        )
-//                                        Text(
-//                                            text = "${state.accountInfo.summary.follower} 关注者",
-//                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                                            fontSize = 14.sp
-//                                        )
-//                                    }
-//                                }
-//                            }
-//
-//                            EditAccountButton(
-//                                isLoggedIn = state.isLoggedIn,
-//                                onLogIn = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(true)) },
-//                                onEditAccount = {
-//                                    // TODO 打开资料编辑对话框 或者 模态框
-//                                },
-//                            )
-//                        }
-//
-//                        Spacer(modifier = Modifier.height(16.dp))
-//
-//                        // 标签页
-//                        TabRow(
-//                            selectedTabIndex = selectedTabIndex,
-//                            containerColor = MaterialTheme.colorScheme.surface,
-//                            contentColor = MaterialTheme.colorScheme.primary
-//                        ) {
-//                            tabs.forEachIndexed { index, title ->
-//                                Tab(
-//                                    selected = selectedTabIndex == index,
-//                                    onClick = { selectedTabIndex = index },
-//                                    text = { Text(title) }
-//                                )
-//                            }
-//                        }
-//
-//                        // 标签页内容
-//                        when (selectedTabIndex) {
-//                            0 -> {
-//                                // 发布历史
-//                                LazyColumn(
-//                                    modifier = Modifier.fillMaxSize(),
-//                                    contentPadding = PaddingValues(8.dp)
-//                                ) {
-//                                    itemsIndexed(state.accountInfo.roomNumberHistory) { index, roomInfo ->
-//                                        SimpleRoomCard(
-//                                            number = roomInfo.number,
-//                                            rawMessage = roomInfo.rawMessage,
-//                                            timestamp = roomInfo.time,
-//                                            sourceName = roomInfo.sourceName,
-//                                            avatarName = state.accountInfo.summary.avatar,
-//                                            userName = state.accountInfo.summary.username,
-//                                            onCopy = { roomNumber ->
-//                                                viewModel.sendEffect(AccountEffect.CopyRoomNumber(roomNumber))
-//                                            },
-//                                        )
-//                                    }
-//                                }
-//                            }
-//                            1 -> {
-//                                // 玩家信息
-//                                Box(
-//                                    modifier = Modifier
-//                                        .fillMaxSize()
-//                                        .padding(16.dp),
-//                                    contentAlignment = Alignment.Center
-//                                ) {
-//                                    Text(
-//                                        text = "即将推出",
-//                                        color = Color.Gray
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
     )
 }

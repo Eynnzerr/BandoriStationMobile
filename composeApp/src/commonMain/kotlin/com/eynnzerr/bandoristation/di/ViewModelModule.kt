@@ -19,7 +19,8 @@ fun provideViewModelModule() = module {
             checkUnreadChatUseCase = get(),
             uploadRoomUseCase = get(),
             setPreferenceUseCase = get(),
-            stringSetPreferenceUseCase = get(named("stringSetPreferenceUseCase"))
+            stringSetPreferenceUseCase = get(named("stringSetPreferenceUseCase")),
+            receiveNoticeUseCase = get(),
         )
     }
 
@@ -28,7 +29,7 @@ fun provideViewModelModule() = module {
     factory {
         AccountViewModel(
             loginUseCase = get(),
-            getUserInfoUseCase = get(),
+            getSelfInfoUseCase = get(),
             stringPreferenceUseCase = get(named("stringPreferenceUseCase")),
             setPreferenceUseCase = get(),
             logoutUseCase = get(),

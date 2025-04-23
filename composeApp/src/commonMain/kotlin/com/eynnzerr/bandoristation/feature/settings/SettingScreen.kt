@@ -12,10 +12,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.PictureInPicture
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,6 +33,7 @@ import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
 import com.eynnzerr.bandoristation.ui.component.settings.SettingDropdownItem
+import com.eynnzerr.bandoristation.ui.component.settings.SettingItem
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.ui.theme.bandThemeList
 import org.jetbrains.compose.resources.stringResource
@@ -70,6 +73,19 @@ fun SettingScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
+            SettingItem(
+                title = "画中画",
+                desc = "管理悬浮窗组件配置",
+                icon = Icons.Outlined.PictureInPicture,
+                action = {
+                    Switch(
+                        checked = true,
+                        onCheckedChange = null
+                    )
+                },
+                onClick = {}
+            )
+
             SettingDropdownItem(
                 title = stringResource(Res.string.theme),
                 desc = stringResource(Res.string.theme_desc),

@@ -62,11 +62,20 @@ sealed class ApiRequest(
     )
 
     @Serializable
-    class VerifyEmail(
+    data class VerifyEmail(
         @SerialName("verification_code") val code: String,
     ) : ApiRequest(
         group = "UserLogin",
         function = "verifyEmail",
+    )
+
+    @Serializable
+    data class FollowUser(
+        @SerialName("user_id") val id: Long,
+        @SerialName("is_following") val follow: Boolean,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "followUser",
     )
 }
 

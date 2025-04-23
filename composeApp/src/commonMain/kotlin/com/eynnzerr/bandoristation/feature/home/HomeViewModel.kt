@@ -15,6 +15,7 @@ import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.*
+import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
@@ -28,6 +29,7 @@ import kotlinx.datetime.Clock.System
 
 class HomeViewModel(
     private val connectWebSocketUseCase: ConnectWebSocketUseCase,
+    private val receiveNoticeUseCase: ReceiveNoticeUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
     private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val getRoomListUseCase: GetRoomListUseCase,
@@ -44,6 +46,20 @@ class HomeViewModel(
         AppLogger.d(TAG, "loadInitialData: Initialize HomeViewModel!")
 
         connectWebSocketUseCase(Unit)
+
+        viewModelScope.launch {
+            receiveNoticeUseCase.invoke(Unit).collect { result ->
+                when (result) {
+                    is UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Error -> {
+                        AppLogger.d(TAG, "Failed to receive notice.")
+                    }
+                    is UseCaseResult.Success -> {
+                        sendEffect(ShowSnackbar(result.data))
+                    }
+                }
+            }
+        }
 
         viewModelScope.launch {
             updateTimestampUseCase.invoke(Unit).collect { result ->
@@ -129,14 +145,14 @@ class HomeViewModel(
                 state.value.copy(
                     selectedRoom = event.room,
                     joinedTimestampMillis = System.now().toEpochMilliseconds(),
-                ) to event.room?.let { ShowSnackbar(Res.string.join_room_snackbar) }
+                ) to event.room?.let { ShowResourceSnackbar(Res.string.join_room_snackbar) }
             }
 
             is HomeIntent.UploadRoom -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     uploadRoomUseCase(event.room)
                 }
-                null to ShowSnackbar(Res.string.upload_room_snackbar)
+                null to ShowResourceSnackbar(Res.string.upload_room_snackbar)
             }
 
             is HomeIntent.AddPresetWord -> {

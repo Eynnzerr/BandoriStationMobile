@@ -39,7 +39,8 @@ sealed class HomeIntent: UIEvent {
 sealed class HomeEffect: UIEffect {
     data class NavigateToScreen(val destination: Screen): HomeEffect()
     data class CopyRoomNumber(val roomNumber: String): HomeEffect()
-    data class ShowSnackbar(val textRes: StringResource): HomeEffect()
+    data class ShowResourceSnackbar(val textRes: StringResource): HomeEffect()
+    data class ShowSnackbar(val text: String): HomeEffect()
     class ScrollToFirst: HomeEffect()
     data class OpenSendRoomDialog(
         val prefillRoomNumber: String = "",

@@ -22,4 +22,6 @@
     <string name="settings_screen_title">Settings</string>
     <string name="theme">Theme</string>
     <string name="theme_desc">app appearance, colors, palette</string>
+    <string name="pip">Picture in Picture</string>
+    <string name="pip_desc">overlay window configuration</string>
 </resources>
