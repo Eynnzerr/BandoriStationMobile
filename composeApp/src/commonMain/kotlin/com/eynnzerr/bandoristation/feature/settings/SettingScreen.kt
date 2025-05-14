@@ -76,7 +76,7 @@ fun SettingScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingItem(
+            /* SettingItem(
                 title = "画中画",
                 desc = "管理悬浮窗组件配置",
                 icon = Icons.Outlined.PictureInPicture,
@@ -88,7 +88,7 @@ fun SettingScreen(
                 },
                 onClick = {},
                 enable = false,
-            )
+            ) */
 
             SettingItem(
                 title = "自动过滤PJSK",

@@ -58,6 +58,7 @@ import com.eynnzerr.bandoristation.ui.component.TimePiece
 import com.eynnzerr.bandoristation.ui.component.UnreadBubble
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
+import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -75,7 +76,7 @@ fun ChatScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
+    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var messageText by remember { mutableStateOf("") }
     var showProfileDialog by remember { mutableStateOf(false) }
@@ -174,7 +175,7 @@ fun ChatScreen(
         onNavigateTo = { viewModel.sendEffect(ChatEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
-                title = stringResource(Res.string.chat_screen_title),
+                title = state.title,
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(
@@ -249,6 +250,7 @@ fun ChatScreen(
                     itemsIndexed(
                         items = state.chats,
                         key = { index, item ->
+                            AppLogger.d("ChatScreen", "Message ${item.content} hash: ${item.hashCode()}")
                             val timestampPart = item.timestamp
                             val contentPart = item.content.hashCode()
                             val userPart = item.userInfo.hashCode()

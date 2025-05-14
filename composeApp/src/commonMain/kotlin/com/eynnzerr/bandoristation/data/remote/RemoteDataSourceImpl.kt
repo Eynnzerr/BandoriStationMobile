@@ -8,6 +8,7 @@ import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 
 class RemoteDataSourceImpl(
     private val webSocketClient: WebSocketClient,
@@ -46,6 +47,9 @@ class RemoteDataSourceImpl(
 
     override fun listenForAll()
         = webSocketClient.listenForAll()
+
+    override fun listenWebSocketConnectionState()
+        = webSocketClient.connectionState
 
     override fun disconnectWebSocket()
         = webSocketClient.disconnect()

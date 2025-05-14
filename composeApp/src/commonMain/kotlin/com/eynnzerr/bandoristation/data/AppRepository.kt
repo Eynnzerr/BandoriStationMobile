@@ -15,6 +15,7 @@ class AppRepository(
     suspend fun <T> sendWebSocketRequestWithRetry(action: String, data: T? = null) = remoteDataSource.sendWebSocketRequestWithRetry(action, data, 0)
     fun listenWebSocketForActions(actions: List<String>) = remoteDataSource.listenWebSocketForActions(actions)
     fun listenForAll() = remoteDataSource.listenForAll()
+    fun listenWebSocketConnection() = remoteDataSource.webSocketConnectionState
 
     // page business
     suspend fun setWebSocketApiClient(params: ClientSetInfo) = remoteDataSource.setWebSocketApiClient(params)

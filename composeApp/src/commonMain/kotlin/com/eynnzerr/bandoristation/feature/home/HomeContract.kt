@@ -20,6 +20,7 @@ data class HomeState(
     val localTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val joinedTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val presetWords: Set<String> = emptySet(),
+    val title: String = "主页",
 ) : UIState {
     companion object {
         fun initial() = HomeState(
@@ -38,6 +39,7 @@ sealed class HomeIntent: UIEvent {
     data class AddPresetWord(val word: String): HomeIntent()
     data class RemovePresetWord(val word: String): HomeIntent()
     class ClearRooms(): HomeIntent()
+    class RefreshRooms(): HomeIntent()
     data class InformUser(val params: ApiRequest.InformUser): HomeIntent()
     class GetRoomFilter(): HomeIntent()
     data class UpdateRoomFilter(val filter: RoomFilter): HomeIntent()

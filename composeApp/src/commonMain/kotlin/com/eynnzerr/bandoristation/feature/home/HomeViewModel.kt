@@ -9,6 +9,7 @@ import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
+import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
@@ -16,9 +17,11 @@ import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.*
 import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
+import com.eynnzerr.bandoristation.business.room.RequestRecentRoomsUseCase
 import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
+import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.RoomFilter
@@ -29,6 +32,7 @@ import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -37,8 +41,10 @@ import kotlinx.datetime.Clock.System
 class HomeViewModel(
     private val connectWebSocketUseCase: ConnectWebSocketUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
+    private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
     private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
+    private val requestRecentRoomsUseCase: RequestRecentRoomsUseCase,
     private val getRoomListUseCase: GetRoomListUseCase,
     private val updateTimestampUseCase: UpdateTimestampUseCase,
     private val checkUnreadChatUseCase: CheckUnreadChatUseCase,
@@ -57,7 +63,48 @@ class HomeViewModel(
     override suspend fun loadInitialData() {
         sendEvent(HomeIntent.GetRoomFilter())
 
-        connectWebSocketUseCase(Unit)
+        viewModelScope.launch {
+            connectWebSocketUseCase(Unit).collect { result ->
+                if (result is UseCaseResult.Success) {
+                    when (result.data) {
+                        is WebSocketClient.ConnectionState.Connected -> {
+                            AppLogger.d(TAG, "WebSocket is connected.")
+
+                            // 每次重新连接到websocket时，请求最近房间列表、重新设置权限、设置客户端
+                            internalState.update {
+                                it.copy(title = "房间列表")
+                            }
+                            requestRecentRoomsUseCase(Unit)
+                            setAccessPermissionUseCase(null)
+                            setUpClientUseCase(ClientSetInfo(
+                                client = "BandoriStation",
+                                sendRoomNumber = true,
+                                sendChat = false,
+                            ))
+                        }
+                        is WebSocketClient.ConnectionState.Connecting -> {
+                            internalState.update {
+                                it.copy(title = "连接中...")
+                            }
+                            AppLogger.d(TAG, "Connecting to WebSocket...")
+                        }
+                        is WebSocketClient.ConnectionState.Disconnected -> {
+                            // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
+                            internalState.update {
+                                it.copy(title = "当前离线")
+                            }
+                            sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
+                        }
+                        is WebSocketClient.ConnectionState.Error -> {
+                            internalState.update {
+                                it.copy(title = "错误")
+                            }
+                            sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
+                        }
+                    }
+                }
+            }
+        }
 
         viewModelScope.launch {
             updateTimestampUseCase.invoke(Unit).collect { result ->
@@ -132,8 +179,9 @@ class HomeViewModel(
     }
 
     override suspend fun onStartStateFlow() {
+        // 每次重新进入房间页，设置客户端接收条件
         setUpClientUseCase(ClientSetInfo(
-            client = "BandoriStation Mobile",
+            client = "BandoriStation",
             sendRoomNumber = true,
             sendChat = false,
         ))
@@ -153,7 +201,7 @@ class HomeViewModel(
         return when (event) {
             is HomeIntent.UpdateRoomList -> {
                 val filteredRooms = event.rooms.filterNot(state.value.roomFilter, isFilteringPJSK)
-                state.value.copy(rooms = filteredRooms) to null
+                state.value.copy(rooms = filteredRooms) to ShowSnackbar("获取最新房间列表。")
             }
 
             is HomeIntent.AppendRoomList -> {
@@ -269,6 +317,20 @@ class HomeViewModel(
                     }
                 }
                 null to null
+            }
+
+            is HomeIntent.RefreshRooms -> {
+                viewModelScope.launch {
+                    internalState.update {
+                        it.copy(
+                            rooms = emptyList(),
+                        )
+                    }
+
+                    delay(500L)
+                    requestRecentRoomsUseCase(Unit)
+                }
+                null to ShowSnackbar("刷新房间列表...")
             }
         }
     }

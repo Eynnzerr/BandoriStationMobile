@@ -46,7 +46,7 @@ fun AccountScreen(
     viewModel: AccountViewModel = koinViewModel<AccountViewModel>()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
+    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)

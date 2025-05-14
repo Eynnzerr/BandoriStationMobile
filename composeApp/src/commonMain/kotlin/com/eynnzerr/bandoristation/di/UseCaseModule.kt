@@ -22,6 +22,7 @@ import com.eynnzerr.bandoristation.business.account.SendVerificationCodeUseCase
 import com.eynnzerr.bandoristation.business.account.SignupUseCase
 import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
+import com.eynnzerr.bandoristation.business.room.RequestRecentRoomsUseCase
 import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
@@ -43,7 +44,6 @@ fun provideUseCaseModule() = module {
         ConnectWebSocketUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
-            dataStore = get(),
         )
     }
 
@@ -239,6 +239,13 @@ fun provideUseCaseModule() = module {
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
             dataStore = get(),
+        )
+    }
+
+    single {
+        RequestRecentRoomsUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )
     }
 }

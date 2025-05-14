@@ -25,6 +25,8 @@ fun provideViewModelModule() = module {
             updateRoomFilterUseCase = get(),
             getRoomFilterUseCase = get(),
             boolPreferenceUseCase = get(named("booleanPreferenceUseCase")),
+            setAccessPermissionUseCase = get(),
+            requestRecentRoomsUseCase = get(),
         )
     }
 

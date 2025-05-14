@@ -7,16 +7,19 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.clear_chats_snackbar
 import bandoristationm.composeapp.generated.resources.load_all_snackbar
 import com.eynnzerr.bandoristation.base.BaseViewModel
+import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetChatUseCase
 import com.eynnzerr.bandoristation.business.InitializeChatRoomUseCase
 import com.eynnzerr.bandoristation.business.ReceiveHistoryChatUseCase
 import com.eynnzerr.bandoristation.business.RequestHistoryChatUseCase
 import com.eynnzerr.bandoristation.business.SendChatUseCase
+import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
+import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.chat.ChatEffect.*
 import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.model.ClientSetInfo
@@ -33,7 +36,9 @@ import kotlin.time.Clock.System
 import kotlin.time.ExperimentalTime
 
 class ChatViewModel(
+    private val connectWebSocketUseCase: ConnectWebSocketUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
+    private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
     private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val initializeChatRoomUseCase: InitializeChatRoomUseCase,
@@ -50,12 +55,54 @@ class ChatViewModel(
 
     override suspend fun loadInitialData() {
         viewModelScope.launch {
+            connectWebSocketUseCase(Unit).collect { result ->
+                if (result is UseCaseResult.Success) {
+                    when (result.data) {
+                        is WebSocketClient.ConnectionState.Connected -> {
+                            AppLogger.d(TAG, "WebSocket is connected.")
+
+                            internalState.update {
+                                it.copy(title = "聊天室")
+                            }
+                            setAccessPermissionUseCase(null)
+                            setUpClientUseCase(ClientSetInfo(
+                                client = "BandoriStation",
+                                sendRoomNumber = false,
+                                sendChat = true,
+                            ))
+                            initializeChatRoom()
+                        }
+                        is WebSocketClient.ConnectionState.Connecting -> {
+                            internalState.update {
+                                it.copy(title = "连接中...")
+                            }
+                            AppLogger.d(TAG, "Connecting to WebSocket...")
+                        }
+                        is WebSocketClient.ConnectionState.Disconnected -> {
+                            // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
+                            internalState.update {
+                                it.copy(title = "当前离线")
+                            }
+                            sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
+                        }
+                        is WebSocketClient.ConnectionState.Error -> {
+                            internalState.update {
+                                it.copy(title = "错误")
+                            }
+                            sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
+                        }
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
             receiveNoticeUseCase.invoke(Unit).collect { result ->
                 when (result) {
                     is UseCaseResult.Loading -> Unit
                     is UseCaseResult.Error -> Unit
                     is UseCaseResult.Success -> {
-                        sendEffect(ChatEffect.ShowSnackbar(result.data))
+                        sendEffect(ShowSnackbar(result.data))
                     }
                 }
             }
@@ -65,7 +112,7 @@ class ChatViewModel(
             getChatUseCase.invoke(Unit).collect { result ->
                 when (result) {
                     is UseCaseResult.Error -> Unit
-                    UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Loading -> Unit
                     is UseCaseResult.Success -> {
                         AppLogger.d(TAG, "Successfully received ${result.data.size} new chats")
                         val newChats = result.data
@@ -104,13 +151,17 @@ class ChatViewModel(
     }
 
     override suspend fun onStartStateFlow() {
+        // 每次重新进入页面，收集消息流前，都要重置消息列表，获取在其他页面停留期间服务端新增的消息
+        initializeChatRoom()
+
         setUpClientUseCase(ClientSetInfo(
-            client = "BandoriStation Mobile",
+            client = "BandoriStation",
             sendRoomNumber = false,
             sendChat = true,
         ))
+    }
 
-        // 每次重新进入页面，收集消息流前，都要重置消息列表，获取在其他页面停留期间服务端新增的消息
+    private suspend fun initializeChatRoom() {
         sendEvent(ChatIntent.Reset())
 
         when (val response = initializeChatRoomUseCase(Unit)) {
@@ -135,6 +186,7 @@ class ChatViewModel(
                     initialized = true,
                     unreadCount = 0,
                     isLoading = false,
+                    title = "聊天室"
                 ) to null
             }
             is ChatIntent.ClearAll -> {

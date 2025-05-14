@@ -19,6 +19,7 @@ data class ChatState(
     val isLoading: Boolean = true,
     val selectedUser: AccountInfo = AccountInfo(),
     val followingUsers: List<Long> = emptyList(),
+    val title: String = "聊天室"
 ) : UIState {
     companion object {
         fun initial() = ChatState()

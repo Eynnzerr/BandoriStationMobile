@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.outlined.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -79,7 +80,7 @@ fun HomeScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
+    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
@@ -262,7 +263,7 @@ fun HomeScreen(
         onNavigateTo = { viewModel.sendEffect(HomeEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
-                title = stringResource(Res.string.home_screen_title),
+                title = state.title,
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(
@@ -290,11 +291,11 @@ fun HomeScreen(
 
                     IconButton(
                         onClick = {
-                            // TODO 预测线
+                            viewModel.sendEvent(RefreshRooms())
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.TrendingUp,
+                            imageVector = Icons.Outlined.Refresh,
                             contentDescription = ""
                         )
                     }
