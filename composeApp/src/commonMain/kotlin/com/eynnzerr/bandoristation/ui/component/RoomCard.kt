@@ -46,6 +46,8 @@ fun RoomCard(
     roomInfo: RoomInfo,
     onCopy: (String) -> Unit,
     onJoin: (Boolean) -> Unit,
+    onBlockUser: () -> Unit,
+    onReportUser: () -> Unit,
     isJoined: Boolean,
     currentTimeMillis: Long = System.now().toEpochMilliseconds(),
     modifier: Modifier = Modifier,
@@ -133,7 +135,7 @@ fun RoomCard(
             )
 
             TextButton(
-                onClick = {}
+                onClick = onBlockUser,
             ) {
                 Text(
                     text = "屏蔽",
@@ -141,7 +143,7 @@ fun RoomCard(
             }
 
             TextButton(
-                onClick = {}
+                onClick = onReportUser,
             ) {
                 Text(
                     text = "举报",
@@ -185,6 +187,8 @@ fun RoomCardPreview() {
             AppLogger.d(TAG, "onMark: $join")
             isJoined = join
         },
+        onBlockUser = {},
+        onReportUser = {},
         isJoined = isJoined
     )
 }

@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.feature.account
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
+import com.eynnzerr.bandoristation.business.account.GetEditProfileDataUseCase
 import com.eynnzerr.bandoristation.business.account.GetSelfInfoUseCase
 import com.eynnzerr.bandoristation.business.account.LoginUseCase
 import com.eynnzerr.bandoristation.business.account.LogoutUseCase
@@ -12,6 +13,8 @@ import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.Params
+import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
+import com.eynnzerr.bandoristation.business.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.feature.account.AccountEffect.*
 import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
 import com.eynnzerr.bandoristation.model.account.AccountInfo
@@ -24,6 +27,7 @@ import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -37,6 +41,9 @@ class AccountViewModel(
     private val setPreferenceUseCase: SetPreferenceUseCase,
     private val stringPreferenceUseCase: GetPreferenceUseCase<String>,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
+    private val getFollowingBriefUseCase: GetFollowingBriefUseCase,
+    private val getFollowerBriefUseCase: GetFollowerBriefUseCase,
+    private val getEditProfileDataUseCase: GetEditProfileDataUseCase,
 ) : BaseViewModel<AccountState, AccountIntent, AccountEffect>(
     initialState = AccountState.initial()
 ) {
@@ -205,6 +212,61 @@ class AccountViewModel(
 
            is UpdateCountDown -> {
                state.value.copy(countDown = event.value) to null
+           }
+
+           is GetFollowers -> {
+               viewModelScope.launch {
+                   val selfId = state.value.accountInfo.accountSummary.userId
+                   val followerBriefResult = getFollowerBriefUseCase.invoke(selfId)
+                   when (followerBriefResult) {
+                       UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(followerBriefResult.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           internalState.update {
+                               it.copy(followers = followerBriefResult.data)
+                           }
+                       }
+                   }
+               }
+               null to null
+           }
+
+           is GetFollowings -> {
+               viewModelScope.launch {
+                   val followingBriefResult = getFollowingBriefUseCase.invoke(Unit)
+                   when (followingBriefResult) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(followingBriefResult.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           internalState.update {
+                               it.copy(followings = followingBriefResult.data)
+                           }
+                       }
+                   }
+               }
+               null to null
+           }
+
+           is GetEditProfileData -> {
+               viewModelScope.launch {
+                   val profileResult = getEditProfileDataUseCase.invoke(Unit)
+                   when (profileResult) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(profileResult.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           internalState.update {
+                               it.copy(editProfileData = profileResult.data)
+                           }
+                       }
+                   }
+               }
+               null to null
            }
        }
     }

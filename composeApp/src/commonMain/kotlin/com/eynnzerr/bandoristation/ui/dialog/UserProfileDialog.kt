@@ -8,6 +8,7 @@ import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -45,6 +46,9 @@ fun UserProfileDialog(
                         Button(
                             onClick = { onFollow(accountInfo.accountSummary.userId) },
                             shape = MaterialTheme.shapes.medium,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (hasFollowed) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                            )
                         ) {
                             Text(if (hasFollowed) "取关" else "关注")
                         }

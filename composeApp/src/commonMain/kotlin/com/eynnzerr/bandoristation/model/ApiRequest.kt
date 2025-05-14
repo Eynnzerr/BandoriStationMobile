@@ -77,6 +77,54 @@ sealed class ApiRequest(
         group = "MainAction",
         function = "followUser",
     )
+
+    @Serializable
+    data class GetFollowerList(
+        @SerialName("user_id") val id: Long,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "getFollowerList",
+    )
+
+    @Serializable
+    data class GetUserBriefInfo(
+        @SerialName("user_id") val ids: List<Long>,
+    ) : ApiRequest(
+        group = "",
+        function = "getUserBriefInfo",
+    )
+
+    @Serializable
+    data class InformUser(
+        @SerialName("type") val type: String,
+        @SerialName("user_id") val userId: Long,
+        @SerialName("raw_message") val rawMessage: String,
+        @SerialName("reason") val reason: String,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "informUser",
+    )
+
+    @Serializable
+    class GetRoomFilter : ApiRequest(
+        group = "MainAction",
+        function = "getRoomNumberFilter",
+    )
+
+    @Serializable
+    data class UpdateRoomFilter(
+        @SerialName("room_number_filter")
+        val filter: RoomFilter,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "updateRoomNumberFilter",
+    )
+
+    @Serializable
+    class GetInitialData : ApiRequest(
+        group = "AccountManage",
+        function = "getInitialData",
+    )
 }
 
 /**

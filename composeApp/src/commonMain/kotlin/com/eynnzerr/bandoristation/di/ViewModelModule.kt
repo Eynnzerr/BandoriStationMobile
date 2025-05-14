@@ -21,6 +21,10 @@ fun provideViewModelModule() = module {
             setPreferenceUseCase = get(),
             stringSetPreferenceUseCase = get(named("stringSetPreferenceUseCase")),
             receiveNoticeUseCase = get(),
+            informUserUseCase = get(),
+            updateRoomFilterUseCase = get(),
+            getRoomFilterUseCase = get(),
+            boolPreferenceUseCase = get(named("booleanPreferenceUseCase")),
         )
     }
 
@@ -37,6 +41,9 @@ fun provideViewModelModule() = module {
             sendVerificationCodeUseCase = get(),
             verifyEmailUseCase = get(),
             setAccessPermissionUseCase = get(),
+            getFollowingBriefUseCase = get(),
+            getFollowerBriefUseCase = get(),
+            getEditProfileDataUseCase = get(),
         )
     }
 

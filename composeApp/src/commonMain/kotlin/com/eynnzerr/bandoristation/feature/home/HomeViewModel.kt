@@ -15,16 +15,23 @@ import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.*
+import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
+import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
+import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.RoomFilter
+import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock.System
 
 class HomeViewModel(
@@ -38,28 +45,19 @@ class HomeViewModel(
     private val uploadRoomUseCase: UploadRoomUseCase,
     private val setPreferenceUseCase: SetPreferenceUseCase,
     private val stringSetPreferenceUseCase: GetPreferenceUseCase<Set<String>>,
+    private val boolPreferenceUseCase: GetPreferenceUseCase<Boolean>,
+    private val informUserUseCase: InformUserUseCase,
+    private val getRoomFilterUseCase: GetRoomFilterUseCase,
+    private val updateRoomFilterUseCase: UpdateRoomFilterUseCase,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
 ) {
+    var isFilteringPJSK = true
 
     override suspend fun loadInitialData() {
-        AppLogger.d(TAG, "loadInitialData: Initialize HomeViewModel!")
+        sendEvent(HomeIntent.GetRoomFilter())
 
         connectWebSocketUseCase(Unit)
-
-        viewModelScope.launch {
-            receiveNoticeUseCase.invoke(Unit).collect { result ->
-                when (result) {
-                    is UseCaseResult.Loading -> Unit
-                    is UseCaseResult.Error -> {
-                        AppLogger.d(TAG, "Failed to receive notice.")
-                    }
-                    is UseCaseResult.Success -> {
-                        sendEffect(ShowSnackbar(result.data))
-                    }
-                }
-            }
-        }
 
         viewModelScope.launch {
             updateTimestampUseCase.invoke(Unit).collect { result ->
@@ -102,6 +100,35 @@ class HomeViewModel(
                     }
                 }
         }
+
+        viewModelScope.launch {
+            boolPreferenceUseCase.invoke(GetPreferenceUseCase.Params(PreferenceKeys.FILTER_PJSK, true))
+                .collect { result ->
+                    when (result) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            AppLogger.d(TAG, result.error.message ?: "")
+                        }
+                        is UseCaseResult.Success -> {
+                            isFilteringPJSK = result.data ?: true
+                        }
+                    }
+                }
+        }
+
+        viewModelScope.launch {
+            receiveNoticeUseCase.invoke(Unit).collect { result ->
+                when (result) {
+                    is UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Error -> {
+                        AppLogger.d(TAG, "Failed to receive notice.")
+                    }
+                    is UseCaseResult.Success -> {
+                        sendEffect(ShowSnackbar(result.data))
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun onStartStateFlow() {
@@ -125,12 +152,14 @@ class HomeViewModel(
     override fun reduce(event: HomeIntent): Pair<HomeState?, HomeEffect?> {
         return when (event) {
             is HomeIntent.UpdateRoomList -> {
-                state.value.copy(rooms = event.rooms) to null
+                val filteredRooms = event.rooms.filterNot(state.value.roomFilter, isFilteringPJSK)
+                state.value.copy(rooms = filteredRooms) to null
             }
 
             is HomeIntent.AppendRoomList -> {
                 val originalList = state.value.rooms
-                state.value.copy(rooms = originalList + event.rooms) to null
+                val filteredRooms = event.rooms.filterNot(state.value.roomFilter, isFilteringPJSK)
+                state.value.copy(rooms = originalList + filteredRooms) to null
             }
 
             is HomeIntent.UpdateMessageBadge -> {
@@ -149,14 +178,14 @@ class HomeViewModel(
             }
 
             is HomeIntent.UploadRoom -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     uploadRoomUseCase(event.room)
                 }
                 null to ShowResourceSnackbar(Res.string.upload_room_snackbar)
             }
 
             is HomeIntent.AddPresetWord -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     setPreferenceUseCase(
                         Params(
                             key = PreferenceKeys.PRESET_WORDS,
@@ -166,7 +195,7 @@ class HomeViewModel(
                 null to null
             }
             is HomeIntent.RemovePresetWord -> {
-                viewModelScope.launch(Dispatchers.IO) {
+                viewModelScope.launch {
                     setPreferenceUseCase(
                         Params(
                             key = PreferenceKeys.PRESET_WORDS,
@@ -184,12 +213,93 @@ class HomeViewModel(
                     rooms = emptyList()
                 ) to null
             }
+
+            is HomeIntent.InformUser -> {
+                viewModelScope.launch {
+                    val informResult = informUserUseCase.invoke(event.params)
+                    when (informResult) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(informResult.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar("成功举报该用户。"))
+                        }
+                    }
+                }
+                null to CloseInformUserDialog()
+            }
+
+            is HomeIntent.GetRoomFilter -> {
+                viewModelScope.launch {
+                    val getFilterResult = getRoomFilterUseCase.invoke(Unit)
+                    when (getFilterResult) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(getFilterResult.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(
+                                    roomFilter = getFilterResult.data
+                                )
+                            }
+                        }
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.UpdateRoomFilter -> {
+                viewModelScope.launch {
+                    val updateFilterResult = updateRoomFilterUseCase.invoke(event.filter)
+                    when (updateFilterResult) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(updateFilterResult.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(
+                                    roomFilter = event.filter
+                                )
+                            }
+                            sendEffect(ShowSnackbar("设置过滤条件成功。"))
+                        }
+                    }
+                }
+                null to null
+            }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         viewModelScope.launch { disconnectWebSocketUseCase(Unit) }
+    }
+
+    fun List<RoomInfo>.filterNot(filter: RoomFilter, isFilteringPJSK: Boolean = true): List<RoomInfo> {
+        return this.filter { roomInfo ->
+            // 条件1: 不过滤掉type包含在filter.type中的元素
+            val notMatchType = roomInfo.type == null || !filter.type.contains(roomInfo.type)
+
+            // 条件2: 不过滤掉rawMessage能与filter.keyword中任一元素正则匹配的元素
+            val notMatchKeyword = roomInfo.rawMessage == null || filter.keyword.none { keyword ->
+                roomInfo.rawMessage.contains(Regex(keyword))
+            }
+
+            // 条件3: 不过滤掉userInfo.userId与filter.user中任一元素的userId相同的元素
+            val notMatchUserId = roomInfo.userInfo?.userId == null ||
+                    filter.user.none { it.userId != null && it.userId == roomInfo.userInfo.userId }
+
+            // 条件4: 当isFilteringOther为true时，不过滤掉number少于6位数的元素
+            val notMatchNumberLength = !isFilteringPJSK ||
+                    roomInfo.number == null ||
+                    roomInfo.number.length >= 6
+
+            // 所有条件都满足才保留该元素
+            notMatchType && notMatchKeyword && notMatchUserId && notMatchNumberLength
+        }
     }
 }
 

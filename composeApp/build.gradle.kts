@@ -88,6 +88,7 @@ kotlin {
             implementation(libs.ktor.client.logging)
 
             implementation(libs.materialKolor)
+            implementation(libs.richEditor.compose)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

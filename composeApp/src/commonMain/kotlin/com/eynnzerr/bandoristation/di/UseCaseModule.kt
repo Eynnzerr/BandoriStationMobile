@@ -13,6 +13,7 @@ import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
+import com.eynnzerr.bandoristation.business.account.GetEditProfileDataUseCase
 import com.eynnzerr.bandoristation.business.account.GetSelfInfoUseCase
 import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.business.account.LoginUseCase
@@ -20,7 +21,12 @@ import com.eynnzerr.bandoristation.business.account.LogoutUseCase
 import com.eynnzerr.bandoristation.business.account.SendVerificationCodeUseCase
 import com.eynnzerr.bandoristation.business.account.SignupUseCase
 import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
+import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
+import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
+import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
+import com.eynnzerr.bandoristation.business.social.GetFollowingBriefUseCase
+import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -182,6 +188,54 @@ fun provideUseCaseModule() = module {
 
     single {
         FollowUserUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        GetFollowerBriefUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        GetFollowingBriefUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        InformUserUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        GetRoomFilterUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        UpdateRoomFilterUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            dataStore = get(),
+        )
+    }
+
+    single {
+        GetEditProfileDataUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
             dataStore = get(),

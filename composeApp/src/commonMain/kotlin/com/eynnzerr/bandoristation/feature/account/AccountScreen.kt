@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
+import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
@@ -29,6 +31,7 @@ import com.eynnzerr.bandoristation.ui.component.EditAccountButton
 import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
 import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.UserProfile
+import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
@@ -49,6 +52,9 @@ fun AccountScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val clipboardManager = LocalClipboardManager.current
+    var showFollowerDialog by remember { mutableStateOf(false) }
+    var showFollowingDialog by remember { mutableStateOf(false) }
+    var showEditProfileDialog by remember { mutableStateOf(false) }
     var showLoginDialog by remember { mutableStateOf(false) }
     var loginDialogState by remember { mutableStateOf(LoginScreenState.INITIAL) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -107,6 +113,28 @@ fun AccountScreen(
                         else -> LoginScreenState.INITIAL
                     }
                 }
+
+                is AccountEffect.ControlFollowerDialog -> {
+                    // lazy loading
+                    if (action.visible) {
+                        viewModel.sendEvent(GetFollowers())
+                    }
+                    showFollowerDialog = action.visible
+                }
+
+                is AccountEffect.ControlFollowingDialog -> {
+                    if (action.visible) {
+                        viewModel.sendEvent(GetFollowings())
+                    }
+                    showFollowingDialog = action.visible
+                }
+
+                is AccountEffect.ControlEditProfileDialog -> {
+                    if (action.visible) {
+                        viewModel.sendEvent(GetEditProfileData())
+                    }
+                    showEditProfileDialog = action.visible
+                }
             }
         }
     }
@@ -122,21 +150,28 @@ fun AccountScreen(
         onEnterRegister = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.REGISTER)) },
         onEnterForgot = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.FORGOT_PASSWORD)) },
         onLoginWithToken = { token ->
-            viewModel.sendEvent(AccountIntent.GetUserInfo(token))
+            viewModel.sendEvent(GetUserInfo(token))
         },
         onLoginWithPassword = { username, password ->
-            viewModel.sendEvent(AccountIntent.Login(username, password))
+            viewModel.sendEvent(Login(username, password))
         },
         onRegister = { username, password, email ->
-            viewModel.sendEvent(AccountIntent.Signup(username, password, email))
+            viewModel.sendEvent(Signup(username, password, email))
         },
         onSendVerificationCode = {
-            viewModel.sendEvent(AccountIntent.SendVerificationCode())
+            viewModel.sendEvent(SendVerificationCode())
         },
         onVerifyCode = { code ->
-            viewModel.sendEvent(AccountIntent.VerifyEmail(code))
+            viewModel.sendEvent(VerifyEmail(code))
         },
         sendCountDown = state.countDown
+    )
+
+    EditProfileDialog(
+        isVisible = showEditProfileDialog,
+        onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlEditProfileDialog(false)) },
+        avatar = state.accountInfo.accountSummary.avatar,
+        profile = state.editProfileData,
     )
 
     ModalNavigationDrawer(
@@ -157,7 +192,7 @@ fun AccountScreen(
                     NavigationDrawerItem(
                         icon = { Icon(Icons.AutoMirrored.Default.Logout, contentDescription = null) },
                         label = { Text("退出登录") },
-                        onClick = { viewModel.sendEvent(AccountIntent.Logout()) },
+                        onClick = { viewModel.sendEvent(Logout()) },
                         selected = false,
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
@@ -210,7 +245,7 @@ fun AccountScreen(
                                 isLoggedIn = state.isLoggedIn,
                                 onLogIn = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(true)) },
                                 onEditAccount = {
-                                    // TODO 打开资料编辑对话框 或者 模态框
+                                    viewModel.sendEffect(AccountEffect.ControlEditProfileDialog(true))
                                 },
                             )
                         }
