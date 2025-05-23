@@ -35,6 +35,8 @@ fun UserProfile(
     accountInfo: AccountInfo,
     actionButton: @Composable () -> Unit = {},
     sideButton: @Composable () -> Unit = {},
+    onBrowseFollowers: () -> Unit = {},
+    onBrowseFollowings: () -> Unit = {},
 ) {
     val tabs = listOf("发布历史", "玩家信息")
     var selectedTabIndex by remember { mutableStateOf(0) }
@@ -93,22 +95,17 @@ fun UserProfile(
                         modifier = Modifier.padding(top = 0.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // TODO 点击打开关注列表
                         Text(
                             text = "${accountInfo.accountSummary.following} 关注",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-
-                            }
+                            modifier = Modifier.clickable(onClick = onBrowseFollowings)
                         )
                         Text(
                             text = "${accountInfo.accountSummary.follower} 关注者",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
-                            modifier = Modifier.clickable {
-
-                            }
+                            modifier = Modifier.clickable(onClick = onBrowseFollowers)
                         )
                     }
                 }

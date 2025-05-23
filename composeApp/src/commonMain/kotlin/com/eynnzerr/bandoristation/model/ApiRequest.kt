@@ -3,10 +3,11 @@ package com.eynnzerr.bandoristation.model
 import com.eynnzerr.bandoristation.utils.ResponseContentSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
 /**
- * Https请求消息
+ * Https请求消息，API/HTTPS通用
  * @param group 请求方法组
  * @param function 请求方法名
  * 不同请求方法可能需要额外参数，通过新类继承ApiRequest自己添加字段携带
@@ -160,5 +161,5 @@ sealed class ApiResponseContent {
     data class StringContent(val text: String) : ApiResponseContent()
 
     @Serializable
-    data class ObjectContent(val data: JsonObject) : ApiResponseContent()
+    data class ObjectContent(val data: JsonElement) : ApiResponseContent()
 }

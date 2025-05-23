@@ -40,6 +40,7 @@ sealed class AccountIntent: UIEvent {
     class GetFollowers : AccountIntent()
     class GetFollowings : AccountIntent()
     class GetEditProfileData : AccountIntent()
+    data class FollowUser(val id: Long) : AccountIntent()
 }
 
 sealed class AccountEffect: UIEffect {

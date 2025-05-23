@@ -79,6 +79,8 @@ fun provideUseCaseModule() = module {
     single {
         UpdateTimestampUseCase(
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+            repository = get(),
+            dataStore = get(),
         )
     }
 

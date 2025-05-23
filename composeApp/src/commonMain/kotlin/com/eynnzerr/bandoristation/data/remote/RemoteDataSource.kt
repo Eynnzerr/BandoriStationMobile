@@ -37,4 +37,6 @@ interface RemoteDataSource {
     // HTTPS API basic operation
     suspend fun sendHttpsRequest(request: ApiRequest): ApiResponse
     suspend fun sendAuthenticHttpsRequest(request: ApiRequest, token: String): ApiResponse
+
+    suspend fun sendApiRequest(request: ApiRequest): ApiResponse
 }

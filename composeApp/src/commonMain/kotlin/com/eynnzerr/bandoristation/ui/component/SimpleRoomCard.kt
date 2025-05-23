@@ -15,7 +15,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.SourceInfo
+import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.utils.formatTimeDifference
 import com.eynnzerr.bandoristation.utils.formatTimestamp
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class, ExperimentalFoundationApi::class)
@@ -64,7 +69,7 @@ fun SimpleRoomCard(
                         fontSize = 18.sp,
                     )
                     Text(
-                        text = (if (sourceName == "BandoriStation") "来自本站  " else "来自Bot  ") + formatTimestamp(timestamp),
+                        text = (if (sourceName == "BandoriStation") "来自本站" else "来自Bot"),
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -87,7 +92,47 @@ fun SimpleRoomCard(
             style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
             fontSize = 16.sp,
-            modifier = Modifier.padding(start = 12.dp, bottom = 12.dp)
+            modifier = Modifier.padding(start = 12.dp)
+        )
+
+        Text(
+            text = formatTimestamp(timestamp),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(12.dp)
         )
     }
+}
+
+@Preview
+@Composable
+private fun SimpleRoomCardPreview() {
+    val mockRoom = RoomInfo(
+        number = "114514",
+        rawMessage = "114514 5w 130+ 大e长 禁hdfc 欢迎清火 q1",
+        sourceInfo = SourceInfo(
+            name = "Tsugu",
+            type = "qq"
+        ),
+        type = "other",
+        time = 1743581164274,
+        userInfo = UserInfo(
+            type = "local",
+            userId = 8146,
+            username = "Tsugu代发",
+            avatar = "7ec6cbbc94d098d96b291ab4955baa7a.png",
+            role = 0,
+            playerBriefInfo = null,
+        )
+    )
+
+    SimpleRoomCard(
+        number = mockRoom.number ?: "",
+        rawMessage = mockRoom.rawMessage ?: "",
+        timestamp = mockRoom.time ?: 0,
+        sourceName = mockRoom.sourceInfo?.name ?: "",
+        avatarName = mockRoom.userInfo?.avatar ?: "",
+        userName = mockRoom.userInfo?.username ?: "",
+        onCopy = {}
+    )
 }

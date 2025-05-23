@@ -32,8 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock.System
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.Clock
 
 class ChatViewModel(
     private val connectWebSocketUseCase: ConnectWebSocketUseCase,
@@ -174,7 +173,6 @@ class ChatViewModel(
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     override fun reduce(event: ChatIntent): Pair<ChatState?, ChatEffect?> {
         return when (event) {
             is ChatIntent.LoadInitial -> {
@@ -218,7 +216,7 @@ class ChatViewModel(
             }
 
             is ChatIntent.LoadMore -> {
-                val earliestTimestamp = state.value.chats.firstOrNull()?.timestamp ?: System.now().toEpochMilliseconds()
+                val earliestTimestamp = state.value.chats.firstOrNull()?.timestamp ?: Clock.System.now().toEpochMilliseconds()
                 viewModelScope.launch(Dispatchers.IO) {
                     requestHistoryChatUseCase(earliestTimestamp)
                 }

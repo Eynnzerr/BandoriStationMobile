@@ -1,12 +1,9 @@
 package com.eynnzerr.bandoristation.data.remote.https
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
-import com.eynnzerr.bandoristation.preferences.PreferenceKeys
+import com.eynnzerr.bandoristation.model.ApiResponseContent
 import com.eynnzerr.bandoristation.utils.AppLogger
-import com.eynnzerr.bandoristation.utils.testToken
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.header
@@ -16,13 +13,13 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.http.headers
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.Json
 
 class HttpsClient(
+    private val httpsUrl: String,
     private val apiUrl: String,
     private val client: HttpClient, // Injected
+    private val json: Json,
     // private val dataStore: DataStore<Preferences>, // Injected
 ) {
     /**
@@ -31,7 +28,9 @@ class HttpsClient(
      * @return 响应对象
      */
     suspend fun sendRequest(request: ApiRequest): ApiResponse {
-        val response: HttpResponse = client.post(apiUrl) {
+        AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}.")
+
+        val response: HttpResponse = client.post(httpsUrl) {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
@@ -47,9 +46,9 @@ class HttpsClient(
      */
     suspend fun sendAuthenticatedRequest(request: ApiRequest, token: String): ApiResponse {
         // val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: testToken }.first()
-        AppLogger.d(TAG, "use token: $token")
+        AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}; using token: $token.")
 
-        val response: HttpResponse = client.post(apiUrl) {
+        val response: HttpResponse = client.post(httpsUrl) {
             header("Auth-Token", token)
             contentType(ContentType.Application.Json)
             setBody(request)
@@ -57,6 +56,27 @@ class HttpsClient(
 
         AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
         return response.body()
+    }
+
+    suspend fun sendApiRequest(request: ApiRequest): ApiResponse {
+        AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}.")
+
+        val response: HttpResponse = client.post(apiUrl) {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }
+
+        AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
+        try {
+            val apiResponse: ApiResponse = response.body()
+            return apiResponse
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("ktor client json parse error")
+            )
+        }
     }
 }
 

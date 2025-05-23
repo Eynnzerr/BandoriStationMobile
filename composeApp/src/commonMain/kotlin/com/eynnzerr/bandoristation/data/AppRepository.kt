@@ -11,8 +11,6 @@ class AppRepository(
     // control websocket
     suspend fun connectWebSocket() = remoteDataSource.connectWebSocket()
     fun disconnectWebSocket() = remoteDataSource.disconnectWebSocket()
-    suspend fun <T> sendWebSocketRequest(action: String, data: T? = null) = remoteDataSource.sendWebSocketRequest(action, data)
-    suspend fun <T> sendWebSocketRequestWithRetry(action: String, data: T? = null) = remoteDataSource.sendWebSocketRequestWithRetry(action, data, 0)
     fun listenWebSocketForActions(actions: List<String>) = remoteDataSource.listenWebSocketForActions(actions)
     fun listenForAll() = remoteDataSource.listenForAll()
     fun listenWebSocketConnection() = remoteDataSource.webSocketConnectionState
@@ -34,4 +32,5 @@ class AppRepository(
         request: ApiRequest,
         token: String
     ) = remoteDataSource.sendAuthenticHttpsRequest(request, token)
+    suspend fun sendApiRequest(request: ApiRequest) = remoteDataSource.sendApiRequest(request)
 }

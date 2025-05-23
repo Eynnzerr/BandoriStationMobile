@@ -45,24 +45,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import bandoristationm.composeapp.generated.resources.Res
-import bandoristationm.composeapp.generated.resources.chat_screen_title
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
-import com.eynnzerr.bandoristation.ui.component.AppTopBar
+import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.ChatPiece
-import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
+import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.TimePiece
 import com.eynnzerr.bandoristation.ui.component.UnreadBubble
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
-import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -250,7 +246,6 @@ fun ChatScreen(
                     itemsIndexed(
                         items = state.chats,
                         key = { index, item ->
-                            AppLogger.d("ChatScreen", "Message ${item.content} hash: ${item.hashCode()}")
                             val timestampPart = item.timestamp
                             val contentPart = item.content.hashCode()
                             val userPart = item.userInfo.hashCode()

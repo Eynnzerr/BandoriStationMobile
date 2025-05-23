@@ -9,6 +9,7 @@ import kotlinx.serialization.descriptors.SerialKind
 import kotlinx.serialization.descriptors.buildSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
@@ -24,8 +25,10 @@ object ResponseContentSerializer : KSerializer<ApiResponseContent> {
 
         return when {
             element is JsonPrimitive && element.isString -> ApiResponseContent.StringContent(element.content)
-            element is JsonObject -> ApiResponseContent.ObjectContent(element)
-            else -> throw SerializationException("Unknown response format")
+            else -> ApiResponseContent.ObjectContent(element)
+//            element is JsonObject -> ApiResponseContent.ObjectContent(element)
+//            element is JsonArray -> ApiResponseContent.StringContent("123")
+//            else -> throw SerializationException()
         }
     }
 

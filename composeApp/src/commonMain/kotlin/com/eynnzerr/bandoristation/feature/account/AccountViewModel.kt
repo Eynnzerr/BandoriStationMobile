@@ -13,6 +13,7 @@ import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.Params
+import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.feature.account.AccountEffect.*
@@ -44,6 +45,7 @@ class AccountViewModel(
     private val getFollowingBriefUseCase: GetFollowingBriefUseCase,
     private val getFollowerBriefUseCase: GetFollowerBriefUseCase,
     private val getEditProfileDataUseCase: GetEditProfileDataUseCase,
+    private val followUserUseCase: FollowUserUseCase,
 ) : BaseViewModel<AccountState, AccountIntent, AccountEffect>(
     initialState = AccountState.initial()
 ) {
@@ -263,6 +265,22 @@ class AccountViewModel(
                            internalState.update {
                                it.copy(editProfileData = profileResult.data)
                            }
+                       }
+                   }
+               }
+               null to null
+           }
+
+           is FollowUser -> {
+               viewModelScope.launch {
+                   val response = followUserUseCase.invoke(event.id)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEffect(ShowSnackbar(response.data))
                        }
                    }
                }

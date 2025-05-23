@@ -7,9 +7,10 @@ import org.koin.dsl.module
 fun provideHttpsClientModule() = module {
     single {
         HttpsClient(
-            apiUrl = NetworkUrl.HTTPS_SERVER,
+            apiUrl = NetworkUrl.API_SERVER,
+            httpsUrl = NetworkUrl.HTTPS_SERVER,
             client = get(),
-            // dataStore = get(),
+            json = get(),
         )
     }
 }

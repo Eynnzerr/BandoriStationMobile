@@ -33,7 +33,7 @@ class GetFollowerBriefUseCase(
                 val followers = NetResponseHelper.parseApiResponse<List<UserId>>(responseContent)
                 followers?.let {
                     val ids = followers.map { it.id }
-                    repository.sendHttpsRequest(
+                    repository.sendApiRequest(
                         request = ApiRequest.GetUserBriefInfo(
                             ids = ids
                         )

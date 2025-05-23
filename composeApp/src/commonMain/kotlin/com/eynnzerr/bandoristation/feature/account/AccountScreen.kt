@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -29,9 +28,10 @@ import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.EditAccountButton
 import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
-import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
+import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.UserProfile
 import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
+import com.eynnzerr.bandoristation.ui.dialog.FollowListDialog
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
@@ -174,6 +174,36 @@ fun AccountScreen(
         profile = state.editProfileData,
     )
 
+    FollowListDialog(
+        isVisible = showFollowingDialog,
+        title = "关注列表",
+        onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(false)) },
+        followList = state.followings,
+        onFollow = { viewModel.sendEvent(FollowUser(it)) },
+        placeholder = {
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("暂无")
+            }
+        }
+    )
+
+    FollowListDialog(
+        isVisible = showFollowerDialog,
+        title = "粉丝列表",
+        onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(false)) },
+        followList = state.followers,
+        onFollow = { viewModel.sendEvent(FollowUser(it)) },
+        placeholder = {
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("暂无（若仅使用Token登录，请注意本客户端无法获取账号原有粉丝列表）")
+            }
+        }
+    )
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         gesturesEnabled = true,
@@ -248,7 +278,9 @@ fun AccountScreen(
                                     viewModel.sendEffect(AccountEffect.ControlEditProfileDialog(true))
                                 },
                             )
-                        }
+                        },
+                        onBrowseFollowings = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(true)) },
+                        onBrowseFollowers = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(true)) },
                     )
                 }
             }

@@ -2,9 +2,6 @@ package com.eynnzerr.bandoristation.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,14 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.outlined.DirectionsBus
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,10 +31,9 @@ import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.formatTimeDifference
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.time.Clock.System
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.Clock
 
-@OptIn(ExperimentalTime::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RoomCard(
     roomInfo: RoomInfo,
@@ -49,7 +42,7 @@ fun RoomCard(
     onBlockUser: () -> Unit,
     onReportUser: () -> Unit,
     isJoined: Boolean,
-    currentTimeMillis: Long = System.now().toEpochMilliseconds(),
+    currentTimeMillis: Long = Clock.System.now().toEpochMilliseconds(),
     modifier: Modifier = Modifier,
 ) {
     OutlinedCard(
@@ -156,7 +149,7 @@ fun RoomCard(
 
 @Preview
 @Composable
-fun RoomCardPreview() {
+private fun RoomCardPreview() {
     val mockRoom = RoomInfo(
         number = "114514",
         rawMessage = "114514 5w 130+ 大e长 禁hdfc 欢迎清火 q1",

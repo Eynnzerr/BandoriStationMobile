@@ -46,6 +46,7 @@ fun provideViewModelModule() = module {
             getFollowingBriefUseCase = get(),
             getFollowerBriefUseCase = get(),
             getEditProfileDataUseCase = get(),
+            followUserUseCase = get(),
         )
     }
 

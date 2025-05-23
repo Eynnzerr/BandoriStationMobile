@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.ui.component
+package com.eynnzerr.bandoristation.ui.component.app
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar

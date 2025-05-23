@@ -25,7 +25,7 @@ class GetFollowingBriefUseCase(
             .first()
             .map { it.toLong() }
 
-        repository.sendHttpsRequest(
+        repository.sendApiRequest(
             request = ApiRequest.GetUserBriefInfo(
                 ids = ids
             )

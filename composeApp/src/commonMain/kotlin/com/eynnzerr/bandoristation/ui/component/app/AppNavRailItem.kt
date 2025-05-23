@@ -1,14 +1,14 @@
-package com.eynnzerr.bandoristation.ui.component
+package com.eynnzerr.bandoristation.ui.component.app
 
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -20,7 +20,7 @@ import com.eynnzerr.bandoristation.navigation.Screen
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun RowScope.AppNavBarItem(
+fun ColumnScope.AppNavRailItem(
     screen: Screen,
     showBadge: Boolean = false,
     selected: Boolean,
@@ -34,7 +34,7 @@ fun RowScope.AppNavBarItem(
         )
     }
 
-    NavigationBarItem(
+    NavigationRailItem(
         selected = selected,
         onClick = { onClick(screen) },
         icon = {
@@ -56,7 +56,7 @@ fun RowScope.AppNavBarItem(
         label = { Text(text = stringResource(screen.title ?: Res.string.placeholder)) },
         enabled = true,
         alwaysShowLabel = true,
-        colors = NavigationBarItemDefaults.colors(
+        colors = NavigationRailItemDefaults.colors(
             selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
             selectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
