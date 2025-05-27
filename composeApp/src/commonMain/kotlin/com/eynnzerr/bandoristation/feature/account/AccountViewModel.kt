@@ -9,6 +9,7 @@ import com.eynnzerr.bandoristation.business.account.LoginUseCase
 import com.eynnzerr.bandoristation.business.account.LogoutUseCase
 import com.eynnzerr.bandoristation.business.account.SendVerificationCodeUseCase
 import com.eynnzerr.bandoristation.business.account.SignupUseCase
+import com.eynnzerr.bandoristation.business.account.UpdateAccountAggregator
 import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
@@ -46,6 +47,7 @@ class AccountViewModel(
     private val getFollowerBriefUseCase: GetFollowerBriefUseCase,
     private val getEditProfileDataUseCase: GetEditProfileDataUseCase,
     private val followUserUseCase: FollowUserUseCase,
+    private val updateAccountAggregator: UpdateAccountAggregator,
 ) : BaseViewModel<AccountState, AccountIntent, AccountEffect>(
     initialState = AccountState.initial()
 ) {
@@ -281,6 +283,106 @@ class AccountViewModel(
                        }
                        is UseCaseResult.Success -> {
                            sendEffect(ShowSnackbar(response.data))
+                       }
+                   }
+               }
+               null to null
+           }
+
+           is BindQQ -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.bindQQ(event.qq)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+
+                       }
+                   }
+               }
+               null to null
+           }
+           is UpdateAvatar -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.updateAvatar(event.avatarBase64)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEvent(UpdateAccountInfo(
+                               accountInfo = state.value.accountInfo.copy(
+                                   accountSummary = state.value.accountInfo.accountSummary.copy(
+                                       avatar = response.data
+                                   )
+                               )
+                           ))
+                       }
+                   }
+               }
+               null to null
+           }
+           is UpdateBanner -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.updateBanner(event.bannerBase64)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEvent(UpdateAccountInfo(
+                               accountInfo = state.value.accountInfo.copy(
+                                   accountSummary = state.value.accountInfo.accountSummary.copy(
+                                       banner = response.data
+                                   )
+                               )
+                           ))
+                       }
+                   }
+               }
+               null to null
+           }
+           is UpdateIntroduction -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.updateIntroduction(event.introduction)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEvent(UpdateAccountInfo(
+                               accountInfo = state.value.accountInfo.copy(
+                                   accountSummary = state.value.accountInfo.accountSummary.copy(
+                                       introduction = event.introduction
+                                   )
+                               )
+                           ))
+                       }
+                   }
+               }
+               null to null
+           }
+           is UpdateUsername -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.updateUsername(event.username)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEvent(UpdateAccountInfo(
+                               accountInfo = state.value.accountInfo.copy(
+                                   accountSummary = state.value.accountInfo.accountSummary.copy(
+                                       username = event.username
+                                   )
+                               )
+                           ))
                        }
                    }
                }

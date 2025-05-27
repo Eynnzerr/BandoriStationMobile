@@ -126,6 +126,66 @@ sealed class ApiRequest(
         group = "AccountManage",
         function = "getInitialData",
     )
+
+    @Serializable
+    data class UpdateImage(
+        val image: String,
+        val type: String, // avatar or banner
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateImage",
+    )
+
+    @Serializable
+    data class UpdateUserName(
+        val username: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateUserName",
+    )
+
+    @Serializable
+    data class UpdateIntroduction(
+        val introduction: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateIntroduction",
+    )
+
+    @Serializable
+    data class UpdatePassword(
+        @SerialName("new_password")
+        val newPassword: String,
+        val password: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updatePassword",
+    )
+
+    @Serializable
+    data class UpdateEmailSendVCode(
+        val email: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateEmailSendVerificationCode"
+    )
+
+    @Serializable
+    data class UpdateEmailVerifyEmail(
+        @SerialName("verification_code")
+        val code: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateEmailVerifyEmail"
+    )
+
+    @Serializable
+    data class BindQQ(
+        val qq: Long,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "bindQQ",
+    )
 }
 
 /**

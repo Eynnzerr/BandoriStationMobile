@@ -34,6 +34,10 @@ import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
 import com.eynnzerr.bandoristation.ui.dialog.FollowListDialog
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
+import com.eynnzerr.bandoristation.utils.toBase64String
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -60,6 +64,34 @@ fun AccountScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
+
+    val avatarPickerLauncher = rememberFilePickerLauncher(
+        mode = FileKitMode.Single,
+        type = FileKitType.Image,
+    ) { file ->
+        file?.let { avatarFile ->
+            // 转为base64字符串，进行后续操作
+            coroutineScope.launch {
+                avatarFile.toBase64String()?.let { base64 ->
+                    viewModel.sendEvent(UpdateAvatar(base64))
+                }
+            }
+        }
+    }
+
+    val bannerPickerLauncher = rememberFilePickerLauncher(
+        mode = FileKitMode.Single,
+        type = FileKitType.Image,
+    ) { file ->
+        file?.let { bannerFile ->
+            // 转为base64字符串，进行后续操作
+            coroutineScope.launch {
+                bannerFile.toBase64String()?.let { base64 ->
+                    viewModel.sendEvent(UpdateBanner(base64))
+                }
+            }
+        }
+    }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -172,6 +204,27 @@ fun AccountScreen(
         onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlEditProfileDialog(false)) },
         avatar = state.accountInfo.accountSummary.avatar,
         profile = state.editProfileData,
+        onAvatarClick = {
+            avatarPickerLauncher.launch()
+        },
+        onBannerClick = {
+            bannerPickerLauncher.launch()
+        },
+        onUsernameEdit = {
+            viewModel.sendEvent(UpdateUsername(it))
+        },
+        onIntroductionEdit = {
+            viewModel.sendEvent(UpdateIntroduction(it))
+        },
+        onQQEdit = {
+            viewModel.sendEvent(BindQQ(it))
+        },
+        onEmailEdit = { _, _ ->
+            // TODO
+        },
+        onSendEmailVerification = {
+            // TODO
+        }
     )
 
     FollowListDialog(
@@ -294,3 +347,5 @@ private fun AccountScreenPreview() {
     val navController = rememberNavController()
     AccountScreen(navController)
 }
+
+private const val TAG = "AccountScreen"

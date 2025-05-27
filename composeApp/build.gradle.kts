@@ -89,6 +89,9 @@ kotlin {
 
             implementation(libs.materialKolor)
             implementation(libs.richEditor.compose)
+
+            implementation(libs.filekit.core)
+            implementation(libs.filekit.dialogs.compose)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

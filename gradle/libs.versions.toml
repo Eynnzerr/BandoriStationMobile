@@ -77,7 +77,6 @@ ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "k
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 richEditor-compose = { module = "com.mohamedrejeb.richeditor:richeditor-compose", version.ref = "richEditor" }
 filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
-filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
 filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
 filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
 

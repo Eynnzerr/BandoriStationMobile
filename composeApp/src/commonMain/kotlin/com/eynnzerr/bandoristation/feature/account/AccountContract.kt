@@ -41,6 +41,11 @@ sealed class AccountIntent: UIEvent {
     class GetFollowings : AccountIntent()
     class GetEditProfileData : AccountIntent()
     data class FollowUser(val id: Long) : AccountIntent()
+    data class UpdateAvatar(val avatarBase64: String) : AccountIntent()
+    data class UpdateBanner(val bannerBase64: String) : AccountIntent()
+    data class UpdateUsername(val username: String) : AccountIntent()
+    data class UpdateIntroduction(val introduction: String) : AccountIntent()
+    data class BindQQ(val qq: Long) : AccountIntent()
 }
 
 sealed class AccountEffect: UIEffect {
