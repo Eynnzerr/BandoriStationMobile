@@ -19,7 +19,14 @@ fun provideViewModelModule() = module {
             checkUnreadChatUseCase = get(),
             uploadRoomUseCase = get(),
             setPreferenceUseCase = get(),
-            stringSetPreferenceUseCase = get(named("stringSetPreferenceUseCase"))
+            stringSetPreferenceUseCase = get(named("stringSetPreferenceUseCase")),
+            receiveNoticeUseCase = get(),
+            informUserUseCase = get(),
+            updateRoomFilterUseCase = get(),
+            getRoomFilterUseCase = get(),
+            boolPreferenceUseCase = get(named("booleanPreferenceUseCase")),
+            setAccessPermissionUseCase = get(),
+            requestRecentRoomsUseCase = get(),
         )
     }
 
@@ -28,7 +35,7 @@ fun provideViewModelModule() = module {
     factory {
         AccountViewModel(
             loginUseCase = get(),
-            getUserInfoUseCase = get(),
+            getSelfInfoUseCase = get(),
             stringPreferenceUseCase = get(named("stringPreferenceUseCase")),
             setPreferenceUseCase = get(),
             logoutUseCase = get(),
@@ -36,6 +43,11 @@ fun provideViewModelModule() = module {
             sendVerificationCodeUseCase = get(),
             verifyEmailUseCase = get(),
             setAccessPermissionUseCase = get(),
+            getFollowingBriefUseCase = get(),
+            getFollowerBriefUseCase = get(),
+            getEditProfileDataUseCase = get(),
+            followUserUseCase = get(),
+            updateAccountAggregator = get(),
         )
     }
 

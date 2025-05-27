@@ -5,4 +5,5 @@ object NetworkUrl {
     const val BANNER = "https://asset.bandoristation.com/images/user-banner/"
     const val WS_SERVER = "ws://api.bandoristation.com"
     const val HTTPS_SERVER = "https://server.bandoristation.com"
+    const val API_SERVER = "https://api.bandoristation.com"
 }

@@ -3,10 +3,11 @@ package com.eynnzerr.bandoristation.model
 import com.eynnzerr.bandoristation.utils.ResponseContentSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 
 /**
- * Https请求消息
+ * Https请求消息，API/HTTPS通用
  * @param group 请求方法组
  * @param function 请求方法名
  * 不同请求方法可能需要额外参数，通过新类继承ApiRequest自己添加字段携带
@@ -62,11 +63,128 @@ sealed class ApiRequest(
     )
 
     @Serializable
-    class VerifyEmail(
+    data class VerifyEmail(
         @SerialName("verification_code") val code: String,
     ) : ApiRequest(
         group = "UserLogin",
         function = "verifyEmail",
+    )
+
+    @Serializable
+    data class FollowUser(
+        @SerialName("user_id") val id: Long,
+        @SerialName("is_following") val follow: Boolean,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "followUser",
+    )
+
+    @Serializable
+    data class GetFollowerList(
+        @SerialName("user_id") val id: Long,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "getFollowerList",
+    )
+
+    @Serializable
+    data class GetUserBriefInfo(
+        @SerialName("user_id") val ids: List<Long>,
+    ) : ApiRequest(
+        group = "",
+        function = "getUserBriefInfo",
+    )
+
+    @Serializable
+    data class InformUser(
+        @SerialName("type") val type: String,
+        @SerialName("user_id") val userId: Long,
+        @SerialName("raw_message") val rawMessage: String,
+        @SerialName("reason") val reason: String,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "informUser",
+    )
+
+    @Serializable
+    class GetRoomFilter : ApiRequest(
+        group = "MainAction",
+        function = "getRoomNumberFilter",
+    )
+
+    @Serializable
+    data class UpdateRoomFilter(
+        @SerialName("room_number_filter")
+        val filter: RoomFilter,
+    ) : ApiRequest(
+        group = "MainAction",
+        function = "updateRoomNumberFilter",
+    )
+
+    @Serializable
+    class GetInitialData : ApiRequest(
+        group = "AccountManage",
+        function = "getInitialData",
+    )
+
+    @Serializable
+    data class UpdateImage(
+        val image: String,
+        val type: String, // avatar or banner
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateImage",
+    )
+
+    @Serializable
+    data class UpdateUserName(
+        val username: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateUserName",
+    )
+
+    @Serializable
+    data class UpdateIntroduction(
+        val introduction: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateIntroduction",
+    )
+
+    @Serializable
+    data class UpdatePassword(
+        @SerialName("new_password")
+        val newPassword: String,
+        val password: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updatePassword",
+    )
+
+    @Serializable
+    data class UpdateEmailSendVCode(
+        val email: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateEmailSendVerificationCode"
+    )
+
+    @Serializable
+    data class UpdateEmailVerifyEmail(
+        @SerialName("verification_code")
+        val code: String,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "updateEmailVerifyEmail"
+    )
+
+    @Serializable
+    data class BindQQ(
+        val qq: Long,
+    ) : ApiRequest(
+        group = "AccountManage",
+        function = "bindQQ",
     )
 }
 
@@ -103,5 +221,5 @@ sealed class ApiResponseContent {
     data class StringContent(val text: String) : ApiResponseContent()
 
     @Serializable
-    data class ObjectContent(val data: JsonObject) : ApiResponseContent()
+    data class ObjectContent(val data: JsonElement) : ApiResponseContent()
 }

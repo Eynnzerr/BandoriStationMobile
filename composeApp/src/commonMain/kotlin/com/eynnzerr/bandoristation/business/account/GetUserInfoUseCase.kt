@@ -1,52 +1,37 @@
 package com.eynnzerr.bandoristation.business.account
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import com.eynnzerr.bandoristation.business.base.UseCase
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
-import com.eynnzerr.bandoristation.model.account.AccountInfo
-import com.eynnzerr.bandoristation.model.account.AccountSettings
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
-import com.eynnzerr.bandoristation.utils.AppLogger
+import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 class GetUserInfoUseCase(
     private val repository: AppRepository,
     private val dispatcher: CoroutineDispatcher,
-): UseCase<String, AccountInfo, String>(dispatcher) {
+    private val dataStore: DataStore<Preferences>,
+): UseCase<Long, AccountInfo, String>(dispatcher) {
 
-    override suspend fun execute(token: String): UseCaseResult<AccountInfo, String> {
+    override suspend fun execute(parameters: Long): UseCaseResult<AccountInfo, String> {
+        val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: "" }.first()
         repository.sendAuthenticHttpsRequest(
-            request = ApiRequest.InitializeAccountSetting(),
+            request = ApiRequest.GetUserInfo(id = parameters),
             token = token,
         ).handle(
-            onSuccess = { usrSettingsContent ->
-                val userSettings = NetResponseHelper.parseApiResponse<AccountSettings>(usrSettingsContent)
-                if (userSettings != null) {
-                    // using the fetched user_id to get full user information.
-                    val userId = userSettings.usedId
-                    AppLogger.d("GetUserInfoUseCase", "fetched used id: $userId")
-                    repository.sendAuthenticHttpsRequest(
-                        request = ApiRequest.GetUserInfo(id = userId),
-                        token = token,
-                    ).handle(
-                        onSuccess = { userInfoContent ->
-                            // successfully fetched user information.
-                            val userInfo = NetResponseHelper.parseApiResponse<AccountInfo>(userInfoContent)
-                            return userInfo?.let { UseCaseResult.Success(it) } ?: UseCaseResult.Error("Failed to parse GetUserInfo response.")
-                        },
-                        onFailure = {
-                            // failed on GetUserInfo.
-                            return UseCaseResult.Error(it)
-                        }
-                    )
-                } else {
-                    // response of InitializeAccountSetting is illegal.
-                    return UseCaseResult.Error("Failed to parse InitializeAccountSetting response.")
-                }
+            onSuccess = { userInfoContent ->
+                // successfully fetched user information.
+                val userInfo = NetResponseHelper.parseApiResponse<AccountInfo>(userInfoContent)
+                return userInfo?.let { UseCaseResult.Success(it) } ?: UseCaseResult.Error("Failed to parse GetUserInfo response.")
             },
             onFailure = {
-                // failed on InitializeAccountSetting. Only hanppens when 1) no Internet 2) token invalid
+                // failed on GetUserInfo.
                 return UseCaseResult.Error(it)
             }
         )

@@ -26,9 +26,9 @@ interface UIEffect
 abstract class BaseViewModel<State : UIState, Event: UIEvent, Effect: UIEffect>(
     val initialState: State,
 ) : ViewModel() {
-    private val _state: MutableStateFlow<State> = MutableStateFlow(initialState)
+    protected val internalState: MutableStateFlow<State> = MutableStateFlow(initialState)
     val state: StateFlow<State> by lazy {
-        _state.onStart {
+        internalState.onStart {
             viewModelScope.launch(Dispatchers.IO) {
                 onStartStateFlow()
             }
@@ -61,7 +61,7 @@ abstract class BaseViewModel<State : UIState, Event: UIEvent, Effect: UIEffect>(
         val (newState, effect) = reduce(event)
 
         newState?.let {
-            _state.tryEmit(it)
+            internalState.tryEmit(it)
         }
         effect?.let {
             sendEffect(it)
@@ -73,6 +73,6 @@ abstract class BaseViewModel<State : UIState, Event: UIEvent, Effect: UIEffect>(
     }
 
     fun sendState(state: State) {
-        _state.tryEmit(state)
+        internalState.tryEmit(state)
     }
 }

@@ -12,24 +12,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.Sort
-import androidx.compose.material.icons.automirrored.outlined.TrendingUp
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.FilterAlt
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -43,28 +39,29 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
-import bandoristationm.composeapp.generated.resources.home_screen_title
-import bandoristationm.composeapp.generated.resources.placeholder
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
+import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
-import com.eynnzerr.bandoristation.ui.component.AppNavBar
-import com.eynnzerr.bandoristation.ui.component.AppTopBar
+import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.CurrentRoomHeader
 import com.eynnzerr.bandoristation.ui.component.RoomCard
-import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
+import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
+import com.eynnzerr.bandoristation.ui.dialog.BlockUserDialog
+import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
+import com.eynnzerr.bandoristation.ui.dialog.InformDialog
+import com.eynnzerr.bandoristation.ui.dialog.RoomFilterDialog
 import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -77,14 +74,19 @@ fun HomeScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
+    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
     val coroutineScope = rememberCoroutineScope()
     var wasAtTop by remember { mutableStateOf(true) }
+    var showInformUserDialog by remember { mutableStateOf(false) }
     var showSendRoomDialog by remember { mutableStateOf(false) }
-
+    var showFilterRoomDialog by remember { mutableStateOf(false) }
+    var showBlockUserDialog by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
+    var roomToInform : RoomInfo? by remember { mutableStateOf(null) }
+    var userToBlock: UserInfo? by remember { mutableStateOf(null) }
     var prefillRoomNumber by remember { mutableStateOf("") }
     var prefillDescription by remember { mutableStateOf("") }
 
@@ -133,7 +135,7 @@ fun HomeScreen(
                     }
                 }
 
-                is HomeEffect.ShowSnackbar -> {
+                is HomeEffect.ShowResourceSnackbar -> {
                     coroutineScope.launch {
                         val result = snackbarHostState.showSnackbar(
                             message = getString(action.textRes),
@@ -147,10 +149,56 @@ fun HomeScreen(
                     prefillDescription = action.prefillDescription
                     showSendRoomDialog = true
                 }
+
                 is HomeEffect.CloseSendRoomDialog -> {
                     showSendRoomDialog = false
                     prefillRoomNumber = ""
                     prefillDescription = ""
+                }
+
+                is HomeEffect.OpenInformUserDialog -> {
+                    roomToInform = action.roomToInform
+                    showInformUserDialog = true
+                }
+
+                is HomeEffect.CloseInformUserDialog -> {
+                    roomToInform = null
+                    showInformUserDialog = false
+                }
+
+                is HomeEffect.CloseFilterDialog -> {
+                    showFilterRoomDialog = false
+                }
+
+                is HomeEffect.OpenFilterDialog -> {
+                    showFilterRoomDialog = true
+                }
+
+                is HomeEffect.CloseBlockUserDialog -> {
+                    userToBlock = null
+                    showBlockUserDialog = false
+                }
+
+                is HomeEffect.OpenBlockUserDialog -> {
+                    userToBlock = action.userToBlock
+                    showBlockUserDialog = true
+                }
+
+                is HomeEffect.CloseHelpDialog -> {
+                    showHelpDialog = false
+                }
+
+                is HomeEffect.OpenHelpDialog -> {
+                    showHelpDialog = true
+                }
+
+                is HomeEffect.ShowSnackbar -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = action.text,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
                 }
             }
         }
@@ -167,6 +215,38 @@ fun HomeScreen(
         prefillDescription = prefillDescription,
     )
 
+    InformDialog(
+        isVisible = showInformUserDialog,
+        selectedRoom = roomToInform,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseInformUserDialog()) },
+        onConfirm = { viewModel.sendEvent(InformUser(it)) }
+    )
+
+    RoomFilterDialog(
+        isVisible = showFilterRoomDialog,
+        presetWords = state.roomFilter.keyword,
+        presetUsers = state.roomFilter.user,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseFilterDialog()) },
+        onConfirm = { viewModel.sendEvent(UpdateRoomFilter(it)) }
+    )
+
+    BlockUserDialog(
+        isVisible = showBlockUserDialog,
+        selectedUser = userToBlock,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseBlockUserDialog()) },
+        onConfirm = {
+            userToBlock?.let {
+                val filter = state.roomFilter.copy(user = state.roomFilter.user + it)
+                viewModel.sendEvent(UpdateRoomFilter(filter))
+            }
+        }
+    )
+
+    HelpDialog(
+        isVisible = showHelpDialog,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) }
+    )
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     SuiteScaffold(
         scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
@@ -177,7 +257,7 @@ fun HomeScreen(
         onNavigateTo = { viewModel.sendEffect(HomeEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
-                title = stringResource(Res.string.home_screen_title),
+                title = state.title,
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(
@@ -194,29 +274,29 @@ fun HomeScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            // TODO 预测线
+                            viewModel.sendEffect(HomeEffect.OpenHelpDialog())
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.TrendingUp,
+                            imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
+                            contentDescription = "",
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {
+                            viewModel.sendEvent(RefreshRooms())
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Refresh,
                             contentDescription = ""
                         )
                     }
 
                     IconButton(
                         onClick = {
-                            // TODO 排序
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.Sort,
-                            contentDescription = ""
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            // TODO 过滤
+                            viewModel.sendEffect(HomeEffect.OpenFilterDialog())
                         }
                     ) {
                         Icon(
@@ -306,6 +386,10 @@ fun HomeScreen(
                     onJoin = { joined ->
                         viewModel.sendEvent(JoinRoom(if (joined) roomInfo else null))
                     },
+                    onBlockUser = {
+                        roomInfo.userInfo?.let { viewModel.sendEffect(HomeEffect.OpenBlockUserDialog(it)) }
+                    },
+                    onReportUser = { viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo)) },
                     isJoined = roomInfo == state.selectedRoom,
                     currentTimeMillis = state.localTimestampMillis,
                     modifier = Modifier.animateItem()

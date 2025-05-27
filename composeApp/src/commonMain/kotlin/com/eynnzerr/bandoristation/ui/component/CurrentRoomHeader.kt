@@ -39,18 +39,16 @@ import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.utils.formatTimeDifference
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.time.Clock.System
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.Clock
 
-@OptIn(ExperimentalTime::class)
 @Composable
 fun CurrentRoomHeader(
     roomInfo: RoomInfo,
     onCopy: (String) -> Unit,
     onPublish: () -> Unit,
     onLeave: () -> Unit,
-    currentTimeMillis: Long = System.now().toEpochMilliseconds(),
-    startTimeMillis: Long = System.now().toEpochMilliseconds(),
+    currentTimeMillis: Long = Clock.System.now().toEpochMilliseconds(),
+    startTimeMillis: Long = Clock.System.now().toEpochMilliseconds(),
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(

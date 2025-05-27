@@ -21,6 +21,7 @@ interface RemoteDataSource {
     suspend fun <T> sendWebSocketRequestWithRetry(action: String, data: T? = null, retryAttempts: Int = 0) // TODO 废弃
     fun listenWebSocketForActions(actions: List<String>): Flow<WebSocketResponse<JsonElement>>
     fun listenForAll(): Flow<WebSocketResponse<JsonElement>>
+    fun listenWebSocketConnectionState(): Flow<WebSocketClient.ConnectionState>
     fun disconnectWebSocket()
 
     // websocket concrete business
@@ -36,4 +37,6 @@ interface RemoteDataSource {
     // HTTPS API basic operation
     suspend fun sendHttpsRequest(request: ApiRequest): ApiResponse
     suspend fun sendAuthenticHttpsRequest(request: ApiRequest, token: String): ApiResponse
+
+    suspend fun sendApiRequest(request: ApiRequest): ApiResponse
 }

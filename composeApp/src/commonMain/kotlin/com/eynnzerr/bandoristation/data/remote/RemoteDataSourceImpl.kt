@@ -47,6 +47,9 @@ class RemoteDataSourceImpl(
     override fun listenForAll()
         = webSocketClient.listenForAll()
 
+    override fun listenWebSocketConnectionState()
+        = webSocketClient.connectionState
+
     override fun disconnectWebSocket()
         = webSocketClient.disconnect()
 
@@ -99,7 +102,7 @@ class RemoteDataSourceImpl(
         )
 
     override suspend fun sendHttpsRequest(request: ApiRequest): ApiResponse {
-        AppLogger.d(TAG, "Send https request ${request.group}:${request.function} to server.")
+        // AppLogger.d(TAG, "Send https request ${request.group}:${request.function} to server.")
         return httpsClient.sendRequest(request)
     }
 
@@ -107,11 +110,12 @@ class RemoteDataSourceImpl(
         request: ApiRequest,
         token: String
     ): ApiResponse {
-        AppLogger.d(TAG, "Send https request ${request.group}:${request.function} to server with token: $token")
+        // AppLogger.d(TAG, "Send https request ${request.group}:${request.function} to server with token: $token")
         return httpsClient.sendAuthenticatedRequest(request, token)
     }
 
-
+    override suspend fun sendApiRequest(request: ApiRequest)
+        = httpsClient.sendApiRequest(request)
 }
 
 private const val TAG = "RemoteDataSourceImpl"

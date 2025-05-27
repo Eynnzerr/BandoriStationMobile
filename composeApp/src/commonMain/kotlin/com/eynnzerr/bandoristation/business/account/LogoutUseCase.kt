@@ -27,7 +27,10 @@ class LogoutUseCase(
         ).handle(
             onSuccess = {
                 // when success, response returns "" so no need to processing.
-                dataStore.edit { p -> p[PreferenceKeys.USER_TOKEN] = "" }
+                dataStore.edit { p ->
+                    p[PreferenceKeys.USER_TOKEN] = ""
+                    p[PreferenceKeys.FOLLOWING_LIST] = emptySet()
+                }
                 return UseCaseResult.Success(Unit)
             },
             onFailure = {

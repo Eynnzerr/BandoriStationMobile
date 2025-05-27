@@ -2,8 +2,6 @@ package com.eynnzerr.bandoristation.feature.account
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -14,12 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -27,19 +22,22 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
+import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
-import com.eynnzerr.bandoristation.ui.component.AppNavBar
 import com.eynnzerr.bandoristation.ui.component.EditAccountButton
 import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
-import com.eynnzerr.bandoristation.ui.component.SimpleRoomCard
-import com.eynnzerr.bandoristation.ui.component.SuiteScaffold
-import com.eynnzerr.bandoristation.ui.component.UserAvatar
-import com.eynnzerr.bandoristation.ui.component.UserBannerImage
+import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
+import com.eynnzerr.bandoristation.ui.component.UserProfile
+import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
+import com.eynnzerr.bandoristation.ui.dialog.FollowListDialog
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
-import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
+import com.eynnzerr.bandoristation.utils.toBase64String
+import io.github.vinceglb.filekit.dialogs.FileKitMode
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -52,19 +50,48 @@ fun AccountScreen(
     viewModel: AccountViewModel = koinViewModel<AccountViewModel>()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isExpanded = LocalAppProperty.current.screenInfo.isExpanded()
+    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
-    val tabs = listOf("发布历史", "玩家信息")
     val clipboardManager = LocalClipboardManager.current
-    var selectedTabIndex by remember { mutableStateOf(0) }
+    var showFollowerDialog by remember { mutableStateOf(false) }
+    var showFollowingDialog by remember { mutableStateOf(false) }
+    var showEditProfileDialog by remember { mutableStateOf(false) }
     var showLoginDialog by remember { mutableStateOf(false) }
     var loginDialogState by remember { mutableStateOf(LoginScreenState.INITIAL) }
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
+
+    val avatarPickerLauncher = rememberFilePickerLauncher(
+        mode = FileKitMode.Single,
+        type = FileKitType.Image,
+    ) { file ->
+        file?.let { avatarFile ->
+            // 转为base64字符串，进行后续操作
+            coroutineScope.launch {
+                avatarFile.toBase64String()?.let { base64 ->
+                    viewModel.sendEvent(UpdateAvatar(base64))
+                }
+            }
+        }
+    }
+
+    val bannerPickerLauncher = rememberFilePickerLauncher(
+        mode = FileKitMode.Single,
+        type = FileKitType.Image,
+    ) { file ->
+        file?.let { bannerFile ->
+            // 转为base64字符串，进行后续操作
+            coroutineScope.launch {
+                bannerFile.toBase64String()?.let { base64 ->
+                    viewModel.sendEvent(UpdateBanner(base64))
+                }
+            }
+        }
+    }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -118,6 +145,28 @@ fun AccountScreen(
                         else -> LoginScreenState.INITIAL
                     }
                 }
+
+                is AccountEffect.ControlFollowerDialog -> {
+                    // lazy loading
+                    if (action.visible) {
+                        viewModel.sendEvent(GetFollowers())
+                    }
+                    showFollowerDialog = action.visible
+                }
+
+                is AccountEffect.ControlFollowingDialog -> {
+                    if (action.visible) {
+                        viewModel.sendEvent(GetFollowings())
+                    }
+                    showFollowingDialog = action.visible
+                }
+
+                is AccountEffect.ControlEditProfileDialog -> {
+                    if (action.visible) {
+                        viewModel.sendEvent(GetEditProfileData())
+                    }
+                    showEditProfileDialog = action.visible
+                }
             }
         }
     }
@@ -133,21 +182,79 @@ fun AccountScreen(
         onEnterRegister = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.REGISTER)) },
         onEnterForgot = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.FORGOT_PASSWORD)) },
         onLoginWithToken = { token ->
-            viewModel.sendEvent(AccountIntent.GetUserInfo(token))
+            viewModel.sendEvent(GetUserInfo(token))
         },
         onLoginWithPassword = { username, password ->
-            viewModel.sendEvent(AccountIntent.Login(username, password))
+            viewModel.sendEvent(Login(username, password))
         },
         onRegister = { username, password, email ->
-            viewModel.sendEvent(AccountIntent.Signup(username, password, email))
+            viewModel.sendEvent(Signup(username, password, email))
         },
         onSendVerificationCode = {
-            viewModel.sendEvent(AccountIntent.SendVerificationCode())
+            viewModel.sendEvent(SendVerificationCode())
         },
         onVerifyCode = { code ->
-            viewModel.sendEvent(AccountIntent.VerifyEmail(code))
+            viewModel.sendEvent(VerifyEmail(code))
         },
         sendCountDown = state.countDown
+    )
+
+    EditProfileDialog(
+        isVisible = showEditProfileDialog,
+        onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlEditProfileDialog(false)) },
+        avatar = state.accountInfo.accountSummary.avatar,
+        profile = state.editProfileData,
+        onAvatarClick = {
+            avatarPickerLauncher.launch()
+        },
+        onBannerClick = {
+            bannerPickerLauncher.launch()
+        },
+        onUsernameEdit = {
+            viewModel.sendEvent(UpdateUsername(it))
+        },
+        onIntroductionEdit = {
+            viewModel.sendEvent(UpdateIntroduction(it))
+        },
+        onQQEdit = {
+            viewModel.sendEvent(BindQQ(it))
+        },
+        onEmailEdit = { _, _ ->
+            // TODO
+        },
+        onSendEmailVerification = {
+            // TODO
+        }
+    )
+
+    FollowListDialog(
+        isVisible = showFollowingDialog,
+        title = "关注列表",
+        onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(false)) },
+        followList = state.followings,
+        onFollow = { viewModel.sendEvent(FollowUser(it)) },
+        placeholder = {
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("暂无")
+            }
+        }
+    )
+
+    FollowListDialog(
+        isVisible = showFollowerDialog,
+        title = "粉丝列表",
+        onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(false)) },
+        followList = state.followers,
+        onFollow = { viewModel.sendEvent(FollowUser(it)) },
+        placeholder = {
+            Box(
+                contentAlignment = Alignment.Center,
+            ) {
+                Text("暂无（若仅使用Token登录，请注意本客户端无法获取账号原有粉丝列表）")
+            }
+        }
     )
 
     ModalNavigationDrawer(
@@ -168,14 +275,17 @@ fun AccountScreen(
                     NavigationDrawerItem(
                         icon = { Icon(Icons.AutoMirrored.Default.Logout, contentDescription = null) },
                         label = { Text("退出登录") },
-                        onClick = { viewModel.sendEvent(AccountIntent.Logout()) },
+                        onClick = { viewModel.sendEvent(Logout()) },
                         selected = false,
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                     NavigationDrawerItem(
                         icon = { Icon(Icons.Default.Token, contentDescription = null) },
                         label = { Text("重置令牌") },
-                        onClick = {  },
+                        onClick = {
+                            viewModel.sendEffect(AccountEffect.ControlLoginDialog(true))
+                            viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.TOKEN_LOGIN))
+                        },
                         selected = false,
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
@@ -208,297 +318,25 @@ fun AccountScreen(
                         )
                     }
                 } else {
-                    Column(
+                    UserProfile(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues)
-                    ) {
-                        UserBannerImage(
-                            bannerName = state.accountInfo.summary.banner,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(150.dp)
-                        )
-
-                        // 用户信息区域
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                // 用户头像
-                                UserAvatar(
-                                    avatarName = state.accountInfo.summary.avatar,
-                                    size = 64.dp
-                                )
-
-                                // 用户信息
-                                Column(
-                                    modifier = Modifier
-                                        .padding(start = 12.dp)
-                                        .padding(top = 4.dp)
-                                ) {
-                                    Text(
-                                        text = state.accountInfo.summary.username,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 20.sp
-                                    )
-                                    Text(
-                                        text = "UID: ${state.accountInfo.summary.userId}",
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 14.sp,
-                                        modifier = Modifier.padding(top = 4.dp),
-                                    )
-                                    Row(
-                                        modifier = Modifier.padding(top = 0.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                    ) {
-                                        // TODO 点击打开关注列表
-                                        Text(
-                                            text = "${state.accountInfo.summary.following} 关注",
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 14.sp
-                                        )
-                                        Text(
-                                            text = "${state.accountInfo.summary.follower} 关注者",
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 14.sp
-                                        )
-                                    }
-                                }
-                            }
-
+                            .padding(paddingValues),
+                        accountInfo = state.accountInfo,
+                        sideButton = {
                             EditAccountButton(
                                 isLoggedIn = state.isLoggedIn,
                                 onLogIn = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(true)) },
                                 onEditAccount = {
-                                    // TODO 打开资料编辑对话框 或者 模态框
+                                    viewModel.sendEffect(AccountEffect.ControlEditProfileDialog(true))
                                 },
                             )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // 标签页
-                        TabRow(
-                            selectedTabIndex = selectedTabIndex,
-                            containerColor = MaterialTheme.colorScheme.surface,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        ) {
-                            tabs.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = { selectedTabIndex = index },
-                                    text = { Text(title) }
-                                )
-                            }
-                        }
-
-                        // 标签页内容
-                        when (selectedTabIndex) {
-                            0 -> {
-                                // 发布历史
-                                LazyColumn(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentPadding = PaddingValues(8.dp)
-                                ) {
-                                    itemsIndexed(state.accountInfo.roomNumberHistory) { index, roomInfo ->
-                                        SimpleRoomCard(
-                                            number = roomInfo.number,
-                                            rawMessage = roomInfo.rawMessage,
-                                            timestamp = roomInfo.time,
-                                            sourceName = roomInfo.sourceName,
-                                            avatarName = state.accountInfo.summary.avatar,
-                                            userName = state.accountInfo.summary.username,
-                                            onCopy = { roomNumber ->
-                                                viewModel.sendEffect(AccountEffect.CopyRoomNumber(roomNumber))
-                                            },
-                                        )
-                                    }
-                                }
-                            }
-                            1 -> {
-                                // 玩家信息
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = "即将推出",
-                                        color = Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    }
+                        },
+                        onBrowseFollowings = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(true)) },
+                        onBrowseFollowers = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(true)) },
+                    )
                 }
             }
-
-//            Scaffold(
-//                bottomBar = {
-//                    AppNavBar(
-//                        screens = Screen.bottomScreenList,
-//                        currentDestination = navBackStackEntry?.destination,
-//                        onNavigateTo = navController::navigateTo,
-//                    )
-//                },
-//                snackbarHost = {
-//                    SnackbarHost(
-//                        hostState = snackbarHostState,
-//                        modifier = Modifier
-//                            .zIndex(Float.MAX_VALUE)
-//                            .imePadding()
-//                    )
-//                }
-//            ) { paddingValues ->
-//                if (state.isLoading) {
-//                    Box(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .padding(paddingValues)
-//                    ) {
-//                        CircularProgressIndicator(
-//                            modifier = Modifier.align(Alignment.Center)
-//                        )
-//                    }
-//                } else {
-//                    Column(
-//                        modifier = Modifier
-//                            .fillMaxSize()
-//                            .padding(paddingValues)
-//                    ) {
-//                        UserBannerImage(
-//                            bannerName = state.accountInfo.summary.banner,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .height(150.dp)
-//                        )
-//
-//                        // 用户信息区域
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(horizontal = 16.dp)
-//                                .padding(top = 16.dp),
-//                            horizontalArrangement = Arrangement.SpaceBetween,
-//                            verticalAlignment = Alignment.Top
-//                        ) {
-//                            Row(verticalAlignment = Alignment.CenterVertically) {
-//                                // 用户头像
-//                                UserAvatar(
-//                                    avatarName = state.accountInfo.summary.avatar,
-//                                    size = 64.dp
-//                                )
-//
-//                                // 用户信息
-//                                Column(
-//                                    modifier = Modifier
-//                                        .padding(start = 12.dp)
-//                                        .padding(top = 4.dp)
-//                                ) {
-//                                    Text(
-//                                        text = state.accountInfo.summary.username,
-//                                        fontWeight = FontWeight.Bold,
-//                                        fontSize = 20.sp
-//                                    )
-//                                    Text(
-//                                        text = "UID: ${state.accountInfo.summary.userId}",
-//                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                                        fontSize = 14.sp,
-//                                        modifier = Modifier.padding(top = 4.dp),
-//                                    )
-//                                    Row(
-//                                        modifier = Modifier.padding(top = 0.dp),
-//                                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-//                                    ) {
-//                                        // TODO 点击打开关注列表
-//                                        Text(
-//                                            text = "${state.accountInfo.summary.following} 关注",
-//                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                                            fontSize = 14.sp
-//                                        )
-//                                        Text(
-//                                            text = "${state.accountInfo.summary.follower} 关注者",
-//                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-//                                            fontSize = 14.sp
-//                                        )
-//                                    }
-//                                }
-//                            }
-//
-//                            EditAccountButton(
-//                                isLoggedIn = state.isLoggedIn,
-//                                onLogIn = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(true)) },
-//                                onEditAccount = {
-//                                    // TODO 打开资料编辑对话框 或者 模态框
-//                                },
-//                            )
-//                        }
-//
-//                        Spacer(modifier = Modifier.height(16.dp))
-//
-//                        // 标签页
-//                        TabRow(
-//                            selectedTabIndex = selectedTabIndex,
-//                            containerColor = MaterialTheme.colorScheme.surface,
-//                            contentColor = MaterialTheme.colorScheme.primary
-//                        ) {
-//                            tabs.forEachIndexed { index, title ->
-//                                Tab(
-//                                    selected = selectedTabIndex == index,
-//                                    onClick = { selectedTabIndex = index },
-//                                    text = { Text(title) }
-//                                )
-//                            }
-//                        }
-//
-//                        // 标签页内容
-//                        when (selectedTabIndex) {
-//                            0 -> {
-//                                // 发布历史
-//                                LazyColumn(
-//                                    modifier = Modifier.fillMaxSize(),
-//                                    contentPadding = PaddingValues(8.dp)
-//                                ) {
-//                                    itemsIndexed(state.accountInfo.roomNumberHistory) { index, roomInfo ->
-//                                        SimpleRoomCard(
-//                                            number = roomInfo.number,
-//                                            rawMessage = roomInfo.rawMessage,
-//                                            timestamp = roomInfo.time,
-//                                            sourceName = roomInfo.sourceName,
-//                                            avatarName = state.accountInfo.summary.avatar,
-//                                            userName = state.accountInfo.summary.username,
-//                                            onCopy = { roomNumber ->
-//                                                viewModel.sendEffect(AccountEffect.CopyRoomNumber(roomNumber))
-//                                            },
-//                                        )
-//                                    }
-//                                }
-//                            }
-//                            1 -> {
-//                                // 玩家信息
-//                                Box(
-//                                    modifier = Modifier
-//                                        .fillMaxSize()
-//                                        .padding(16.dp),
-//                                    contentAlignment = Alignment.Center
-//                                ) {
-//                                    Text(
-//                                        text = "即将推出",
-//                                        color = Color.Gray
-//                                    )
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
         }
     )
 }
@@ -509,3 +347,5 @@ private fun AccountScreenPreview() {
     val navController = rememberNavController()
     AccountScreen(navController)
 }
+
+private const val TAG = "AccountScreen"
