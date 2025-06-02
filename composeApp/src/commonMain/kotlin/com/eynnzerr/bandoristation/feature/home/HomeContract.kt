@@ -17,10 +17,11 @@ data class HomeState(
     val roomFilter: RoomFilter = RoomFilter(),
     val hasUnReadMessages: Boolean = false,
     val selectedRoom: RoomInfo? = null,
-    val localTimestampMillis: Long = System.now().toEpochMilliseconds(),
+    val serverTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val joinedTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val presetWords: Set<String> = emptySet(),
     val title: String = "主页",
+    val isShowingPlayerBrief: Boolean = false,
 ) : UIState {
     companion object {
         fun initial() = HomeState(

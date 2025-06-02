@@ -114,7 +114,7 @@ fun AccountScreen(
                         )
                     }
                 }
-                
+
                 is AccountEffect.NavigateToScreen -> {
                     navController.navigateTo(action.destination)
                 }
@@ -323,6 +323,7 @@ fun AccountScreen(
                             .fillMaxSize()
                             .padding(paddingValues),
                         accountInfo = state.accountInfo,
+                        roomHistories = state.roomHistory,
                         sideButton = {
                             EditAccountButton(
                                 isLoggedIn = state.isLoggedIn,
@@ -334,6 +335,7 @@ fun AccountScreen(
                         },
                         onBrowseFollowings = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(true)) },
                         onBrowseFollowers = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(true)) },
+                        onDeleteHistory = { viewModel.sendEvent(DeleteRoomHistory(it)) },
                     )
                 }
             }

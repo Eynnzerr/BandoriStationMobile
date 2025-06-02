@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
  * @param rawMessage 房间要求
  * @param sourceInfo 数据来源信息
  * @param type 房间类型
- * @param time 房间发布时间，13位时间戳
+ * @param time 房间发布时间，13位时间戳（服务器时区）
  * @param userInfo 发布者用户信息
  */
 @Serializable

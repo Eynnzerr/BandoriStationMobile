@@ -11,7 +11,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Filter
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.SaveAlt
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,6 +32,14 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.settings_screen_title
 import bandoristationm.composeapp.generated.resources.theme
 import bandoristationm.composeapp.generated.resources.theme_desc
+import bandoristationm.composeapp.generated.resources.settings_auto_clear_expired_rooms_title
+import bandoristationm.composeapp.generated.resources.settings_auto_clear_expired_rooms_desc
+import bandoristationm.composeapp.generated.resources.settings_auto_filter_pjsk_title
+import bandoristationm.composeapp.generated.resources.settings_auto_filter_pjsk_desc
+import bandoristationm.composeapp.generated.resources.settings_show_player_data_title
+import bandoristationm.composeapp.generated.resources.settings_show_player_data_desc
+import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_title
+import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_desc
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
 import com.eynnzerr.bandoristation.ui.component.settings.SettingDropdownItem
@@ -74,30 +86,49 @@ fun SettingScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            /* SettingItem(
-                title = "画中画",
-                desc = "管理悬浮窗组件配置",
-                icon = Icons.Outlined.PictureInPicture,
+            SettingItem(
+                title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
+                desc = stringResource(Res.string.settings_auto_clear_expired_rooms_desc),
+                icon = Icons.Outlined.Schedule,
                 action = {
                     Switch(
-                        checked = false,
-                        onCheckedChange = null
+                        checked = state.isClearingOutdatedRoom,
+                        onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateClearOutdatedRoom(it)) }
                     )
                 },
-                onClick = {},
-                enable = false,
-            ) */
+                onClick = {}
+            )
 
             SettingItem(
-                title = "自动过滤PJSK",
-                desc = "自动屏蔽PJSK的车（车牌少于六位数）",
+                title = stringResource(Res.string.settings_auto_filter_pjsk_title),
+                desc = stringResource(Res.string.settings_auto_filter_pjsk_desc),
                 icon = Icons.Outlined.Block,
                 action = {
                     Switch(
-                        checked = true,
+                        checked = state.isFilteringPJSK,
                         onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateFilterPJSK(it)) }
                     )
                 },
+                onClick = {}
+            )
+
+            SettingItem(
+                title = stringResource(Res.string.settings_show_player_data_title),
+                desc = stringResource(Res.string.settings_show_player_data_desc),
+                icon = Icons.Outlined.SaveAlt,
+                action = {
+                    Switch(
+                        checked = state.isRecordingRoomHistory,
+                        onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateRecordRoomHistory(it)) }
+                    )
+                },
+                onClick = {}
+            )
+
+            SettingItem(
+                title = stringResource(Res.string.settings_active_filter_rules_title),
+                desc = stringResource(Res.string.settings_active_filter_rules_desc),
+                icon = Icons.Outlined.Filter,
                 onClick = {}
             )
 

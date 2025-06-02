@@ -1,5 +1,7 @@
 package com.eynnzerr.bandoristation.feature.account
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
@@ -14,6 +16,7 @@ import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.Params
+import com.eynnzerr.bandoristation.business.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowingBriefUseCase
@@ -26,12 +29,12 @@ import com.eynnzerr.bandoristation.model.account.LoginParams
 import com.eynnzerr.bandoristation.model.account.SignupParams
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
+import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
 
 class AccountViewModel(
     private val loginUseCase: LoginUseCase,
@@ -41,35 +44,45 @@ class AccountViewModel(
     private val sendVerificationCodeUseCase: SendVerificationCodeUseCase,
     private val verifyEmailUseCase: VerifyEmailUseCase,
     private val setPreferenceUseCase: SetPreferenceUseCase,
-    private val stringPreferenceUseCase: GetPreferenceUseCase<String>,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val getFollowingBriefUseCase: GetFollowingBriefUseCase,
     private val getFollowerBriefUseCase: GetFollowerBriefUseCase,
     private val getEditProfileDataUseCase: GetEditProfileDataUseCase,
     private val followUserUseCase: FollowUserUseCase,
     private val updateAccountAggregator: UpdateAccountAggregator,
+    private val roomHistoryAggregator: RoomHistoryAggregator,
+    private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<AccountState, AccountIntent, AccountEffect>(
     initialState = AccountState.initial()
 ) {
     override suspend fun loadInitialData() {
-        val token = stringPreferenceUseCase.invoke(GetPreferenceUseCase.Params(
-            key = PreferenceKeys.USER_TOKEN,
-            defaultValue = ""
-        )).map {
-            when (it) {
-                is UseCaseResult.Error -> ""
-                is UseCaseResult.Loading -> ""
-                is UseCaseResult.Success -> it.data ?: ""
-            }
+        val token = dataStore.data.map {
+            it[PreferenceKeys.USER_TOKEN] ?: ""
         }.first()
+        if (token.isNotEmpty()) {
+            sendEvent(GetUserInfo(token))
+        } else {
+            sendEffect(ControlLoginDialog(true))
+        }
 
-        sendEvent(GetUserInfo(token))
+        roomHistoryAggregator.fetchAllHistory(null).collect { result ->
+            when (result) {
+                is UseCaseResult.Loading -> Unit
+                is UseCaseResult.Error -> {
+                    sendEffect(ShowSnackbar(result.error.message ?: ""))
+                }
+                is UseCaseResult.Success -> {
+                    AppLogger.d(TAG, "Successfully fetched room history. length: ${result.data.size}")
+                    sendEvent(UpdateRoomHistory(result.data))
+                }
+            }
+        }
     }
 
     override fun reduce(event: AccountIntent): Pair<AccountState?, AccountEffect?> {
        return when (event) {
            is UpdateAccountInfo -> {
-               AccountState(
+               state.value.copy(
                    isLoading = false,
                    accountInfo = event.accountInfo,
                    isLoggedIn = event.accountInfo.isSelf,
@@ -79,7 +92,7 @@ class AccountViewModel(
            is NotifyUpdateInfoFailed -> {
                sendEffect(ShowSnackbar(event.reason)) // side side effect
 
-               AccountState(
+               state.value.copy(
                    isLoading = false,
                    accountInfo = AccountInfo(),
                    isLoggedIn = false,
@@ -298,7 +311,13 @@ class AccountViewModel(
                            sendEffect(ShowSnackbar(response.error))
                        }
                        is UseCaseResult.Success -> {
-
+                           internalState.update {
+                               it.copy(
+                                   editProfileData = state.value.editProfileData.copy(
+                                       qq = event.qq.toString()
+                                   )
+                               )
+                           }
                        }
                    }
                }
@@ -334,13 +353,18 @@ class AccountViewModel(
                            sendEffect(ShowSnackbar(response.error))
                        }
                        is UseCaseResult.Success -> {
-                           sendEvent(UpdateAccountInfo(
-                               accountInfo = state.value.accountInfo.copy(
-                                   accountSummary = state.value.accountInfo.accountSummary.copy(
+                           internalState.update {
+                               it.copy(
+                                   accountInfo = state.value.accountInfo.copy(
+                                       accountSummary = state.value.accountInfo.accountSummary.copy(
+                                           banner = response.data
+                                       )
+                                   ),
+                                   editProfileData = state.value.editProfileData.copy(
                                        banner = response.data
                                    )
                                )
-                           ))
+                           }
                        }
                    }
                }
@@ -355,13 +379,18 @@ class AccountViewModel(
                            sendEffect(ShowSnackbar(response.error))
                        }
                        is UseCaseResult.Success -> {
-                           sendEvent(UpdateAccountInfo(
-                               accountInfo = state.value.accountInfo.copy(
-                                   accountSummary = state.value.accountInfo.accountSummary.copy(
+                           internalState.update {
+                               it.copy(
+                                   accountInfo = state.value.accountInfo.copy(
+                                       accountSummary = state.value.accountInfo.accountSummary.copy(
+                                           introduction = event.introduction
+                                       )
+                                   ),
+                                   editProfileData = state.value.editProfileData.copy(
                                        introduction = event.introduction
                                    )
                                )
-                           ))
+                           }
                        }
                    }
                }
@@ -376,18 +405,38 @@ class AccountViewModel(
                            sendEffect(ShowSnackbar(response.error))
                        }
                        is UseCaseResult.Success -> {
-                           sendEvent(UpdateAccountInfo(
-                               accountInfo = state.value.accountInfo.copy(
-                                   accountSummary = state.value.accountInfo.accountSummary.copy(
+                           internalState.update {
+                               it.copy(
+                                   accountInfo = state.value.accountInfo.copy(
+                                       accountSummary = state.value.accountInfo.accountSummary.copy(
+                                           username = event.username
+                                       )
+                                   ),
+                                   editProfileData = state.value.editProfileData.copy(
                                        username = event.username
                                    )
                                )
-                           ))
+                           }
                        }
                    }
                }
                null to null
            }
+
+           is UpdateRoomHistory -> {
+               state.value.copy(
+                   roomHistory = event.roomHistory
+               ) to null
+           }
+
+           is DeleteRoomHistory -> {
+               viewModelScope.launch {
+                   roomHistoryAggregator.deleteRoomHistory(event.roomHistory)
+               }
+               null to ShowSnackbar("删除该条上车记录。")
+           }
        }
     }
 }
+
+private const val TAG = "AccountViewModel"

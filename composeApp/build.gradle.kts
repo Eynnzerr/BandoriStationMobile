@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -10,6 +11,8 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.composeHotReload)
+    // alias(libs.plugins.foojay.resolver.convention)
 }
 
 kotlin {
@@ -44,8 +47,8 @@ kotlin {
 
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
-
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.charts.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -92,14 +95,18 @@ kotlin {
 
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialogs.compose)
+
+            implementation(libs.charts)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.java)
+            implementation(libs.charts.jvm)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            // implementation(libs.charts.iosarm64)
         }
     }
 
@@ -161,6 +168,10 @@ compose.desktop {
 compose.resources {
     publicResClass = true
     generateResClass = always
+}
+
+composeCompiler {
+    featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
 }
 
 room {

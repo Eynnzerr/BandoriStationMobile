@@ -34,6 +34,12 @@ import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.DeleteRoomHistoriesUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.DeleteRoomHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.EditRoomHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.FetchAllHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -258,15 +264,19 @@ fun provideUseCaseModule() = module {
         )
     }
 
+    // Account UseCases
     singleOf(::BindQQUseCase)
-
     singleOf(::UpdateAvatarUseCase)
-
     singleOf(::UpdateBannerUseCase)
-
     singleOf(::UpdateUsernameUseCase)
-
     singleOf(::UpdateIntroductionUseCase)
-
     singleOf(::UpdateAccountAggregator)
+
+    // Room History UseCases
+    singleOf(::FetchAllHistoryUseCase)
+    singleOf(::AddRoomHistoryUseCase)
+    singleOf(::EditRoomHistoryUseCase)
+    singleOf(::DeleteRoomHistoryUseCase)
+    singleOf(::DeleteRoomHistoriesUseCase)
+    singleOf(::RoomHistoryAggregator)
 }

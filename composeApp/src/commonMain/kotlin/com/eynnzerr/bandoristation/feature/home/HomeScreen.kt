@@ -333,7 +333,7 @@ fun HomeScreen(
                         viewModel.sendEffect(HomeEffect.OpenSendRoomDialog())
                     }
                 ) {
-                    Icon(Icons.Filled.Add, "add student menu")
+                    Icon(Icons.Filled.Add, "")
                 }
             }
         },
@@ -349,7 +349,7 @@ fun HomeScreen(
                 stickyHeader(key = -1) {
                     CurrentRoomHeader(
                         roomInfo = state.selectedRoom!!,
-                        currentTimeMillis = state.localTimestampMillis,
+                        currentTimeMillis = state.serverTimestampMillis,
                         startTimeMillis = state.joinedTimestampMillis,
                         onCopy = { roomNumber ->
                             viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
@@ -391,7 +391,7 @@ fun HomeScreen(
                     },
                     onReportUser = { viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo)) },
                     isJoined = roomInfo == state.selectedRoom,
-                    currentTimeMillis = state.localTimestampMillis,
+                    currentTimeMillis = state.serverTimestampMillis,
                     modifier = Modifier.animateItem()
                 )
             }

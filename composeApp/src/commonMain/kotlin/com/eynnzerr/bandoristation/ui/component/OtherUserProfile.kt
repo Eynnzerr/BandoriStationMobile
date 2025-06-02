@@ -13,9 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -30,36 +27,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
-import com.eynnzerr.bandoristation.utils.AppLogger
-import com.eynnzerr.bandoristation.utils.TimeGranularity
-import com.eynnzerr.bandoristation.utils.getCountDataByGranularity
-import com.eynnzerr.bandoristation.utils.getDurationDataByGranularity
-import io.github.dautovicharis.charts.BarChart
-import io.github.dautovicharis.charts.LineChart
-import io.github.dautovicharis.charts.PieChart
-import io.github.dautovicharis.charts.model.toChartDataSet
-import io.github.dautovicharis.charts.style.BarChartDefaults
-import io.github.dautovicharis.charts.style.ChartViewDefaults
-import io.github.dautovicharis.charts.style.ChartViewStyle
-import io.github.dautovicharis.charts.style.LineChartDefaults
-import io.github.dautovicharis.charts.style.PieChartDefaults
 
 @Composable
-fun UserProfile(
+fun OtherUserProfile(
     modifier: Modifier = Modifier,
     accountInfo: AccountInfo,
-    roomHistories: List<RoomHistory> = emptyList(),
     actionButton: @Composable () -> Unit = {},
     sideButton: @Composable () -> Unit = {},
     onBrowseFollowers: () -> Unit = {},
     onBrowseFollowings: () -> Unit = {},
-    onDeleteHistory: (RoomHistory) -> Unit = {},
 ) {
-    AppLogger.d("UserProfile", "recompose with room history length: ${roomHistories.size}")
-
-    val tabs = listOf("发车历史", "上车历史", "使用统计")
+    val tabs = listOf("发车历史")
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Column(
@@ -194,86 +173,6 @@ fun UserProfile(
                             )
                         }
                     }
-                }
-            }
-            1 -> {
-                // 上车历史
-                if (roomHistories.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "无最近上车记录",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(8.dp),
-                    ) {
-                        itemsIndexed(
-                            items = roomHistories,
-                            key = { _, roomHistory -> roomHistory.historyId }
-                        ) { index, roomHistory ->
-                            RoomHistoryCard(
-                                roomHistory = roomHistory,
-                                onDelete = { onDeleteHistory(roomHistory) }
-                            )
-                        }
-                    }
-                }
-
-            }
-            2 -> {
-                // 统计图
-                var selectedGranularity by remember { mutableStateOf(TimeGranularity.DAILY) }
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    Row(
-                        modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        TimeGranularity.entries.forEach { granularity ->
-                            FilterChip(
-                                selected = selectedGranularity == granularity,
-                                onClick = { selectedGranularity = granularity },
-                                label = { Text(granularity.displayName) }
-                            )
-                        }
-                    }
-
-                    val countData = getCountDataByGranularity(roomHistories, selectedGranularity)
-                    LineChart(
-                        dataSet = countData.toChartDataSet(
-                            title = "上车次数统计"
-                        ),
-                    )
-
-                    val durationData = getDurationDataByGranularity(roomHistories, selectedGranularity)
-                    BarChart(
-                        dataSet = durationData.toChartDataSet(
-                            title = "在车时长统计",
-                            postfix = " 分钟"
-                        ),
-                    )
-
-                    PieChart(
-                        dataSet = listOf(8.0f, 23.0f, 54.0f, 32.0f, 12.0f, 37.0f, 7.0f, 23.0f, 43.0f)
-                            .toChartDataSet(
-                                title = "表3",
-                                postfix = " °C"
-                            ),
-                    )
                 }
             }
         }

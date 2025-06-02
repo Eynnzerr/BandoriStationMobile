@@ -71,4 +71,12 @@
     <string name="theme_desc">app appearance, colors, palette</string>
     <string name="pip">Picture in Picture</string>
     <string name="pip_desc">overlay window configuration</string>
+    <string name="settings_auto_clear_expired_rooms_title">Auto-clear expired rooms</string>
+    <string name="settings_auto_clear_expired_rooms_desc">Automatically clear rooms created more than 60 seconds ago</string>
+    <string name="settings_auto_filter_pjsk_title">Filter PJSK</string>
+    <string name="settings_auto_filter_pjsk_desc">Automatically hide PJSK rooms (room number less than 6 digits)</string>
+    <string name="settings_show_player_data_title">Save room join history</string>
+    <string name="settings_show_player_data_desc">Automatically saving room join history for statistics</string>
+    <string name="settings_active_filter_rules_title">Active filter rules</string>
+    <string name="settings_active_filter_rules_desc">Set regular expression rules for room filtering</string>
 </resources>
