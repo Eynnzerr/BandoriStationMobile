@@ -216,14 +216,17 @@ fun AccountScreen(
         onIntroductionEdit = {
             viewModel.sendEvent(UpdateIntroduction(it))
         },
+        onPasswordEdit = { oldPassword, newPassword ->
+            viewModel.sendEvent(UpdatePassword(oldPassword, newPassword))
+        },
         onQQEdit = {
             viewModel.sendEvent(BindQQ(it))
         },
-        onEmailEdit = { _, _ ->
-            // TODO
+        onEmailEdit = { _, code ->
+            viewModel.sendEvent(VerifyUpdateEmail(code))
         },
         onSendEmailVerification = {
-            // TODO
+            viewModel.sendEvent(SendUpdateEmailVCode(it))
         }
     )
 

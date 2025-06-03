@@ -47,7 +47,10 @@ sealed class AccountIntent: UIEvent {
     data class UpdateBanner(val bannerBase64: String) : AccountIntent()
     data class UpdateUsername(val username: String) : AccountIntent()
     data class UpdateIntroduction(val introduction: String) : AccountIntent()
+    data class UpdatePassword(val password: String, val newPassword: String) : AccountIntent()
     data class BindQQ(val qq: Long) : AccountIntent()
+    data class SendUpdateEmailVCode(val email: String): AccountIntent()
+    data class VerifyUpdateEmail(val code: String): AccountIntent()
     data class UpdateRoomHistory(val roomHistory: List<RoomHistory>) : AccountIntent()
     data class DeleteRoomHistory(val roomHistory: RoomHistory) : AccountIntent()
 }

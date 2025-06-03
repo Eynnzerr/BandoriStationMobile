@@ -13,7 +13,6 @@ import com.eynnzerr.bandoristation.business.account.SendVerificationCodeUseCase
 import com.eynnzerr.bandoristation.business.account.SignupUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateAccountAggregator
 import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
-import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.Params
 import com.eynnzerr.bandoristation.business.roomhistory.RoomHistoryAggregator
@@ -323,6 +322,7 @@ class AccountViewModel(
                }
                null to null
            }
+
            is UpdateAvatar -> {
                viewModelScope.launch {
                    val response = updateAccountAggregator.updateAvatar(event.avatarBase64)
@@ -344,6 +344,7 @@ class AccountViewModel(
                }
                null to null
            }
+
            is UpdateBanner -> {
                viewModelScope.launch {
                    val response = updateAccountAggregator.updateBanner(event.bannerBase64)
@@ -370,6 +371,7 @@ class AccountViewModel(
                }
                null to null
            }
+
            is UpdateIntroduction -> {
                viewModelScope.launch {
                    val response = updateAccountAggregator.updateIntroduction(event.introduction)
@@ -396,6 +398,7 @@ class AccountViewModel(
                }
                null to null
            }
+
            is UpdateUsername -> {
                viewModelScope.launch {
                    val response = updateAccountAggregator.updateUsername(event.username)
@@ -417,6 +420,55 @@ class AccountViewModel(
                                    )
                                )
                            }
+                       }
+                   }
+               }
+               null to null
+           }
+
+           is UpdatePassword -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.updatePassword(event.password, event.newPassword)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEffect(ShowSnackbar("修改密码成功。"))
+                       }
+                   }
+               }
+               null to null
+           }
+
+
+           is SendUpdateEmailVCode -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.updateEmailSendVCode(event.email)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEffect(ShowSnackbar("已发送验证码至${event.email}"))
+                       }
+                   }
+               }
+               null to null
+           }
+
+           is VerifyUpdateEmail -> {
+               viewModelScope.launch {
+                   val response = updateAccountAggregator.updateEmailVerifyEmail(event.code)
+                   when (response) {
+                       is UseCaseResult.Loading -> Unit
+                       is UseCaseResult.Error -> {
+                           sendEffect(ShowSnackbar(response.error))
+                       }
+                       is UseCaseResult.Success -> {
+                           sendEffect(ShowSnackbar("邮箱验证成功。"))
                        }
                    }
                }

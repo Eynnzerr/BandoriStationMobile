@@ -25,6 +25,7 @@ data class HomeState(
 ) : UIState {
     companion object {
         fun initial() = HomeState(
+            rooms = listOf(RoomInfo(number = "123456"))
         )
     }
 }

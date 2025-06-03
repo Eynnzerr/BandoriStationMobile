@@ -12,7 +12,6 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.composeHotReload)
-    // alias(libs.plugins.foojay.resolver.convention)
 }
 
 kotlin {
@@ -48,7 +47,6 @@ kotlin {
             implementation(libs.koin.android)
             implementation(libs.koin.androidx.compose)
             implementation(libs.ktor.client.okhttp)
-            implementation(libs.charts.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -85,7 +83,6 @@ kotlin {
 
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
-            // implementation(libs.ktor.client.cio)
             implementation(libs.ktor.serialization.json)
             implementation(libs.ktor.client.websockets)
             implementation(libs.ktor.client.logging)
@@ -95,18 +92,14 @@ kotlin {
 
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialogs.compose)
-
-            implementation(libs.charts)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.java)
-            implementation(libs.charts.jvm)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-            // implementation(libs.charts.iosarm64)
         }
     }
 

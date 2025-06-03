@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
@@ -32,19 +33,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
-import com.eynnzerr.bandoristation.utils.AppLogger
+import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
+import com.eynnzerr.bandoristation.ui.component.charts.BarChart
+import com.eynnzerr.bandoristation.ui.component.charts.BarOrientation
+import com.eynnzerr.bandoristation.ui.component.charts.BarStyle
+import com.eynnzerr.bandoristation.ui.component.charts.ChartConfig
+import com.eynnzerr.bandoristation.ui.component.charts.ChartData
+import com.eynnzerr.bandoristation.ui.component.charts.ChartDataSet
+import com.eynnzerr.bandoristation.ui.component.charts.ChartShowcase
+import com.eynnzerr.bandoristation.ui.component.charts.LineChart
+import com.eynnzerr.bandoristation.ui.component.charts.LineType
+import com.eynnzerr.bandoristation.ui.component.charts.PieChart
 import com.eynnzerr.bandoristation.utils.TimeGranularity
+import com.eynnzerr.bandoristation.utils.extractKeywordsFromRoomHistory
 import com.eynnzerr.bandoristation.utils.getCountDataByGranularity
 import com.eynnzerr.bandoristation.utils.getDurationDataByGranularity
-import io.github.dautovicharis.charts.BarChart
-import io.github.dautovicharis.charts.LineChart
-import io.github.dautovicharis.charts.PieChart
-import io.github.dautovicharis.charts.model.toChartDataSet
-import io.github.dautovicharis.charts.style.BarChartDefaults
-import io.github.dautovicharis.charts.style.ChartViewDefaults
-import io.github.dautovicharis.charts.style.ChartViewStyle
-import io.github.dautovicharis.charts.style.LineChartDefaults
-import io.github.dautovicharis.charts.style.PieChartDefaults
 
 @Composable
 fun UserProfile(
@@ -57,8 +60,7 @@ fun UserProfile(
     onBrowseFollowings: () -> Unit = {},
     onDeleteHistory: (RoomHistory) -> Unit = {},
 ) {
-    AppLogger.d("UserProfile", "recompose with room history length: ${roomHistories.size}")
-
+    val appProperty = LocalAppProperty.current
     val tabs = listOf("发车历史", "上车历史", "使用统计")
     var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -235,13 +237,14 @@ fun UserProfile(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        modifier = Modifier.padding(top = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         TimeGranularity.entries.forEach { granularity ->
                             FilterChip(
@@ -252,28 +255,115 @@ fun UserProfile(
                         }
                     }
 
-                    val countData = getCountDataByGranularity(roomHistories, selectedGranularity)
-                    LineChart(
-                        dataSet = countData.toChartDataSet(
-                            title = "上车次数统计"
-                        ),
-                    )
+                    Card {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "上车次数统计",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            BarChart(
+                                dataSet = ChartDataSet(
+                                    data = getCountDataByGranularity(
+                                        roomHistories,
+                                        selectedGranularity
+                                    ).map { data ->
+                                        ChartData(
+                                            label = "xx",
+                                            value = data,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    label = "次数",
+                                    color = MaterialTheme.colorScheme.primary
+                                ),
+                                height = 250.dp,
+                                barStyle = BarStyle.GRADIENT,
+                                orientation = BarOrientation.VERTICAL,
+                                config = ChartConfig(
+                                    showGrid = false,
+                                    showLabels = false,
+                                    showValues = true
+                                ),
+                                onBarClick = { data ->
+                                    // println("点击了柱子: ${data.label} - ${data.value}")
+                                }
+                            )
+                        }
+                    }
 
-                    val durationData = getDurationDataByGranularity(roomHistories, selectedGranularity)
-                    BarChart(
-                        dataSet = durationData.toChartDataSet(
-                            title = "在车时长统计",
-                            postfix = " 分钟"
-                        ),
-                    )
+                    Card {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "在车时长统计",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            LineChart(
+                                dataSets = listOf(ChartDataSet(
+                                    data = getDurationDataByGranularity(
+                                        roomHistories,
+                                        selectedGranularity
+                                    ).map { data ->
+                                        ChartData(
+                                            label = "",
+                                            value = data,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    },
+                                    label = "时长/分钟",
+                                    color = MaterialTheme.colorScheme.primary
+                                )),
+                                height = 250.dp,
+                                lineType = LineType.CURVED,
+                                config = ChartConfig(
+                                    showGrid = false,
+                                    showLabels = false,
+                                    showValues = true,
+                                    showLegend = false
+                                ),
+                                onPointClick = { dataSet, data ->
+                                    // println("点击了 ${dataSet.label}: ${data.label} - ${data.value}")
+                                }
+                            )
+                        }
+                    }
 
-                    PieChart(
-                        dataSet = listOf(8.0f, 23.0f, 54.0f, 32.0f, 12.0f, 37.0f, 7.0f, 23.0f, 43.0f)
-                            .toChartDataSet(
-                                title = "表3",
-                                postfix = " °C"
-                            ),
-                    )
+                    Card {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "车头关键词统计",
+                                style = MaterialTheme.typography.titleMedium,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+                            val wordDict = extractKeywordsFromRoomHistory(roomHistories)
+                            val totalCount = wordDict.values.sum()
+                            PieChart(
+                                dataSet = ChartDataSet(
+                                    data = wordDict.map { data ->
+                                        val (label, value) = data
+                                        ChartData(
+                                            label = label,
+                                            value = value.toFloat(),
+                                            color = MaterialTheme.colorScheme.primary.copy(value.toFloat() / totalCount)
+                                        )
+                                    },
+                                ),
+                                height = 500.dp,
+                                donutMode = false,
+                                donutWidth = 0.4f,
+                                config = ChartConfig(
+                                    showValues = true,
+                                    showLegend = true,
+                                    animationDuration = 1000,
+                                ),
+                                onSliceClick = { data ->
+                                    // println("点击了切片: ${data.label} - ${data.value}")
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -244,6 +244,7 @@ fun HomeScreen(
 
     HelpDialog(
         isVisible = showHelpDialog,
+        markdownPath = "files/help.md",
         onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) }
     )
 

@@ -49,8 +49,6 @@ fun RoomFilterDialog(
     onDismissRequest: () -> Unit,
     onConfirm: (RoomFilter) -> Unit,
 ) {
-    AppLogger.d(TAG, "Recompose with words $presetWords and users size ${presetUsers.size}")
-
     val initialWords by remember(presetWords) { mutableStateOf(presetWords) }
     val initialUsers by remember(presetUsers) { mutableStateOf(presetUsers) }
 

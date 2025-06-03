@@ -25,7 +25,7 @@ fun getCountDataByGranularity(
     val now = Clock.System.now()
     val timeZone = TimeZone.currentSystemDefault()
 
-    return when (granularity) {
+    val ret = when (granularity) {
         TimeGranularity.DAILY -> {
             // 最近30天，每天的访问次数
             val counts = mutableMapOf<LocalDate, Int>()
@@ -88,6 +88,10 @@ fun getCountDataByGranularity(
             counts.entries.sortedBy { it.key }.map { it.value.toFloat() }
         }
     }
+
+    AppLogger.d(TAG, "getCountDataByGranularity result: $ret")
+
+    return ret
 }
 
 // 按时间粒度统计使用时长
@@ -101,7 +105,7 @@ fun getDurationDataByGranularity(
     // 过滤掉duration为-1的记录
     val validHistoryList = historyList.filter { it.duration >= 0 }
 
-    return when (granularity) {
+    val ret = when (granularity) {
         TimeGranularity.DAILY -> {
             val durations = mutableMapOf<LocalDate, Long>()
             val startDate = now.minus(30, DateTimeUnit.DAY, timeZone).toLocalDateTime(timeZone).date
@@ -120,7 +124,7 @@ fun getDurationDataByGranularity(
             }
 
             // 转换为分钟
-            durations.entries.sortedBy { it.key }.map { (it.value / 60000).toFloat() }
+            durations.entries.sortedBy { it.key }.map { it.value.toFloat() / 60000f }
         }
 
         TimeGranularity.MONTHLY -> {
@@ -143,7 +147,7 @@ fun getDurationDataByGranularity(
                 }
             }
 
-            durations.entries.sortedBy { it.key }.map { (it.value / 60000).toFloat() }
+            durations.entries.sortedBy { it.key }.map { it.value.toFloat() / 60000f }
         }
 
         TimeGranularity.YEARLY -> {
@@ -155,15 +159,48 @@ fun getDurationDataByGranularity(
                 durations[year] = (durations[year] ?: 0L) + history.duration
             }
 
-            durations.entries.sortedBy { it.key }.map { (it.value / 60000).toFloat() }
+            durations.entries.sortedBy { it.key }.map { it.value.toFloat() / 60000f }
         }
     }
+
+    AppLogger.d(TAG, "getDurationDataByGranularity result: $ret")
+
+    return ret
 }
 
-// 获取房间类型分布
-fun getTypeDistribution(historyList: List<RoomHistory>): List<Float> {
-    val typeCount = historyList.groupBy { it.type }
-        .mapValues { it.value.size }
+// 车头描述 词云提取 （单词划分依据：空格）
+fun extractWords(text: String): List<String> {
+    val cleanText = text.replace(Regex("<[^>]*>"), " ")
 
-    return typeCount.values.map { it.toFloat() }
+    return cleanText.split(Regex("\\s+"))
+        .filter { word ->
+            word.isNotBlank() && !isLongNumber(word)
+        }
 }
+
+// 过滤车牌
+fun isLongNumber(word: String): Boolean {
+    return word.length > 5 && word.all { it.isDigit() }
+}
+
+fun extractKeywordsFromRoomHistory(
+    historyList: List<RoomHistory>,
+    topN: Int = 10
+): Map<String, Int> {
+    val wordCount = mutableMapOf<String, Int>()
+
+    historyList.forEach { history ->
+        val words = extractWords(history.rawMessage)
+        words.forEach { word ->
+            wordCount[word] = (wordCount[word] ?: 0) + 1
+        }
+    }
+
+    // 返回出现次数最多的前N个词
+    return wordCount.entries
+        .sortedByDescending { it.value }
+        .take(topN)
+        .associate { it.key to it.value }
+}
+
+private const val TAG = "StatisticsUtils"

@@ -24,6 +24,7 @@ sealed class SettingEvent : UIEvent {
     data class UpdateRecordRoomHistory(val isRecording: Boolean): SettingEvent()
 }
 
-sealed class SettingEffect(
-
-) : UIEffect
+sealed class SettingEffect : UIEffect {
+    data class ControlTutorialDialog(val isShowing: Boolean): SettingEffect()
+    data class ControlRegexDialog(val isShowing: Boolean): SettingEffect()
+}

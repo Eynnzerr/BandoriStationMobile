@@ -24,7 +24,10 @@ import com.eynnzerr.bandoristation.business.account.SignupUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateAccountAggregator
 import com.eynnzerr.bandoristation.business.account.UpdateAvatarUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateBannerUseCase
+import com.eynnzerr.bandoristation.business.account.UpdateEmailSendVCodeUseCase
+import com.eynnzerr.bandoristation.business.account.UpdateEmailVerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateIntroductionUseCase
+import com.eynnzerr.bandoristation.business.account.UpdatePasswordUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateUsernameUseCase
 import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
@@ -270,6 +273,9 @@ fun provideUseCaseModule() = module {
     singleOf(::UpdateBannerUseCase)
     singleOf(::UpdateUsernameUseCase)
     singleOf(::UpdateIntroductionUseCase)
+    singleOf(::UpdatePasswordUseCase)
+    singleOf(::UpdateEmailSendVCodeUseCase)
+    singleOf(::UpdateEmailVerifyEmailUseCase)
     singleOf(::UpdateAccountAggregator)
 
     // Room History UseCases
