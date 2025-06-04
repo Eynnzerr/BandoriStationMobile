@@ -6,6 +6,7 @@ import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
+import com.eynnzerr.bandoristation.model.GithubRelease
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,4 +40,6 @@ interface RemoteDataSource {
     suspend fun sendAuthenticHttpsRequest(request: ApiRequest, token: String): ApiResponse
 
     suspend fun sendApiRequest(request: ApiRequest): ApiResponse
+
+    suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease
 }

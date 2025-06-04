@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -57,9 +58,11 @@ import com.eynnzerr.bandoristation.ui.dialog.BlockUserDialog
 import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
 import com.eynnzerr.bandoristation.ui.dialog.InformDialog
 import com.eynnzerr.bandoristation.ui.dialog.RoomFilterDialog
+import com.eynnzerr.bandoristation.ui.dialog.UpdateDialog
 import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
+import com.eynnzerr.bandoristation.model.GithubRelease
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.koin.compose.viewmodel.koinViewModel
@@ -85,6 +88,8 @@ fun HomeScreen(
     var showFilterRoomDialog by remember { mutableStateOf(false) }
     var showBlockUserDialog by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var latestRelease by remember { mutableStateOf<GithubRelease?>(null) }
     var roomToInform : RoomInfo? by remember { mutableStateOf(null) }
     var userToBlock: UserInfo? by remember { mutableStateOf(null) }
     var prefillRoomNumber by remember { mutableStateOf("") }
@@ -195,6 +200,16 @@ fun HomeScreen(
                     showHelpDialog = true
                 }
 
+                is HomeEffect.OpenUpdateDialog -> {
+                    latestRelease = action.release
+                    showUpdateDialog = true
+                }
+
+                is HomeEffect.CloseUpdateDialog -> {
+                    showUpdateDialog = false
+                    latestRelease = null
+                }
+
                 is HomeEffect.ShowSnackbar -> {
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
@@ -249,6 +264,16 @@ fun HomeScreen(
         isVisible = showHelpDialog,
         markdownPath = "files/help.md",
         onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) },
+    )
+
+    UpdateDialog(
+        isVisible = showUpdateDialog,
+        release = latestRelease,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseUpdateDialog()) },
+        onConfirm = { url ->
+            LocalUriHandler.current.openUri(url)
+            viewModel.sendEffect(HomeEffect.CloseUpdateDialog())
+        }
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

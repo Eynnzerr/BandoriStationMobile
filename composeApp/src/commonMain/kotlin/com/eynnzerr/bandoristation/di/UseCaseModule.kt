@@ -43,6 +43,7 @@ import com.eynnzerr.bandoristation.business.roomhistory.DeleteRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.EditRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.FetchAllHistoryUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.RoomHistoryAggregator
+import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -262,6 +263,13 @@ fun provideUseCaseModule() = module {
 
     single {
         RequestRecentRoomsUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
+        )
+    }
+
+    single {
+        GetLatestReleaseUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )

@@ -22,6 +22,7 @@ import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
+import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
@@ -31,6 +32,7 @@ import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
@@ -52,6 +54,7 @@ class HomeViewModel(
     private val getRoomFilterUseCase: GetRoomFilterUseCase,
     private val updateRoomFilterUseCase: UpdateRoomFilterUseCase,
     private val addRoomHistoryUseCase: AddRoomHistoryUseCase,
+    private val getLatestReleaseUseCase: GetLatestReleaseUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
@@ -169,6 +172,19 @@ class HomeViewModel(
                         sendEffect(ShowSnackbar(result.data))
                     }
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            when (val result = getLatestReleaseUseCase(Unit)) {
+                is UseCaseResult.Success -> {
+                    val latest = result.data.tagName.trimStart('v', 'V')
+                    val current = getPlatform().versionName.trimStart('v', 'V')
+                    if (latest != current) {
+                        sendEffect(OpenUpdateDialog(result.data))
+                    }
+                }
+                else -> Unit
             }
         }
     }
