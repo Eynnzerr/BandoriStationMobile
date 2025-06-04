@@ -47,9 +47,6 @@ fun UserProfileDialog(
                         Button(
                             onClick = { onFollow(accountInfo.accountSummary.userId) },
                             shape = MaterialTheme.shapes.medium,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            )
                         ) {
                             Text(if (hasFollowed) "取关" else "关注")
                         }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Filter
 import androidx.compose.material.icons.outlined.FilterList
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -86,7 +88,7 @@ fun SettingScreen(
     HelpDialog(
         isVisible = showTutorialDialog,
         markdownPath = "files/introduction.md",
-        onDismissRequest = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(false)) }
+        onDismissRequest = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(false)) },
     )
 
     RegexFilterDialog(
@@ -122,6 +124,16 @@ fun SettingScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
+            SettingItem(
+                title = "登录管理",
+                desc = "",
+                icon = Icons.Outlined.AccountBox,
+                action = {},
+                onClick = {
+
+                }
+            )
+
             SettingItem(
                 title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
                 desc = stringResource(Res.string.settings_auto_clear_expired_rooms_desc),
@@ -161,14 +173,6 @@ fun SettingScreen(
                 onClick = {}
             )
 
-            SettingItem(
-                title = stringResource(Res.string.settings_active_filter_rules_title),
-                desc = stringResource(Res.string.settings_active_filter_rules_desc),
-                icon = Icons.Outlined.FilterList,
-                onClick = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(true)) },
-                enable = false
-            )
-
             SettingDropdownItem(
                 title = stringResource(Res.string.theme),
                 desc = stringResource(Res.string.theme_desc),
@@ -192,10 +196,28 @@ fun SettingScreen(
             }
 
             SettingItem(
+                title = stringResource(Res.string.settings_active_filter_rules_title),
+                desc = stringResource(Res.string.settings_active_filter_rules_desc),
+                icon = Icons.Outlined.FilterList,
+                // onClick = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(true)) },
+                onClick = {},
+                enable = false
+            )
+
+            SettingItem(
                 title = "术语教程",
                 desc = "关于车头常用术语的简易教程",
                 icon = Icons.Outlined.School,
                 onClick = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(true)) }
+            )
+
+            SettingItem(
+                title = "版本",
+                desc = "1.0.0",
+                icon = Icons.Outlined.Update,
+                onClick = {
+                    // TODO 检查更新
+                }
             )
         }
     }

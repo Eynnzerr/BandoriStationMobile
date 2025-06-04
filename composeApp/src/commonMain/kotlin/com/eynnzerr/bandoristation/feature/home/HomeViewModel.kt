@@ -143,7 +143,18 @@ class HomeViewModel(
                 isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true
                 isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false
                 isSavingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
-                sendEvent(HomeIntent.UpdatePresetWords(p[PreferenceKeys.PRESET_WORDS] ?: emptySet()))
+
+                val isFirstRun = p[PreferenceKeys.IS_FIRST_RUN] ?: true
+                internalState.update {
+                    it.copy(
+                        isFirstRun = isFirstRun,
+                        presetWords = p[PreferenceKeys.PRESET_WORDS] ?: emptySet()
+                    )
+                }
+
+                if (isFirstRun) {
+                    sendEffect(OpenHelpDialog())
+                }
             }
         }
 
@@ -329,6 +340,15 @@ class HomeViewModel(
                     requestRecentRoomsUseCase(Unit)
                 }
                 null to ShowSnackbar("刷新房间列表...")
+            }
+
+            is HomeIntent.SetNoReminder -> {
+                viewModelScope.launch {
+                    dataStore.edit { p ->
+                        p[PreferenceKeys.IS_FIRST_RUN] = false
+                    }
+                }
+                null to null
             }
         }
     }

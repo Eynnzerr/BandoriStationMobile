@@ -22,15 +22,16 @@ data class HomeState(
     val presetWords: Set<String> = emptySet(),
     val title: String = "主页",
     val isShowingPlayerBrief: Boolean = false,
+    val isFirstRun: Boolean = false,
 ) : UIState {
     companion object {
         fun initial() = HomeState(
-            rooms = listOf(RoomInfo(number = "123456"))
         )
     }
 }
 
 sealed class HomeIntent: UIEvent {
+    class SetNoReminder(): HomeIntent()
     data class UpdateRoomList(val rooms: List<RoomInfo>): HomeIntent()
     data class AppendRoomList(val rooms: List<RoomInfo>): HomeIntent()
     data class UpdateTimestamp(val timestampMillis: Long): HomeIntent()

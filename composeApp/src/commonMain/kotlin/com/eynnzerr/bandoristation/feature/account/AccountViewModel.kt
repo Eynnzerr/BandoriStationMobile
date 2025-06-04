@@ -2,6 +2,7 @@ package com.eynnzerr.bandoristation.feature.account
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
@@ -140,6 +141,9 @@ class AccountViewModel(
                            }
                        }
                        is UseCaseResult.Success -> {
+                           dataStore.edit { p ->
+                               p[PreferenceKeys.IS_TOKEN_LOGIN] = false
+                           }
                            sendEvent(UpdateAccountInfo(loginResult.data))
                        }
                    }

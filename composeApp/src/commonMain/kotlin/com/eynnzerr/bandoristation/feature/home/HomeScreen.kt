@@ -186,6 +186,9 @@ fun HomeScreen(
 
                 is HomeEffect.CloseHelpDialog -> {
                     showHelpDialog = false
+                    if (state.isFirstRun) {
+                        viewModel.sendEvent(SetNoReminder())
+                    }
                 }
 
                 is HomeEffect.OpenHelpDialog -> {
@@ -245,7 +248,7 @@ fun HomeScreen(
     HelpDialog(
         isVisible = showHelpDialog,
         markdownPath = "files/help.md",
-        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) }
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) },
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

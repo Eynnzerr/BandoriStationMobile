@@ -56,10 +56,9 @@ fun HelpDialog(
                 TextButton(
                     onClick = onDismissRequest
                 ) {
-                    Text("确定")
+                    Text("关闭")
                 }
             },
-            dismissButton = {},
         )
     }
 }

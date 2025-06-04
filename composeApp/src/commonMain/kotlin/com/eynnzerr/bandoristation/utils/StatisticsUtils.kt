@@ -6,6 +6,8 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
@@ -17,11 +19,17 @@ enum class TimeGranularity(val displayName: String) {
     YEARLY("按年统计")
 }
 
+private val dailyFormat = LocalDate.Format {
+    monthNumber()
+    char('-')
+    dayOfMonth()
+}
+
 // 按时间粒度统计访问次数
 fun getCountDataByGranularity(
     historyList: List<RoomHistory>,
     granularity: TimeGranularity
-): List<Float> {
+): List<Pair<String, Float>> {
     val now = Clock.System.now()
     val timeZone = TimeZone.currentSystemDefault()
 
@@ -29,11 +37,11 @@ fun getCountDataByGranularity(
         TimeGranularity.DAILY -> {
             // 最近30天，每天的访问次数
             val counts = mutableMapOf<LocalDate, Int>()
-            val startDate = now.minus(30, DateTimeUnit.DAY, timeZone).toLocalDateTime(timeZone).date
+            val nowDate = now.toLocalDateTime(timeZone).date
 
             // 初始化30天的数据
             for (i in 0 until 30) {
-                val date = startDate.plus(i, DateTimeUnit.DAY)
+                val date = nowDate.minus(i, DateTimeUnit.DAY)
                 counts[date] = 0
             }
 
@@ -41,22 +49,24 @@ fun getCountDataByGranularity(
             historyList.forEach { history ->
                 val date = Instant.fromEpochMilliseconds(history.time)
                     .toLocalDateTime(timeZone).date
-                if (date >= startDate) {
+                if (date in counts.keys) {
                     counts[date] = (counts[date] ?: 0) + 1
                 }
             }
 
-            counts.entries.sortedBy { it.key }.map { it.value.toFloat() }
+            counts.entries
+                .sortedBy { it.key }
+                .map { it.key.format(dailyFormat) to it.value.toFloat() }
         }
 
         TimeGranularity.MONTHLY -> {
             // 最近12个月，每月的访问次数
             val counts = mutableMapOf<String, Int>()
-            val startMonth = now.minus(12, DateTimeUnit.MONTH, timeZone).toLocalDateTime(timeZone)
+            val nowMonth = now.toLocalDateTime(timeZone)
 
             // 初始化12个月的数据
             for (i in 0 until 12) {
-                val month = startMonth.toInstant(timeZone).plus(i, DateTimeUnit.MONTH, timeZone)
+                val month = nowMonth.toInstant(timeZone).minus(i, DateTimeUnit.MONTH, timeZone)
                     .toLocalDateTime(timeZone)
                 val key = "${month.year}-${month.monthNumber.toString().padStart(2, '0')}"
                 counts[key] = 0
@@ -72,7 +82,9 @@ fun getCountDataByGranularity(
                 }
             }
 
-            counts.entries.sortedBy { it.key }.map { it.value.toFloat() }
+            counts.entries
+                .sortedBy { it.key }
+                .map { it.key to it.value.toFloat() }
         }
 
         TimeGranularity.YEARLY -> {
@@ -85,7 +97,9 @@ fun getCountDataByGranularity(
                 counts[year] = (counts[year] ?: 0) + 1
             }
 
-            counts.entries.sortedBy { it.key }.map { it.value.toFloat() }
+            counts.entries
+                .sortedBy { it.key }
+                .map { it.key.toString() to it.value.toFloat() }
         }
     }
 
@@ -98,7 +112,7 @@ fun getCountDataByGranularity(
 fun getDurationDataByGranularity(
     historyList: List<RoomHistory>,
     granularity: TimeGranularity
-): List<Float> {
+): List<Pair<String, Float>> {
     val now = Clock.System.now()
     val timeZone = TimeZone.currentSystemDefault()
 
@@ -108,31 +122,33 @@ fun getDurationDataByGranularity(
     val ret = when (granularity) {
         TimeGranularity.DAILY -> {
             val durations = mutableMapOf<LocalDate, Long>()
-            val startDate = now.minus(30, DateTimeUnit.DAY, timeZone).toLocalDateTime(timeZone).date
+            val nowDate = now.toLocalDateTime(timeZone).date
 
             for (i in 0 until 30) {
-                val date = startDate.plus(i, DateTimeUnit.DAY)
+                val date = nowDate.minus(i, DateTimeUnit.DAY)
                 durations[date] = 0L
             }
 
             validHistoryList.forEach { history ->
                 val date = Instant.fromEpochMilliseconds(history.time)
                     .toLocalDateTime(timeZone).date
-                if (date >= startDate) {
+                if (date in durations.keys) {
                     durations[date] = (durations[date] ?: 0L) + history.duration
                 }
             }
 
             // 转换为分钟
-            durations.entries.sortedBy { it.key }.map { it.value.toFloat() / 60000f }
+            durations.entries
+                .sortedBy { it.key }
+                .map {  it.key.format(dailyFormat) to it.value.toFloat() / 60000f }
         }
 
         TimeGranularity.MONTHLY -> {
             val durations = mutableMapOf<String, Long>()
-            val startMonth = now.minus(12, DateTimeUnit.MONTH, timeZone).toLocalDateTime(timeZone)
+            val nowMonth = now.toLocalDateTime(timeZone)
 
             for (i in 0 until 12) {
-                val month = startMonth.toInstant(timeZone).plus(i, DateTimeUnit.MONTH, timeZone)
+                val month = nowMonth.toInstant(timeZone).minus(i, DateTimeUnit.MONTH, timeZone)
                     .toLocalDateTime(timeZone)
                 val key = "${month.year}-${month.monthNumber.toString().padStart(2, '0')}"
                 durations[key] = 0L
@@ -147,7 +163,9 @@ fun getDurationDataByGranularity(
                 }
             }
 
-            durations.entries.sortedBy { it.key }.map { it.value.toFloat() / 60000f }
+            durations.entries
+                .sortedBy { it.key }
+                .map { it.key to it.value.toFloat() / 60000f }
         }
 
         TimeGranularity.YEARLY -> {
@@ -159,7 +177,9 @@ fun getDurationDataByGranularity(
                 durations[year] = (durations[year] ?: 0L) + history.duration
             }
 
-            durations.entries.sortedBy { it.key }.map { it.value.toFloat() / 60000f }
+            durations.entries
+                .sortedBy { it.key }
+                .map { it.key.toString() to it.value.toFloat() / 60000f }
         }
     }
 

@@ -33,14 +33,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
-import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.charts.BarChart
 import com.eynnzerr.bandoristation.ui.component.charts.BarOrientation
 import com.eynnzerr.bandoristation.ui.component.charts.BarStyle
 import com.eynnzerr.bandoristation.ui.component.charts.ChartConfig
 import com.eynnzerr.bandoristation.ui.component.charts.ChartData
 import com.eynnzerr.bandoristation.ui.component.charts.ChartDataSet
-import com.eynnzerr.bandoristation.ui.component.charts.ChartShowcase
 import com.eynnzerr.bandoristation.ui.component.charts.LineChart
 import com.eynnzerr.bandoristation.ui.component.charts.LineType
 import com.eynnzerr.bandoristation.ui.component.charts.PieChart
@@ -60,7 +58,6 @@ fun UserProfile(
     onBrowseFollowings: () -> Unit = {},
     onDeleteHistory: (RoomHistory) -> Unit = {},
 ) {
-    val appProperty = LocalAppProperty.current
     val tabs = listOf("发车历史", "上车历史", "使用统计")
     var selectedTabIndex by remember { mutableStateOf(0) }
 
@@ -267,10 +264,10 @@ fun UserProfile(
                                     data = getCountDataByGranularity(
                                         roomHistories,
                                         selectedGranularity
-                                    ).map { data ->
+                                    ).map { (label, value) ->
                                         ChartData(
-                                            label = "xx",
-                                            value = data,
+                                            label = label,
+                                            value = value,
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     },
@@ -282,7 +279,7 @@ fun UserProfile(
                                 orientation = BarOrientation.VERTICAL,
                                 config = ChartConfig(
                                     showGrid = false,
-                                    showLabels = false,
+                                    showLabels = true,
                                     showValues = true
                                 ),
                                 onBarClick = { data ->
@@ -295,7 +292,7 @@ fun UserProfile(
                     Card {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "在车时长统计",
+                                text = "在车时长统计/分钟",
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
@@ -304,10 +301,10 @@ fun UserProfile(
                                     data = getDurationDataByGranularity(
                                         roomHistories,
                                         selectedGranularity
-                                    ).map { data ->
+                                    ).map { (label, value) ->
                                         ChartData(
-                                            label = "",
-                                            value = data,
+                                            label = label,
+                                            value = value,
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     },
