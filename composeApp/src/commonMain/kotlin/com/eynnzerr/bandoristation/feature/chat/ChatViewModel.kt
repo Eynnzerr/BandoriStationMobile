@@ -52,7 +52,7 @@ class ChatViewModel(
     initialState = ChatState.initial()
 ) {
 
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         viewModelScope.launch {
             connectWebSocketUseCase(Unit).collect { result ->
                 if (result is UseCaseResult.Success) {

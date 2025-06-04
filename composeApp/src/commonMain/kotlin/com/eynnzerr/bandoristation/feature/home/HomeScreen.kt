@@ -77,6 +77,7 @@ fun HomeScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val uriHandler = LocalUriHandler.current
     val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -271,7 +272,7 @@ fun HomeScreen(
         release = latestRelease,
         onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseUpdateDialog()) },
         onConfirm = { url ->
-            LocalUriHandler.current.openUri(url)
+            uriHandler.openUri(url)
             viewModel.sendEffect(HomeEffect.CloseUpdateDialog())
         }
     )

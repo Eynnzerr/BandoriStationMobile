@@ -63,7 +63,7 @@ class HomeViewModel(
     var isClearingOutdatedRoom = false
     var isSavingRoomHistory = true
 
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         sendEvent(HomeIntent.GetRoomFilter())
 
         viewModelScope.launch {

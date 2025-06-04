@@ -55,7 +55,7 @@ class AccountViewModel(
 ) : BaseViewModel<AccountState, AccountIntent, AccountEffect>(
     initialState = AccountState.initial()
 ) {
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         val token = dataStore.data.map {
             it[PreferenceKeys.USER_TOKEN] ?: ""
         }.first()
