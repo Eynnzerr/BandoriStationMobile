@@ -8,6 +8,7 @@ import com.eynnzerr.bandoristation.model.RoomFilter
 import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.model.GithubRelease
 import com.eynnzerr.bandoristation.navigation.Screen
 import kotlinx.datetime.Clock.System
 import org.jetbrains.compose.resources.StringResource
@@ -74,4 +75,6 @@ sealed class HomeEffect: UIEffect {
     class CloseBlockUserDialog(): HomeEffect()
     class OpenHelpDialog(): HomeEffect()
     class CloseHelpDialog(): HomeEffect()
+    data class OpenUpdateDialog(val release: GithubRelease): HomeEffect()
+    class CloseUpdateDialog(): HomeEffect()
 }

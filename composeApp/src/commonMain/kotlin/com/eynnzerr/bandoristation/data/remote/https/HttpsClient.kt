@@ -9,11 +9,13 @@ import io.ktor.client.call.body
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.request.get
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
+import com.eynnzerr.bandoristation.model.GithubRelease
 
 class HttpsClient(
     private val httpsUrl: String,
@@ -77,6 +79,13 @@ class HttpsClient(
                 response = ApiResponseContent.StringContent("ktor client json parse error")
             )
         }
+    }
+
+    suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease {
+        val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
+        val response: HttpResponse = client.get(url)
+        AppLogger.d(TAG, "fetchLatestRelease response: ${response.bodyAsText()}")
+        return response.body()
     }
 }
 
