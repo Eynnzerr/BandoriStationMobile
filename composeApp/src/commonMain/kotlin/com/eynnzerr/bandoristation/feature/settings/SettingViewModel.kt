@@ -11,9 +11,6 @@ import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/**
- * 由于设置页主要都是与preferences打交道，故仅限SettingViewModel，省略了UseCase层，直接依赖dataStore
- */
 class SettingViewModel(
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<SettingState, SettingEvent, SettingEffect>(
@@ -25,6 +22,9 @@ class SettingViewModel(
                 it.copy(
                     themeName = p[PreferenceKeys.BAND_THEME] ?: "",
                     isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true,
+                    isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false,
+                    isShowingPlayerInfo = p[PreferenceKeys.SHOW_PLAER_BRIEF] ?: false,
+                    isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
                 )
             }
         }
@@ -42,6 +42,27 @@ class SettingViewModel(
             is SettingEvent.UpdateFilterPJSK -> {
                 viewModelScope.launch {
                     dataStore.edit { p -> p[PreferenceKeys.FILTER_PJSK] = event.isFiltering }
+                }
+                null to null
+            }
+
+            is SettingEvent.UpdateClearOutdatedRoom -> {
+                viewModelScope.launch {
+                    dataStore.edit { p -> p[PreferenceKeys.CLEAR_OUTDATED_ROOM] = event.isClearing }
+                }
+                null to null
+            }
+
+            is SettingEvent.UpdateShowPlayerInfo -> {
+                viewModelScope.launch {
+                    dataStore.edit { p -> p[PreferenceKeys.SHOW_PLAER_BRIEF] = event.isShowing }
+                }
+                null to null
+            }
+
+            is SettingEvent.UpdateRecordRoomHistory -> {
+                viewModelScope.launch {
+                    dataStore.edit { p -> p[PreferenceKeys.RECORD_ROOM_HISTORY] = event.isRecording }
                 }
                 null to null
             }

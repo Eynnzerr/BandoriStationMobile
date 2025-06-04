@@ -7,6 +7,7 @@ val appModule = listOf(
     provideKtorClientModule(),
     provideWebSocketClientModule(),
     provideHttpsClientModule(),
+    provideDatabaseModule(),
     provideRepositoryModule(),
     provideUseCaseModule(),
     provideViewModelModule(),

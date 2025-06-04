@@ -24,7 +24,10 @@ import com.eynnzerr.bandoristation.business.account.SignupUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateAccountAggregator
 import com.eynnzerr.bandoristation.business.account.UpdateAvatarUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateBannerUseCase
+import com.eynnzerr.bandoristation.business.account.UpdateEmailSendVCodeUseCase
+import com.eynnzerr.bandoristation.business.account.UpdateEmailVerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateIntroductionUseCase
+import com.eynnzerr.bandoristation.business.account.UpdatePasswordUseCase
 import com.eynnzerr.bandoristation.business.account.UpdateUsernameUseCase
 import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
@@ -34,6 +37,12 @@ import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
 import com.eynnzerr.bandoristation.business.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.DeleteRoomHistoriesUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.DeleteRoomHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.EditRoomHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.FetchAllHistoryUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
@@ -258,15 +267,22 @@ fun provideUseCaseModule() = module {
         )
     }
 
+    // Account UseCases
     singleOf(::BindQQUseCase)
-
     singleOf(::UpdateAvatarUseCase)
-
     singleOf(::UpdateBannerUseCase)
-
     singleOf(::UpdateUsernameUseCase)
-
     singleOf(::UpdateIntroductionUseCase)
-
+    singleOf(::UpdatePasswordUseCase)
+    singleOf(::UpdateEmailSendVCodeUseCase)
+    singleOf(::UpdateEmailVerifyEmailUseCase)
     singleOf(::UpdateAccountAggregator)
+
+    // Room History UseCases
+    singleOf(::FetchAllHistoryUseCase)
+    singleOf(::AddRoomHistoryUseCase)
+    singleOf(::EditRoomHistoryUseCase)
+    singleOf(::DeleteRoomHistoryUseCase)
+    singleOf(::DeleteRoomHistoriesUseCase)
+    singleOf(::RoomHistoryAggregator)
 }

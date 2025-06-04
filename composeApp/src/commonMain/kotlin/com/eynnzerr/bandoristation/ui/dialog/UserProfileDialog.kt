@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.ui.component.OtherUserProfile
 import com.eynnzerr.bandoristation.ui.component.UserProfile
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,15 +41,12 @@ fun UserProfileDialog(
                 shape = MaterialTheme.shapes.large,
                 tonalElevation = AlertDialogDefaults.TonalElevation
             ) {
-                UserProfile(
+                OtherUserProfile(
                     accountInfo = accountInfo,
                     sideButton = {
                         Button(
                             onClick = { onFollow(accountInfo.accountSummary.userId) },
                             shape = MaterialTheme.shapes.medium,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (hasFollowed) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-                            )
                         ) {
                             Text(if (hasFollowed) "取关" else "关注")
                         }

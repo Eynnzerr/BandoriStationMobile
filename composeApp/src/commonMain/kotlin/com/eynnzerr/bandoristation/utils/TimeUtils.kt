@@ -1,17 +1,15 @@
 package com.eynnzerr.bandoristation.utils
 
 import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-fun formatTimeDifference(currentTimeMillis: Long, pastTimeMillis: Long): String {
-    val timeDiffMillis = currentTimeMillis - pastTimeMillis
-    val timeDiffSeconds = (timeDiffMillis / 1000).toInt()
+fun formatTimestamp(timestamp: Long): String {
+    val timeAsSeconds = (timestamp / 1000).toInt()
 
-    val hours = timeDiffSeconds / 3600
-    val minutes = (timeDiffSeconds % 3600) / 60
-    val seconds = timeDiffSeconds % 60
+    val hours = timeAsSeconds / 3600
+    val minutes = (timeAsSeconds % 3600) / 60
+    val seconds = timeAsSeconds % 60
 
     return buildString {
         if (hours > 0) {
@@ -24,7 +22,9 @@ fun formatTimeDifference(currentTimeMillis: Long, pastTimeMillis: Long): String 
     }
 }
 
-fun formatTimestamp(timestamp: Long): String {
+fun formatTimeDifference(currentTimeMillis: Long, pastTimeMillis: Long) = formatTimestamp(currentTimeMillis - pastTimeMillis)
+
+fun formatTimestampAsDate(timestamp: Long): String {
     val instant = Instant.fromEpochMilliseconds(timestamp)
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
     return "${localDateTime.year}/${

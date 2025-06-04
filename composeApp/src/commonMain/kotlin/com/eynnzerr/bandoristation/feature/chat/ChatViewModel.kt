@@ -27,7 +27,7 @@ import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
-import com.eynnzerr.bandoristation.utils.formatTimestamp
+import com.eynnzerr.bandoristation.utils.formatTimestampAsDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.update
@@ -276,7 +276,7 @@ class ChatViewModel(
             if (chat.timestamp - lastLatestTimestamp > 300000) {
                 val timeMessage = ChatMessage(
                     timestamp = chat.timestamp,
-                    content = formatTimestamp(chat.timestamp),
+                    content = formatTimestampAsDate(chat.timestamp),
                     userInfo = UserInfo(),
                 )
                 processedChatList.add(timeMessage)
@@ -293,7 +293,7 @@ class ChatViewModel(
             if (chat.timestamp - lastLatestTimestamp > 300000) {
                 val timeMessage = ChatMessage(
                     timestamp = chat.timestamp,
-                    content = formatTimestamp(chat.timestamp),
+                    content = formatTimestampAsDate(chat.timestamp),
                     userInfo = UserInfo(),
                 )
                 processedChatList.add(timeMessage)

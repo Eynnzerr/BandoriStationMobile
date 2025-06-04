@@ -1,5 +1,8 @@
 package com.eynnzerr.bandoristation.feature.home
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.join_room_snackbar
@@ -13,30 +16,26 @@ import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
-import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.*
 import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.room.RequestRecentRoomsUseCase
 import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
+import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.RoomFilter
+import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock.System
 
 class HomeViewModel(
     private val connectWebSocketUseCase: ConnectWebSocketUseCase,
@@ -49,16 +48,17 @@ class HomeViewModel(
     private val updateTimestampUseCase: UpdateTimestampUseCase,
     private val checkUnreadChatUseCase: CheckUnreadChatUseCase,
     private val uploadRoomUseCase: UploadRoomUseCase,
-    private val setPreferenceUseCase: SetPreferenceUseCase,
-    private val stringSetPreferenceUseCase: GetPreferenceUseCase<Set<String>>,
-    private val boolPreferenceUseCase: GetPreferenceUseCase<Boolean>,
     private val informUserUseCase: InformUserUseCase,
     private val getRoomFilterUseCase: GetRoomFilterUseCase,
     private val updateRoomFilterUseCase: UpdateRoomFilterUseCase,
+    private val addRoomHistoryUseCase: AddRoomHistoryUseCase,
+    private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
 ) {
     var isFilteringPJSK = true
+    var isClearingOutdatedRoom = false
+    var isSavingRoomHistory = true
 
     override suspend fun loadInitialData() {
         sendEvent(HomeIntent.GetRoomFilter())
@@ -113,6 +113,11 @@ class HomeViewModel(
                     is UseCaseResult.Error -> Unit
                     is UseCaseResult.Success -> {
                         sendEvent(HomeIntent.UpdateTimestamp(result.data))
+                        if (isClearingOutdatedRoom) {
+                            sendEvent(HomeIntent.UpdateRoomList(state.value.rooms.filter {
+                                result.data - (it.time ?: 0) <= 60000L
+                            }))
+                        }
                     }
                 }
             }
@@ -134,33 +139,23 @@ class HomeViewModel(
         }
 
         viewModelScope.launch {
-            stringSetPreferenceUseCase.invoke(GetPreferenceUseCase.Params(PreferenceKeys.PRESET_WORDS, emptySet()))
-                .collect { result ->
-                    when (result) {
-                        is UseCaseResult.Loading -> Unit
-                        is UseCaseResult.Error -> {
-                            AppLogger.d(TAG, result.error.message ?: "")
-                        }
-                        is UseCaseResult.Success -> {
-                            sendEvent(HomeIntent.UpdatePresetWords(result.data ?: emptySet()))
-                        }
-                    }
-                }
-        }
+            dataStore.data.collect { p ->
+                isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true
+                isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false
+                isSavingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
 
-        viewModelScope.launch {
-            boolPreferenceUseCase.invoke(GetPreferenceUseCase.Params(PreferenceKeys.FILTER_PJSK, true))
-                .collect { result ->
-                    when (result) {
-                        is UseCaseResult.Loading -> Unit
-                        is UseCaseResult.Error -> {
-                            AppLogger.d(TAG, result.error.message ?: "")
-                        }
-                        is UseCaseResult.Success -> {
-                            isFilteringPJSK = result.data ?: true
-                        }
-                    }
+                val isFirstRun = p[PreferenceKeys.IS_FIRST_RUN] ?: true
+                internalState.update {
+                    it.copy(
+                        isFirstRun = isFirstRun,
+                        presetWords = p[PreferenceKeys.PRESET_WORDS] ?: emptySet()
+                    )
                 }
+
+                if (isFirstRun) {
+                    sendEffect(OpenHelpDialog())
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -186,7 +181,6 @@ class HomeViewModel(
             sendChat = false,
         ))
 
-        // TODO BUG: 与设置访问权限请求异步。必须尽快解决不能批量发送ws action的问题，即改造泛型为密封类
         delay(2000L)
         when (val checkResult = checkUnreadChatUseCase(Unit)) {
             is UseCaseResult.Error -> Unit
@@ -215,13 +209,32 @@ class HomeViewModel(
             }
 
             is HomeIntent.UpdateTimestamp -> {
-                state.value.copy(localTimestampMillis = event.timestampMillis) to null
+                state.value.copy(serverTimestampMillis = event.timestampMillis) to null
             }
 
             is HomeIntent.JoinRoom -> {
+                val selectedRoom = event.room
+                val previousRoom = state.value.selectedRoom
+                val currentTimestamp = state.value.serverTimestampMillis
+
+                if (isSavingRoomHistory && previousRoom != selectedRoom && previousRoom != null) {
+                    viewModelScope.launch {
+                        addRoomHistoryUseCase.invoke(RoomHistory(
+                            number = previousRoom.number ?: "",
+                            rawMessage = previousRoom.rawMessage ?: "",
+                            sourceInfo = previousRoom.sourceInfo ?: SourceInfo(),
+                            type = previousRoom.type ?: "",
+                            time = previousRoom.time ?: 0,
+                            userInfo = previousRoom.userInfo ?: UserInfo(),
+                            loginId = 0,
+                            duration = currentTimestamp - state.value.joinedTimestampMillis,
+                        ))
+                    }
+                }
+
                 state.value.copy(
                     selectedRoom = event.room,
-                    joinedTimestampMillis = System.now().toEpochMilliseconds(),
+                    joinedTimestampMillis = currentTimestamp,
                 ) to event.room?.let { ShowResourceSnackbar(Res.string.join_room_snackbar) }
             }
 
@@ -234,21 +247,17 @@ class HomeViewModel(
 
             is HomeIntent.AddPresetWord -> {
                 viewModelScope.launch {
-                    setPreferenceUseCase(
-                        Params(
-                            key = PreferenceKeys.PRESET_WORDS,
-                            value = state.value.presetWords.toMutableSet().apply { add(event.word) }
-                        ))
+                    dataStore.edit { p ->
+                        p[PreferenceKeys.PRESET_WORDS] = state.value.presetWords.toMutableSet().apply { add(event.word) }
+                    }
                 }
                 null to null
             }
             is HomeIntent.RemovePresetWord -> {
                 viewModelScope.launch {
-                    setPreferenceUseCase(
-                        Params(
-                            key = PreferenceKeys.PRESET_WORDS,
-                            value = state.value.presetWords.toMutableSet().apply { remove(event.word) }
-                        ))
+                    dataStore.edit { p ->
+                        p[PreferenceKeys.PRESET_WORDS] = state.value.presetWords.toMutableSet().apply { remove(event.word) }
+                    }
                 }
                 null to null
             }
@@ -331,6 +340,15 @@ class HomeViewModel(
                     requestRecentRoomsUseCase(Unit)
                 }
                 null to ShowSnackbar("刷新房间列表...")
+            }
+
+            is HomeIntent.SetNoReminder -> {
+                viewModelScope.launch {
+                    dataStore.edit { p ->
+                        p[PreferenceKeys.IS_FIRST_RUN] = false
+                    }
+                }
+                null to null
             }
         }
     }

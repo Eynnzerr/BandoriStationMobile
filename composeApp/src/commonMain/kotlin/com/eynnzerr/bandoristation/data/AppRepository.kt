@@ -1,12 +1,16 @@
 package com.eynnzerr.bandoristation.data
 
+import com.eynnzerr.bandoristation.data.local.LocalDataSource
 import com.eynnzerr.bandoristation.data.remote.RemoteDataSource
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import kotlinx.coroutines.flow.Flow
 
 class AppRepository(
-    private val remoteDataSource: RemoteDataSource
+    private val remoteDataSource: RemoteDataSource,
+    private val localDataSource: LocalDataSource
 ) {
     // control websocket
     suspend fun connectWebSocket() = remoteDataSource.connectWebSocket()
@@ -33,4 +37,13 @@ class AppRepository(
         token: String
     ) = remoteDataSource.sendAuthenticHttpsRequest(request, token)
     suspend fun sendApiRequest(request: ApiRequest) = remoteDataSource.sendApiRequest(request)
+
+    // Local
+    fun fetchAllHistory(loginId: Long?): Flow<List<RoomHistory>> {
+        return loginId?.let { localDataSource.fetchAllHistoryWithId(it) } ?: localDataSource.fetchAllHistory()
+    }
+    suspend fun addToHistory(roomHistory: RoomHistory) = localDataSource.addToHistory(roomHistory)
+    suspend fun updateHistory(roomHistory: RoomHistory) = localDataSource.editHistory(roomHistory)
+    suspend fun deleteFromHistory(roomHistory: RoomHistory) = localDataSource.deleteFromHistory(roomHistory)
+    suspend fun deleteFromHistory(roomHistories: List<RoomHistory>) = localDataSource.deleteFromHistory(roomHistories)
 }

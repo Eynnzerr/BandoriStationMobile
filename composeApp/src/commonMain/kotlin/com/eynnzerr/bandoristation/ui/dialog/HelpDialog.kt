@@ -24,12 +24,13 @@ import org.jetbrains.compose.resources.ExperimentalResourceApi
 @Composable
 fun HelpDialog(
     isVisible: Boolean,
+    markdownPath: String,
     onDismissRequest: () -> Unit,
 ) {
     val state = rememberRichTextState()
     var markdown by rememberSaveable { mutableStateOf("") }
     LaunchedEffect(Unit) {
-        markdown = Res.readBytes("files/help.md").decodeToString()
+        markdown = Res.readBytes(markdownPath).decodeToString()
         state.setMarkdown(markdown)
     }
 
@@ -55,10 +56,9 @@ fun HelpDialog(
                 TextButton(
                     onClick = onDismissRequest
                 ) {
-                    Text("确定")
+                    Text("关闭")
                 }
             },
-            dismissButton = {},
         )
     }
 }

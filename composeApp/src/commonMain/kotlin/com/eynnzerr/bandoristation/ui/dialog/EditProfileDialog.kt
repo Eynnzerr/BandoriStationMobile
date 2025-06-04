@@ -185,48 +185,48 @@ fun EditProfileDialog(
                         onClick = { showQQDialog = true }
                     )
 
-                    ProfileItem(
-                        title = "国服游戏ID",
-                        content = {
-                            Text(
-                                text = if (profile.playerId.cn.isEmpty()) "未绑定" else profile.playerId.cn.first().toString(),
-                                style = MaterialTheme.typography.bodyLarge,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        },
-                        onClick = { /* 点击编辑国服游戏ID */ }
-                    )
+//                    ProfileItem(
+//                        title = "国服游戏ID",
+//                        content = {
+//                            Text(
+//                                text = if (profile.playerId.cn.isEmpty()) "未绑定" else profile.playerId.cn.first().toString(),
+//                                style = MaterialTheme.typography.bodyLarge,
+//                                maxLines = 1,
+//                                overflow = TextOverflow.Ellipsis
+//                            )
+//                        },
+//                        onClick = { /* 点击编辑国服游戏ID */ }
+//                    )
 
-                    ProfileItem(
-                        title = "日服游戏ID",
-                        content = {
-                            Text(
-                                text = if (profile.playerId.jp.isEmpty()) "未绑定" else profile.playerId.jp.first().toString(),
-                                style = MaterialTheme.typography.bodyLarge,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        },
-                        onClick = { /* 点击编辑日服游戏ID */ }
-                    )
+//                    ProfileItem(
+//                        title = "日服游戏ID",
+//                        content = {
+//                            Text(
+//                                text = if (profile.playerId.jp.isEmpty()) "未绑定" else profile.playerId.jp.first().toString(),
+//                                style = MaterialTheme.typography.bodyLarge,
+//                                maxLines = 1,
+//                                overflow = TextOverflow.Ellipsis
+//                            )
+//                        },
+//                        onClick = { /* 点击编辑日服游戏ID */ }
+//                    )
 
-                    ProfileItem(
-                        title = "主游戏账号",
-                        content = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = profile.mainGameAccount.playerId.toString(),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        },
-                        onClick = { /* 点击设置主游戏账号 */ }
-                    )
+//                    ProfileItem(
+//                        title = "主游戏账号",
+//                        content = {
+//                            Row(
+//                                verticalAlignment = Alignment.CenterVertically
+//                            ) {
+//                                Text(
+//                                    text = profile.mainGameAccount.playerId.toString(),
+//                                    style = MaterialTheme.typography.bodyLarge,
+//                                    maxLines = 1,
+//                                    overflow = TextOverflow.Ellipsis
+//                                )
+//                            }
+//                        },
+//                        onClick = { /* 点击设置主游戏账号 */ }
+//                    )
 
                     Row(
                         modifier = Modifier
@@ -904,7 +904,7 @@ fun ProfileItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
+            .padding(vertical = 18.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

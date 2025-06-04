@@ -17,10 +17,12 @@ data class HomeState(
     val roomFilter: RoomFilter = RoomFilter(),
     val hasUnReadMessages: Boolean = false,
     val selectedRoom: RoomInfo? = null,
-    val localTimestampMillis: Long = System.now().toEpochMilliseconds(),
+    val serverTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val joinedTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val presetWords: Set<String> = emptySet(),
     val title: String = "主页",
+    val isShowingPlayerBrief: Boolean = false,
+    val isFirstRun: Boolean = false,
 ) : UIState {
     companion object {
         fun initial() = HomeState(
@@ -29,6 +31,7 @@ data class HomeState(
 }
 
 sealed class HomeIntent: UIEvent {
+    class SetNoReminder(): HomeIntent()
     data class UpdateRoomList(val rooms: List<RoomInfo>): HomeIntent()
     data class AppendRoomList(val rooms: List<RoomInfo>): HomeIntent()
     data class UpdateTimestamp(val timestampMillis: Long): HomeIntent()

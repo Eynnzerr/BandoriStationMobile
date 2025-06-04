@@ -186,6 +186,9 @@ fun HomeScreen(
 
                 is HomeEffect.CloseHelpDialog -> {
                     showHelpDialog = false
+                    if (state.isFirstRun) {
+                        viewModel.sendEvent(SetNoReminder())
+                    }
                 }
 
                 is HomeEffect.OpenHelpDialog -> {
@@ -244,7 +247,8 @@ fun HomeScreen(
 
     HelpDialog(
         isVisible = showHelpDialog,
-        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) }
+        markdownPath = "files/help.md",
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) },
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -333,7 +337,7 @@ fun HomeScreen(
                         viewModel.sendEffect(HomeEffect.OpenSendRoomDialog())
                     }
                 ) {
-                    Icon(Icons.Filled.Add, "add student menu")
+                    Icon(Icons.Filled.Add, "")
                 }
             }
         },
@@ -349,7 +353,7 @@ fun HomeScreen(
                 stickyHeader(key = -1) {
                     CurrentRoomHeader(
                         roomInfo = state.selectedRoom!!,
-                        currentTimeMillis = state.localTimestampMillis,
+                        currentTimeMillis = state.serverTimestampMillis,
                         startTimeMillis = state.joinedTimestampMillis,
                         onCopy = { roomNumber ->
                             viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
@@ -391,7 +395,7 @@ fun HomeScreen(
                     },
                     onReportUser = { viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo)) },
                     isJoined = roomInfo == state.selectedRoom,
-                    currentTimeMillis = state.localTimestampMillis,
+                    currentTimeMillis = state.serverTimestampMillis,
                     modifier = Modifier.animateItem()
                 )
             }

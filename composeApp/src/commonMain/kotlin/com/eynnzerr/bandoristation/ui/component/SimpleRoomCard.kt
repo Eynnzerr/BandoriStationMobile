@@ -18,8 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
-import com.eynnzerr.bandoristation.utils.formatTimeDifference
-import com.eynnzerr.bandoristation.utils.formatTimestamp
+import com.eynnzerr.bandoristation.utils.formatTimestampAsDate
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.ExperimentalTime
 
@@ -96,7 +95,7 @@ fun SimpleRoomCard(
         )
 
         Text(
-            text = formatTimestamp(timestamp),
+            text = formatTimestampAsDate(timestamp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(12.dp)

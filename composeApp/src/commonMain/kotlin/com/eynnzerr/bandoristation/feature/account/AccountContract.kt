@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.feature.account
 import com.eynnzerr.bandoristation.base.UIEffect
 import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
+import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.account.AccountSummary
 import com.eynnzerr.bandoristation.model.account.EditProfileInfo
@@ -17,6 +18,7 @@ data class AccountState(
     val followers: List<AccountSummary> = emptyList(),
     val followings: List<AccountSummary> = emptyList(),
     val editProfileData: EditProfileInfo = EditProfileInfo(),
+    val roomHistory: List<RoomHistory> = emptyList(),
 ) : UIState {
     companion object {
         fun initial() = AccountState()
@@ -45,7 +47,12 @@ sealed class AccountIntent: UIEvent {
     data class UpdateBanner(val bannerBase64: String) : AccountIntent()
     data class UpdateUsername(val username: String) : AccountIntent()
     data class UpdateIntroduction(val introduction: String) : AccountIntent()
+    data class UpdatePassword(val password: String, val newPassword: String) : AccountIntent()
     data class BindQQ(val qq: Long) : AccountIntent()
+    data class SendUpdateEmailVCode(val email: String): AccountIntent()
+    data class VerifyUpdateEmail(val code: String): AccountIntent()
+    data class UpdateRoomHistory(val roomHistory: List<RoomHistory>) : AccountIntent()
+    data class DeleteRoomHistory(val roomHistory: RoomHistory) : AccountIntent()
 }
 
 sealed class AccountEffect: UIEffect {

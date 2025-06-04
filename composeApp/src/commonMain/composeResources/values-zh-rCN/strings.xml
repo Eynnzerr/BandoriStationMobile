@@ -69,4 +69,12 @@
     <string name="settings_screen_title">设置</string>
     <string name="theme">主题</string>
     <string name="theme_desc">应用外观、色调</string>
+    <string name="settings_auto_clear_expired_rooms_title">自动清除过期车牌</string>
+    <string name="settings_auto_clear_expired_rooms_desc">自动清除发车时间超过60秒的车</string>
+    <string name="settings_auto_filter_pjsk_title">自动过滤PJSK</string>
+    <string name="settings_auto_filter_pjsk_desc">自动屏蔽PJSK的车（车牌少于六位数）</string>
+    <string name="settings_show_player_data_title">保存上车历史</string>
+    <string name="settings_show_player_data_desc">自动保存上车历史用于个人统计</string>
+    <string name="settings_active_filter_rules_title">主动筛选规则</string>
+    <string name="settings_active_filter_rules_desc">设置用于房间筛选的正则表达式规则</string>
 </resources>
