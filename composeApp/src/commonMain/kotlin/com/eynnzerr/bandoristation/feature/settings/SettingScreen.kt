@@ -126,16 +126,6 @@ fun SettingScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             SettingItem(
-                title = "登录管理",
-                desc = "",
-                icon = Icons.Outlined.AccountBox,
-                action = {},
-                onClick = {
-
-                }
-            )
-
-            SettingItem(
                 title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
                 desc = stringResource(Res.string.settings_auto_clear_expired_rooms_desc),
                 icon = Icons.Outlined.Schedule,
@@ -214,7 +204,7 @@ fun SettingScreen(
 
             SettingItem(
                 title = "版本",
-                desc = getPlatform().name + ": " + getPlatform().versionName,
+                desc = state.versionName,
                 icon = Icons.Outlined.Update,
                 onClick = {
                     // TODO 检查更新

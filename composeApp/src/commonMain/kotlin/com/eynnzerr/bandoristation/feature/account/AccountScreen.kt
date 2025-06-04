@@ -122,6 +122,9 @@ fun AccountScreen(
                 is AccountEffect.ControlLoginDialog -> {
                     showLoginDialog = action.visible
                     loginDialogState = LoginScreenState.INITIAL
+                    if (!action.visible && !state.isLoggedIn && state.isLoading) {
+                        viewModel.sendEvent(CancelLoading())
+                    }
                 }
 
                 is AccountEffect.ControlDrawer -> {
