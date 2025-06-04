@@ -75,7 +75,7 @@ class HomeViewModel(
 
                             // 每次重新连接到websocket时，请求最近房间列表、重新设置权限、设置客户端
                             internalState.update {
-                                it.copy(title = "房间列表")
+                                it.copy(title = Res.string.room_list_title)
                             }
                             requestRecentRoomsUseCase(Unit)
                             setAccessPermissionUseCase(null)
@@ -87,20 +87,20 @@ class HomeViewModel(
                         }
                         is WebSocketClient.ConnectionState.Connecting -> {
                             internalState.update {
-                                it.copy(title = "连接中...")
+                                it.copy(title = Res.string.connecting)
                             }
                             AppLogger.d(TAG, "Connecting to WebSocket...")
                         }
                         is WebSocketClient.ConnectionState.Disconnected -> {
                             // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
                             internalState.update {
-                                it.copy(title = "当前离线")
+                                it.copy(title = Res.string.offline)
                             }
                             sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
                         }
                         is WebSocketClient.ConnectionState.Error -> {
                             internalState.update {
-                                it.copy(title = "错误")
+                                it.copy(title = Res.string.error)
                             }
                             sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
                         }
