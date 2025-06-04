@@ -79,4 +79,10 @@
     <string name="settings_show_player_data_desc">Automatically saving room join history for statistics</string>
     <string name="settings_active_filter_rules_title">Active filter rules</string>
     <string name="settings_active_filter_rules_desc">Set regular expression rules for room filtering</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="login_or_register">Login/Register</string>
+    <string name="room_list_title">Room List</string>
+    <string name="connecting">Connecting...</string>
+    <string name="offline">Offline</string>
+    <string name="error">Error</string>
 </resources>

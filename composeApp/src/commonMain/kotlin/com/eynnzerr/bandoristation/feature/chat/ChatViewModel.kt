@@ -61,7 +61,7 @@ class ChatViewModel(
                             AppLogger.d(TAG, "WebSocket is connected.")
 
                             internalState.update {
-                                it.copy(title = "聊天室")
+                                it.copy(title = Res.string.chat_screen_title)
                             }
                             setAccessPermissionUseCase(null)
                             setUpClientUseCase(ClientSetInfo(
@@ -73,20 +73,20 @@ class ChatViewModel(
                         }
                         is WebSocketClient.ConnectionState.Connecting -> {
                             internalState.update {
-                                it.copy(title = "连接中...")
+                                it.copy(title = Res.string.connecting)
                             }
                             AppLogger.d(TAG, "Connecting to WebSocket...")
                         }
                         is WebSocketClient.ConnectionState.Disconnected -> {
                             // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
                             internalState.update {
-                                it.copy(title = "当前离线")
+                                it.copy(title = Res.string.offline)
                             }
                             sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
                         }
                         is WebSocketClient.ConnectionState.Error -> {
                             internalState.update {
-                                it.copy(title = "错误")
+                                it.copy(title = Res.string.error)
                             }
                             sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
                         }

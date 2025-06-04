@@ -12,6 +12,8 @@ import com.eynnzerr.bandoristation.model.GithubRelease
 import com.eynnzerr.bandoristation.navigation.Screen
 import kotlinx.datetime.Clock.System
 import org.jetbrains.compose.resources.StringResource
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.home_screen_title
 
 data class HomeState(
     val rooms: List<RoomInfo> = emptyList(),
@@ -21,7 +23,7 @@ data class HomeState(
     val serverTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val joinedTimestampMillis: Long = System.now().toEpochMilliseconds(),
     val presetWords: Set<String> = emptySet(),
-    val title: String = "主页",
+    val title: StringResource = Res.string.home_screen_title,
     val isShowingPlayerBrief: Boolean = false,
     val isFirstRun: Boolean = false,
 ) : UIState {
