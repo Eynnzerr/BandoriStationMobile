@@ -65,6 +65,7 @@ import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import com.eynnzerr.bandoristation.model.GithubRelease
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -287,7 +288,7 @@ fun HomeScreen(
         onNavigateTo = { viewModel.sendEffect(HomeEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
-                title = state.title,
+                title = stringResource(state.title),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(

@@ -5,7 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.connecting
+import bandoristationm.composeapp.generated.resources.error
 import bandoristationm.composeapp.generated.resources.join_room_snackbar
+import bandoristationm.composeapp.generated.resources.offline
+import bandoristationm.composeapp.generated.resources.room_list_title
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase

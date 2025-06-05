@@ -4,8 +4,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.chat_screen_title
 import bandoristationm.composeapp.generated.resources.clear_chats_snackbar
+import bandoristationm.composeapp.generated.resources.connecting
+import bandoristationm.composeapp.generated.resources.error
 import bandoristationm.composeapp.generated.resources.load_all_snackbar
+import bandoristationm.composeapp.generated.resources.offline
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
@@ -184,7 +188,6 @@ class ChatViewModel(
                     initialized = true,
                     unreadCount = 0,
                     isLoading = false,
-                    title = "聊天室"
                 ) to null
             }
             is ChatIntent.ClearAll -> {

@@ -60,6 +60,7 @@ import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -172,7 +173,7 @@ fun ChatScreen(
         onNavigateTo = { viewModel.sendEffect(ChatEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
-                title = state.title,
+                title = stringResource(state.title),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(

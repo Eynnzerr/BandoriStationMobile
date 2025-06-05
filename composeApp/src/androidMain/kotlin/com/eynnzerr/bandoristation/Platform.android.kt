@@ -1,7 +1,7 @@
 package com.eynnzerr.bandoristation
 
 import android.os.Build
-import com.eynnzerr.AppApplication
+import com.eynnzerr.bandoristation.AppApplication
 
 class AndroidPlatform : Platform {
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
