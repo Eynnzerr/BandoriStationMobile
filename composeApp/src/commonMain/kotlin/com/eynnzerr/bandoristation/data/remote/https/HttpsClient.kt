@@ -16,6 +16,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
 import com.eynnzerr.bandoristation.model.GithubRelease
+import com.eynnzerr.bandoristation.utils.isNetworkAvailable
 
 class HttpsClient(
     private val httpsUrl: String,
@@ -30,6 +31,12 @@ class HttpsClient(
      * @return 响应对象
      */
     suspend fun sendRequest(request: ApiRequest): ApiResponse {
+        if (!isNetworkAvailable()) {
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("No Internet")
+            )
+        }
         AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}.")
 
         val response: HttpResponse = client.post(httpsUrl) {
@@ -47,6 +54,12 @@ class HttpsClient(
      * @return 响应对象
      */
     suspend fun sendAuthenticatedRequest(request: ApiRequest, token: String): ApiResponse {
+        if (!isNetworkAvailable()) {
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("No Internet")
+            )
+        }
         // val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: testToken }.first()
         AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}; using token: $token.")
 
@@ -61,6 +74,12 @@ class HttpsClient(
     }
 
     suspend fun sendApiRequest(request: ApiRequest): ApiResponse {
+        if (!isNetworkAvailable()) {
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("No Internet")
+            )
+        }
         AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}.")
 
         val response: HttpResponse = client.post(apiUrl) {
@@ -82,6 +101,9 @@ class HttpsClient(
     }
 
     suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease {
+        if (!isNetworkAvailable()) {
+            throw RuntimeException("No Internet")
+        }
         val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         val response: HttpResponse = client.get(url)
         AppLogger.d(TAG, "fetchLatestRelease response: ${response.bodyAsText()}")
