@@ -72,13 +72,8 @@ fun LineChart(
                         }
                     }
                 }
-                .pointerInput(Unit) {
-                    detectDragGestures { _, _ ->
-                        // 可以添加拖动交互
-                    }
-                }
         ) {
-            val chartPadding = 60.dp.toPx()
+            val chartPadding = 20.dp.toPx()
             val chartWidth = size.width - chartPadding * 2
             val chartHeight = size.height - chartPadding * 2
 
@@ -160,7 +155,7 @@ fun LineChart(
                     )
 
                     // 绘制数值标签
-                    if (config.showValues && animationProgress > 0.5f) {
+                    if (config.showValues && animationProgress > 0.5f && dataSet.data[index].value > 0f) {
                         drawValueLabel(
                             point,
                             dataSet.data[index].value,

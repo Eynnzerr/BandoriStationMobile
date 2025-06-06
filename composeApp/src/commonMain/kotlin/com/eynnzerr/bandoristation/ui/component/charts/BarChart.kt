@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -22,7 +20,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import kotlin.math.*
 
 @Composable
 fun BarChart(
@@ -38,7 +35,6 @@ fun BarChart(
     var selectedBar by remember { mutableStateOf<Int?>(null) }
     var hoveredBar by remember { mutableStateOf<Int?>(null) }
 
-    val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
 
     // 动画进度
@@ -87,7 +83,7 @@ fun BarChart(
                     }
                 }
         ) {
-            val chartPadding = 60.dp.toPx()
+            val chartPadding = 20.dp.toPx()
             val chartWidth = size.width - chartPadding * 2
             val chartHeight = size.height - chartPadding * 2
 
@@ -399,6 +395,8 @@ private fun DrawScope.drawBarValues(
             val spacing = width / data.size * 0.2f
 
             data.forEachIndexed { index, item ->
+                if (item.value.toInt() == 0) return@forEachIndexed
+
                 val barHeight = (item.value / maxValue) * height * animationProgress[index]
                 val x = padding + index * (barWidth + spacing) + spacing / 2 + barWidth / 2
                 val y = padding + height - barHeight - 8.dp.toPx()
