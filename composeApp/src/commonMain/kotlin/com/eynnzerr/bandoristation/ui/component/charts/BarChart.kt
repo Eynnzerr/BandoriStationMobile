@@ -453,7 +453,21 @@ private fun DrawScope.drawVerticalBarLabels(
     val barWidth = width / data.size * 0.8f
     val spacing = width / data.size * 0.2f
 
+    val sample = data.maxByOrNull { it.label.length }
+    val sampleText = sample?.let {
+        textMeasurer.measure(
+            text = it.label,
+            style = textStyle,
+            constraints = Constraints(maxWidth = barWidth.toInt())
+        )
+    }
+    val step = if (sampleText != null) {
+        max(1, ceil(sampleText.size.width / (barWidth + spacing)).toInt())
+    } else 1
+
     data.forEachIndexed { index, item ->
+        if (index % step != 0) return@forEachIndexed
+
         val x = padding + index * (barWidth + spacing) + spacing / 2 + barWidth / 2
         val y = padding + height + 16.dp.toPx()
 
@@ -463,9 +477,12 @@ private fun DrawScope.drawVerticalBarLabels(
             constraints = Constraints(maxWidth = barWidth.toInt())
         )
 
+        var xPos = x - text.size.width / 2
+        xPos = xPos.coerceIn(padding, padding + width - text.size.width)
+
         drawText(
             textLayoutResult = text,
-            topLeft = Offset(x - text.size.width / 2, y)
+            topLeft = Offset(xPos, y)
         )
     }
 }
