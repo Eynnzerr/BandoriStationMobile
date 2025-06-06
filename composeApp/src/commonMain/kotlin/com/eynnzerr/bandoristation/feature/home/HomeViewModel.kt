@@ -276,7 +276,10 @@ class HomeViewModel(
                         uploadRoomUseCase(event.room)
                     }
                 }
-                null to ShowResourceSnackbar(Res.string.upload_room_snackbar)
+
+                state.value.selectedRoom?.let {
+                    state.value.copy(selectedRoom = it.copy(event.room.number, event.room.description))
+                } to ShowResourceSnackbar(Res.string.upload_room_snackbar)
             }
 
             is HomeIntent.AddPresetWord -> {

@@ -102,7 +102,7 @@ class HttpsClient(
 
     suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease {
         if (!isNetworkAvailable()) {
-            throw RuntimeException("No Internet")
+            return GithubRelease()
         }
         val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
         val response: HttpResponse = client.get(url)

@@ -96,6 +96,7 @@ fun HomeScreen(
     var userToBlock: UserInfo? by remember { mutableStateOf(null) }
     var prefillRoomNumber by remember { mutableStateOf("") }
     var prefillDescription by remember { mutableStateOf("") }
+    var isRepublish by remember { mutableStateOf(false) }
 
     // Determine if the first item is visible
     val isFirstItemVisible by remember {

@@ -76,14 +76,14 @@ fun PieChart(
         data.color ?: generateChartColors(dataSet.data.size)[index]
     }
 
-    Box (
+    Column (
         modifier = modifier
-            .height(height)
             .clip(RoundedCornerShape(16.dp))
     ) {
         Canvas(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .height(height)
                 .background(config.backgroundColor)
                 .pointerInput(Unit) {
                     detectTapGestures { offset ->
@@ -194,9 +194,7 @@ fun PieChart(
                 dataSet = dataSet,
                 colors = colors,
                 total = total,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
+                modifier = Modifier.padding(16.dp) // Removed .align(Alignment.BottomCenter)
             )
         }
     }
@@ -306,6 +304,7 @@ private fun DrawScope.drawSliceLabel(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PieChartLegend(
     dataSet: ChartDataSet,
@@ -313,18 +312,18 @@ private fun PieChartLegend(
     total: Float,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    FlowRow(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
             .background(MaterialTheme.colorScheme.surface)
             .padding(12.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        dataSet.data.take(4).forEachIndexed { index, item ->
+        dataSet.data.forEachIndexed { index, item ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
             ) {
                 Box(
                     modifier = Modifier
@@ -336,8 +335,13 @@ private fun PieChartLegend(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Column {
+                    val labelText = if (item.label.length > 6) {
+                        "${item.label.take(2)}...${item.label.takeLast(2)}"
+                    } else {
+                        item.label
+                    }
                     Text(
-                        text = item.label,
+                        text = labelText,
                         style = MaterialTheme.typography.labelSmall,
                         maxLines = 1
                     )
@@ -403,3 +407,4 @@ private fun isLightColor(color: Color): Boolean {
     val luminance = 0.299 * r + 0.587 * g + 0.114 * b
     return luminance > 0.5
 }
+

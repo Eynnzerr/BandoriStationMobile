@@ -312,10 +312,10 @@ fun UserProfile(
                                     color = MaterialTheme.colorScheme.primary
                                 )),
                                 height = 250.dp,
-                                lineType = LineType.CURVED,
+                                lineType = LineType.AREA,
                                 config = ChartConfig(
                                     showGrid = false,
-                                    showLabels = false,
+                                    showLabels = true,
                                     showValues = true,
                                     showLegend = false
                                 ),
@@ -347,7 +347,7 @@ fun UserProfile(
                                         )
                                     },
                                 ),
-                                height = 500.dp,
+                                height = 250.dp,
                                 donutMode = false,
                                 donutWidth = 0.4f,
                                 config = ChartConfig(

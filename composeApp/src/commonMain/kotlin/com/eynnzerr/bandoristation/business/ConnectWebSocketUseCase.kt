@@ -10,6 +10,7 @@ import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.testToken
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -23,11 +24,18 @@ class ConnectWebSocketUseCase(
     private val repository: AppRepository,
     private val dispatcher: CoroutineDispatcher,
 ): FlowUseCase<Unit, WebSocketClient.ConnectionState, Unit>(dispatcher) {
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        throwable.printStackTrace()
+    }
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     override fun execute(parameters: Unit): Flow<UseCaseResult<WebSocketClient.ConnectionState, Unit>> {
         // Connect to WebSocket server，and listen for webSocket connection state. Only called once when app starts.
-        scope.launch {
-            repository.connectWebSocket()
+        scope.launch(exceptionHandler) {
+            try {
+                repository.connectWebSocket()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
         return repository.listenWebSocketConnection().map { connectionState ->

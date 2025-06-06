@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import com.eynnzerr.bandoristation.ui.crash.CrashReportPage
 import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
+import kotlin.system.exitProcess
 
 class CrashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +25,7 @@ class CrashActivity : ComponentActivity() {
                     onConfirm = {
                         clipboardManager.setText(AnnotatedString(message))
                         this.finishAffinity()
+                        exitProcess(0)
                     }
                 )
             }
