@@ -39,6 +39,7 @@ import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -67,8 +68,8 @@ class HomeViewModel(
     var isFilteringPJSK = true
     var isClearingOutdatedRoom = false
     var isSavingRoomHistory = true
-    var autoUploadInterval: Long = 30L
-    private var autoUploadJob: kotlinx.coroutines.Job? = null
+    var autoUploadInterval: Long = 5L
+    private var autoUploadJob: Job? = null
 
     override suspend fun onInitialize() {
         sendEvent(HomeIntent.GetRoomFilter())
@@ -153,7 +154,7 @@ class HomeViewModel(
                 isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true
                 isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false
                 isSavingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
-                autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 30L
+                autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 5L
 
                 val isFirstRun = p[PreferenceKeys.IS_FIRST_RUN] ?: true
                 internalState.update {
@@ -266,7 +267,7 @@ class HomeViewModel(
                 autoUploadJob?.cancel()
                 if (event.continuous) {
                     autoUploadJob = viewModelScope.launch {
-                        while (kotlinx.coroutines.isActive) {
+                        while (isActive) {
                             uploadRoomUseCase(event.room)
                             delay(autoUploadInterval * 1000L)
                         }
