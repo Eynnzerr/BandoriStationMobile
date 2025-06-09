@@ -3,7 +3,7 @@ package com.eynnzerr.bandoristation.di
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import com.eynnzerr.AppApplication
+import com.eynnzerr.bandoristation.AppApplication
 import com.eynnzerr.bandoristation.data.local.AppDatabase
 import kotlinx.coroutines.Dispatchers
 import org.koin.android.ext.koin.androidContext

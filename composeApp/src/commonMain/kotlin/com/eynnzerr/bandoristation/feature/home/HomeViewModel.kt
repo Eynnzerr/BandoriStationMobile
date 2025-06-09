@@ -5,7 +5,11 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.connecting
+import bandoristationm.composeapp.generated.resources.error
 import bandoristationm.composeapp.generated.resources.join_room_snackbar
+import bandoristationm.composeapp.generated.resources.offline
+import bandoristationm.composeapp.generated.resources.room_list_title
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
@@ -22,6 +26,7 @@ import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
+import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
@@ -31,6 +36,7 @@ import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
@@ -53,6 +59,7 @@ class HomeViewModel(
     private val getRoomFilterUseCase: GetRoomFilterUseCase,
     private val updateRoomFilterUseCase: UpdateRoomFilterUseCase,
     private val addRoomHistoryUseCase: AddRoomHistoryUseCase,
+    private val getLatestReleaseUseCase: GetLatestReleaseUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
@@ -63,7 +70,7 @@ class HomeViewModel(
     var autoUploadInterval: Long = 30L
     private var autoUploadJob: kotlinx.coroutines.Job? = null
 
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         sendEvent(HomeIntent.GetRoomFilter())
 
         viewModelScope.launch {
@@ -75,7 +82,7 @@ class HomeViewModel(
 
                             // 每次重新连接到websocket时，请求最近房间列表、重新设置权限、设置客户端
                             internalState.update {
-                                it.copy(title = "房间列表")
+                                it.copy(title = Res.string.room_list_title)
                             }
                             requestRecentRoomsUseCase(Unit)
                             setAccessPermissionUseCase(null)
@@ -87,20 +94,20 @@ class HomeViewModel(
                         }
                         is WebSocketClient.ConnectionState.Connecting -> {
                             internalState.update {
-                                it.copy(title = "连接中...")
+                                it.copy(title = Res.string.connecting)
                             }
                             AppLogger.d(TAG, "Connecting to WebSocket...")
                         }
                         is WebSocketClient.ConnectionState.Disconnected -> {
                             // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
                             internalState.update {
-                                it.copy(title = "当前离线")
+                                it.copy(title = Res.string.offline)
                             }
                             sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
                         }
                         is WebSocketClient.ConnectionState.Error -> {
                             internalState.update {
-                                it.copy(title = "错误")
+                                it.copy(title = Res.string.error)
                             }
                             sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
                         }
@@ -173,6 +180,19 @@ class HomeViewModel(
                         sendEffect(ShowSnackbar(result.data))
                     }
                 }
+            }
+        }
+
+        viewModelScope.launch {
+            when (val result = getLatestReleaseUseCase(Unit)) {
+                is UseCaseResult.Success -> {
+                    val latest = result.data.tagName.trimStart('v', 'V')
+                    val current = getPlatform().versionName.trimStart('v', 'V')
+                    if (latest != current) {
+                        sendEffect(OpenUpdateDialog(result.data))
+                    }
+                }
+                else -> Unit
             }
         }
     }

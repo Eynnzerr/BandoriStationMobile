@@ -55,7 +55,7 @@ class AccountViewModel(
 ) : BaseViewModel<AccountState, AccountIntent, AccountEffect>(
     initialState = AccountState.initial()
 ) {
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         val token = dataStore.data.map {
             it[PreferenceKeys.USER_TOKEN] ?: ""
         }.first()
@@ -490,6 +490,10 @@ class AccountViewModel(
                    roomHistoryAggregator.deleteRoomHistory(event.roomHistory)
                }
                null to ShowSnackbar("删除该条上车记录。")
+           }
+
+           is CancelLoading -> {
+               state.value.copy(isLoading = false) to ShowSnackbar("您取消了登录，建议登录以使用完整功能。")
            }
        }
     }

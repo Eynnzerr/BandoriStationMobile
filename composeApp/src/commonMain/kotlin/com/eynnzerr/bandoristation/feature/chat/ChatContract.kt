@@ -9,6 +9,8 @@ import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.navigation.Screen
 import org.jetbrains.compose.resources.StringResource
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.chat_screen_title
 
 data class ChatState(
     val chats: List<ChatMessage> = emptyList(),
@@ -19,7 +21,7 @@ data class ChatState(
     val isLoading: Boolean = true,
     val selectedUser: AccountInfo = AccountInfo(),
     val followingUsers: List<Long> = emptyList(),
-    val title: String = "聊天室"
+    val title: StringResource = Res.string.chat_screen_title
 ) : UIState {
     companion object {
         fun initial() = ChatState()

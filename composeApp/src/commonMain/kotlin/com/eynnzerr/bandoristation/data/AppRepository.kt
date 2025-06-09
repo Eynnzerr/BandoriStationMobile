@@ -38,6 +38,9 @@ class AppRepository(
     ) = remoteDataSource.sendAuthenticHttpsRequest(request, token)
     suspend fun sendApiRequest(request: ApiRequest) = remoteDataSource.sendApiRequest(request)
 
+    suspend fun fetchLatestRelease(owner: String, repo: String) =
+        remoteDataSource.fetchLatestRelease(owner, repo)
+
     // Local
     fun fetchAllHistory(loginId: Long?): Flow<List<RoomHistory>> {
         return loginId?.let { localDataSource.fetchAllHistoryWithId(it) } ?: localDataSource.fetchAllHistory()

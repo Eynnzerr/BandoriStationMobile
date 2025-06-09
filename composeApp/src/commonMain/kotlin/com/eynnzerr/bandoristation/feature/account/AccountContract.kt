@@ -30,6 +30,7 @@ sealed class AccountIntent: UIEvent {
     data class NotifyUpdateInfoFailed(val reason: String): AccountIntent()
     data class GetUserInfo(val token: String): AccountIntent()
     data class Login(val username: String, val password: String): AccountIntent()
+    class CancelLoading(): AccountIntent()
     class Logout(): AccountIntent()
     data class Signup(
         val username: String,

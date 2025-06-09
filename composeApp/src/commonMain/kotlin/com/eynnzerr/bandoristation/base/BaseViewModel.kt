@@ -43,14 +43,14 @@ abstract class BaseViewModel<State : UIState, Event: UIEvent, Effect: UIEffect>(
     val effect = _effects.receiveAsFlow()
 
     // Used for one-time setup, when ViewModel is initialized.
-    open suspend fun loadInitialData() {}
+    open suspend fun onInitialize() {}
 
     // Used for each-time setup, when reentering page. Will be called after loadInitialData().
     open suspend fun onStartStateFlow() {}
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            loadInitialData()
+            onInitialize()
         }
     }
 

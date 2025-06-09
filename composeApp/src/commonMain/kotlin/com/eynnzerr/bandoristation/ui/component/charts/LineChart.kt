@@ -406,11 +406,17 @@ private fun DrawScope.drawYAxisLabels(
             )
         )
 
+        val yPos = when (i) {
+            0 -> (y - text.size.height).coerceAtLeast(0f)
+            labelCount -> y.coerceAtMost(size.height - text.size.height)
+            else -> (y - text.size.height / 2).coerceIn(0f, size.height - text.size.height)
+        }
+
         drawText(
             textLayoutResult = text,
             topLeft = Offset(
                 padding - text.size.width - 8.dp.toPx(),
-                y - text.size.height / 2
+                yPos
             )
         )
     }
@@ -424,8 +430,20 @@ private fun DrawScope.drawXAxisLabels(
     textMeasurer: TextMeasurer,
     textColor: Color
 ) {
+    if (data.isEmpty()) return
+
+    val stepWidth = width / (data.size - 1)
+    val sample = data.maxByOrNull { it.label.length } ?: data.first()
+    val sampleText = textMeasurer.measure(
+        text = sample.label,
+        style = TextStyle(fontSize = 10.sp, color = textColor)
+    )
+    val step = max(1, ceil(sampleText.size.width / stepWidth).toInt())
+
     data.forEachIndexed { index, item ->
-        val x = padding + (width / (data.size - 1)) * index
+        if (index % step != 0) return@forEachIndexed
+
+        val x = padding + stepWidth * index
         val y = padding + height + 8.dp.toPx()
 
         val text = textMeasurer.measure(
@@ -436,10 +454,13 @@ private fun DrawScope.drawXAxisLabels(
             )
         )
 
+        var xPos = x - text.size.width / 2
+        xPos = xPos.coerceIn(padding, padding + width - text.size.width)
+
         drawText(
             textLayoutResult = text,
             topLeft = Offset(
-                x - text.size.width / 2,
+                xPos,
                 y
             )
         )

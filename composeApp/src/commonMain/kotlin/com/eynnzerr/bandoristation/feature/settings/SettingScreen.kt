@@ -49,6 +49,7 @@ import bandoristationm.composeapp.generated.resources.settings_show_player_data_
 import bandoristationm.composeapp.generated.resources.settings_show_player_data_desc
 import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_title
 import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_desc
+import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
 import com.eynnzerr.bandoristation.ui.component.settings.SettingDropdownItem
@@ -126,16 +127,6 @@ fun SettingScreen(
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingItem(
-                title = "登录管理",
-                desc = "",
-                icon = Icons.Outlined.AccountBox,
-                action = {},
-                onClick = {
-
-                }
-            )
-
             SettingItem(
                 title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
                 desc = stringResource(Res.string.settings_auto_clear_expired_rooms_desc),
@@ -236,7 +227,7 @@ fun SettingScreen(
 
             SettingItem(
                 title = "版本",
-                desc = "1.0.0",
+                desc = state.versionName,
                 icon = Icons.Outlined.Update,
                 onClick = {
                     // TODO 检查更新

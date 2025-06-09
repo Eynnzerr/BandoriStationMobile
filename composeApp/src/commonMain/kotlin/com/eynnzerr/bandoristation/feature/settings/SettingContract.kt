@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.feature.settings
 import com.eynnzerr.bandoristation.base.UIEffect
 import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
+import com.eynnzerr.bandoristation.getPlatform
 
 data class SettingState(
     val themeName: String = "",
@@ -11,9 +12,12 @@ data class SettingState(
     val isShowingPlayerInfo: Boolean = false,
     val isRecordingRoomHistory: Boolean = true,
     val autoUploadInterval: Long = 30,
+    val versionName: String = "",
 ) : UIState {
     companion object {
-        fun initial() = SettingState()
+        fun initial() = SettingState(
+            versionName = getPlatform().name + ": " + getPlatform().versionName
+        )
     }
 }
 

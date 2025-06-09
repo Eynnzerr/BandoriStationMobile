@@ -16,7 +16,7 @@ class SettingViewModel(
 ) : BaseViewModel<SettingState, SettingEvent, SettingEffect>(
     initialState = SettingState.initial()
 ) {
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         dataStore.data.collect { p ->
             internalState.update {
                 it.copy(
