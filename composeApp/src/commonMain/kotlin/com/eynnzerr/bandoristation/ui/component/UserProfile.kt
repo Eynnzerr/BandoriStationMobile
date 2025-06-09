@@ -279,7 +279,7 @@ fun UserProfile(
                                 orientation = BarOrientation.VERTICAL,
                                 config = ChartConfig(
                                     showGrid = false,
-                                    showLabels = true,
+                                    showLabels = false,
                                     showValues = true
                                 ),
                                 onBarClick = { data ->
@@ -315,7 +315,7 @@ fun UserProfile(
                                 lineType = LineType.AREA,
                                 config = ChartConfig(
                                     showGrid = false,
-                                    showLabels = true,
+                                    showLabels = false,
                                     showValues = true,
                                     showLegend = false
                                 ),

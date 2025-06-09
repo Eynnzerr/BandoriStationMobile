@@ -20,6 +20,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import kotlin.math.ceil
+import kotlin.math.max
 
 @Composable
 fun BarChart(
