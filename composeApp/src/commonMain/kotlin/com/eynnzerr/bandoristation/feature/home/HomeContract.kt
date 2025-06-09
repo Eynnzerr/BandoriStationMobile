@@ -37,7 +37,7 @@ sealed class HomeIntent: UIEvent {
     data class UpdateTimestamp(val timestampMillis: Long): HomeIntent()
     data class UpdateMessageBadge(val hasUnReadMessages: Boolean): HomeIntent()
     data class JoinRoom(val room: RoomInfo?): HomeIntent()
-    data class UploadRoom(val room: RoomUploadInfo): HomeIntent()
+    data class UploadRoom(val room: RoomUploadInfo, val continuous: Boolean = false): HomeIntent()
     data class UpdatePresetWords(val words: Set<String>): HomeIntent()
     data class AddPresetWord(val word: String): HomeIntent()
     data class RemovePresetWord(val word: String): HomeIntent()

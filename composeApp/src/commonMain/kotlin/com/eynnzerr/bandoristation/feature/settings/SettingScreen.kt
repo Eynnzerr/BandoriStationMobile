@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TopAppBarDefaults
@@ -168,6 +170,27 @@ fun SettingScreen(
                     Switch(
                         checked = state.isRecordingRoomHistory,
                         onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateRecordRoomHistory(it)) }
+                    )
+                },
+                onClick = {}
+            )
+
+            var intervalText by remember(state.autoUploadInterval) { mutableStateOf(state.autoUploadInterval.toString()) }
+            SettingItem(
+                title = "持续发车间隔(秒)",
+                desc = "自动上传房间信息的时间间隔",
+                icon = Icons.Outlined.Schedule,
+                action = {
+                    OutlinedTextField(
+                        value = intervalText,
+                        onValueChange = {
+                            intervalText = it.filter { ch -> ch.isDigit() }
+                            intervalText.toLongOrNull()?.let { v ->
+                                viewModel.sendEvent(SettingEvent.UpdateAutoUploadInterval(v))
+                            }
+                        },
+                        modifier = Modifier.width(80.dp),
+                        singleLine = true
                     )
                 },
                 onClick = {}

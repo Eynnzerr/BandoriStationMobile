@@ -34,7 +34,7 @@ fun SendRoomDialog(
     isVisible: Boolean,
     presetWords: Set<String>,
     onDismissRequest: () -> Unit,
-    onSendClick: (uploadInfo: RoomUploadInfo) -> Unit,
+    onSendClick: (uploadInfo: RoomUploadInfo, continuous: Boolean) -> Unit,
     onAddPresetWord: (String) -> Unit,
     onDeletePresetWord: (String) -> Unit,
     prefillRoomNumber: String = "",
@@ -44,6 +44,7 @@ fun SendRoomDialog(
         var roomNumber by remember(prefillRoomNumber) { mutableStateOf(prefillRoomNumber) }
         var description by remember(prefillDescription) { mutableStateOf(prefillDescription) }
         var newPresetWord by remember { mutableStateOf("") }
+        var continuous by remember { mutableStateOf(false) }
         var isPresetWordsExpanded by remember { mutableStateOf(false) }
         var isAddWordsExpanded by remember { mutableStateOf(false) }
 
@@ -192,6 +193,16 @@ fun SendRoomDialog(
                         }
                     }
                 }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = continuous,
+                        onCheckedChange = { continuous = it }
+                    )
+                    Text("持续发送车牌直到下次发车")
+                }
             },
             confirmButton = {
                 TextButton(
@@ -201,7 +212,7 @@ fun SendRoomDialog(
                                 number = roomNumber,
                                 description = description
                             )
-                            onSendClick(roomInfo)
+                            onSendClick(roomInfo, continuous)
                             onDismissRequest()
                         }
                     }

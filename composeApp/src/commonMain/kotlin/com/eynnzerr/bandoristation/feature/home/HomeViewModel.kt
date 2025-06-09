@@ -36,6 +36,7 @@ import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
 
 class HomeViewModel(
     private val connectWebSocketUseCase: ConnectWebSocketUseCase,
@@ -59,6 +60,8 @@ class HomeViewModel(
     var isFilteringPJSK = true
     var isClearingOutdatedRoom = false
     var isSavingRoomHistory = true
+    var autoUploadInterval: Long = 30L
+    private var autoUploadJob: kotlinx.coroutines.Job? = null
 
     override suspend fun loadInitialData() {
         sendEvent(HomeIntent.GetRoomFilter())
@@ -143,6 +146,7 @@ class HomeViewModel(
                 isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true
                 isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false
                 isSavingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
+                autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 30L
 
                 val isFirstRun = p[PreferenceKeys.IS_FIRST_RUN] ?: true
                 internalState.update {
@@ -239,8 +243,18 @@ class HomeViewModel(
             }
 
             is HomeIntent.UploadRoom -> {
-                viewModelScope.launch {
-                    uploadRoomUseCase(event.room)
+                autoUploadJob?.cancel()
+                if (event.continuous) {
+                    autoUploadJob = viewModelScope.launch {
+                        while (kotlinx.coroutines.isActive) {
+                            uploadRoomUseCase(event.room)
+                            delay(autoUploadInterval * 1000L)
+                        }
+                    }
+                } else {
+                    viewModelScope.launch {
+                        uploadRoomUseCase(event.room)
+                    }
                 }
                 null to ShowResourceSnackbar(Res.string.upload_room_snackbar)
             }
@@ -355,6 +369,7 @@ class HomeViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        autoUploadJob?.cancel()
         viewModelScope.launch { disconnectWebSocketUseCase(Unit) }
     }
 

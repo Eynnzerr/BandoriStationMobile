@@ -10,6 +10,7 @@ data class SettingState(
     val isClearingOutdatedRoom: Boolean = false,
     val isShowingPlayerInfo: Boolean = false,
     val isRecordingRoomHistory: Boolean = true,
+    val autoUploadInterval: Long = 30,
 ) : UIState {
     companion object {
         fun initial() = SettingState()
@@ -22,6 +23,7 @@ sealed class SettingEvent : UIEvent {
     data class UpdateClearOutdatedRoom(val isClearing: Boolean): SettingEvent()
     data class UpdateShowPlayerInfo(val isShowing: Boolean): SettingEvent()
     data class UpdateRecordRoomHistory(val isRecording: Boolean): SettingEvent()
+    data class UpdateAutoUploadInterval(val interval: Long): SettingEvent()
 }
 
 sealed class SettingEffect : UIEffect {
