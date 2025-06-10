@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -18,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
@@ -91,7 +93,10 @@ fun SendRoomDialog(
                             IconButton(onClick = { description = "" }) {
                                 Icon(Icons.Filled.Clear, contentDescription = "清空")
                             }
-                        }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done
+                        )
                     )
 
                     // 预选词部分
@@ -211,7 +216,7 @@ fun SendRoomDialog(
                     onClick = {
                         val roomInfo = RoomUploadInfo(
                             number = roomNumber,
-                            description = description
+                            description = description.trim()
                         )
                         onSendClick(roomInfo, continuous)
                         onDismissRequest()

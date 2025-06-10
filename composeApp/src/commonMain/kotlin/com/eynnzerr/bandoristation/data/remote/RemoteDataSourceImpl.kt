@@ -53,6 +53,12 @@ class RemoteDataSourceImpl(
     override fun disconnectWebSocket()
         = webSocketClient.disconnect()
 
+    override suspend fun getServerTimeOnce()
+        = webSocketClient.sendRequestWithRetry(
+            action = "getServerTime",
+            data = Unit,
+        )
+
     override suspend fun setWebSocketApiClient(params: ClientSetInfo)
         = webSocketClient.sendRequestWithRetry(
             action = "setClient",

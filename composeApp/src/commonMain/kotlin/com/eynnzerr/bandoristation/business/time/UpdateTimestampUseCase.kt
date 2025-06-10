@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.business
+package com.eynnzerr.bandoristation.business.time
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -8,6 +8,7 @@ import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
+import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -40,11 +41,16 @@ class UpdateTimestampUseCase(
                 .onEach { newTime ->
                     newTime?.let {
                         // plus one to prevent possible negative time
-                        serverCurrentTime = it + 1
                         dataStore.edit { p -> p[PreferenceKeys.SERVER_TIME] = it + 1 }
                     }
                 }
                 .launchIn(this)
+        }
+
+        CoroutineScope(dispatcher).launch {
+            dataStore.data.map { p -> p[PreferenceKeys.SERVER_TIME] ?: System.now().toEpochMilliseconds() }.collect {
+                serverCurrentTime = it
+            }
         }
     }
 
@@ -56,6 +62,7 @@ class UpdateTimestampUseCase(
 
             // fallback
             if (serverCurrentTime == 0L) {
+                AppLogger.d(TAG, "cannot receive serverCurrentTime. Fallback.")
                 serverCurrentTime = System.now().toEpochMilliseconds()
             }
 
@@ -77,3 +84,5 @@ class UpdateTimestampUseCase(
 data class TimestampWrapper(
     val time: Long,
 )
+
+private const val TAG = "UpdateTimestampUseCase"

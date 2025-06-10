@@ -8,6 +8,12 @@
     <string name="join_room_snackbar">Marked as joining the selected room.</string>
     <string name="upload_room_snackbar">Successfully upload room information.</string>
     <string name="joined">Joined</string>
+    <string name="reconnecting_to_server">Reconnecting to server...</string>
+    <string name="websocket_error_default">WebSocket error.</string>
+    <string name="fetched_latest_room_list">Fetched the latest room list.</string>
+    <string name="inform_user_success">Successfully reported the user.</string>
+    <string name="set_filter_success">Successfully set filter conditions.</string>
+    <string name="refreshing_room_list">Refreshing room list...</string>
 
     <!--  Chat  -->
     <string name="chat_screen_title">Chat</string>

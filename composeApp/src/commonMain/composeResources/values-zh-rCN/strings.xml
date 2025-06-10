@@ -8,6 +8,12 @@
     <string name="join_room_snackbar">已标记上车。</string>
     <string name="joined">在车</string>
     <string name="upload_room_snackbar">已上传房间信息到车站。</string>
+    <string name="reconnecting_to_server">正在重新连接至车站服务器...</string>
+    <string name="websocket_error_default">WebSocket连接错误。</string>
+    <string name="fetched_latest_room_list">获取最新房间列表。</string>
+    <string name="inform_user_success">成功举报该用户。</string>
+    <string name="set_filter_success">设置过滤条件成功。</string>
+    <string name="refreshing_room_list">刷新房间列表...</string>
 
     <!--  聊天页  -->
     <string name="chat_screen_title">聊天</string>

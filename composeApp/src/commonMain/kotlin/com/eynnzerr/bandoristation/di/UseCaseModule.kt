@@ -11,7 +11,7 @@ import com.eynnzerr.bandoristation.business.RequestHistoryChatUseCase
 import com.eynnzerr.bandoristation.business.SendChatUseCase
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
-import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
+import com.eynnzerr.bandoristation.business.time.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.account.BindQQUseCase
 import com.eynnzerr.bandoristation.business.account.GetEditProfileDataUseCase
@@ -44,12 +44,15 @@ import com.eynnzerr.bandoristation.business.roomhistory.EditRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.FetchAllHistoryUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.business.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 fun provideUseCaseModule() = module {
+    singleOf(::GetServerTimeUseCase)
+
     single {
         SetUpClientUseCase(
             repository = get(),

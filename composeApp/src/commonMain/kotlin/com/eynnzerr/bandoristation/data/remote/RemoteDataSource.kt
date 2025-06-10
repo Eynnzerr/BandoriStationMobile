@@ -26,6 +26,7 @@ interface RemoteDataSource {
     fun disconnectWebSocket()
 
     // websocket concrete business
+    suspend fun getServerTimeOnce()
     suspend fun setWebSocketApiClient(params: ClientSetInfo)
     suspend fun setAccessPermission(token: String)
     suspend fun getFirstRoomList()

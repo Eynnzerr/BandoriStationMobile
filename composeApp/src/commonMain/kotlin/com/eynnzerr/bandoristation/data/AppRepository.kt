@@ -20,6 +20,7 @@ class AppRepository(
     fun listenWebSocketConnection() = remoteDataSource.webSocketConnectionState
 
     // page business
+    suspend fun getServerTimeOnce() = remoteDataSource.getServerTimeOnce()
     suspend fun setWebSocketApiClient(params: ClientSetInfo) = remoteDataSource.setWebSocketApiClient(params)
     suspend fun setAccessPermission(token: String) = remoteDataSource.setAccessPermission(token)
 

@@ -7,10 +7,16 @@ import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.connecting
 import bandoristationm.composeapp.generated.resources.error
+import bandoristationm.composeapp.generated.resources.fetched_latest_room_list
+import bandoristationm.composeapp.generated.resources.inform_user_success
 import bandoristationm.composeapp.generated.resources.join_room_snackbar
 import bandoristationm.composeapp.generated.resources.offline
+import bandoristationm.composeapp.generated.resources.reconnecting_to_server
+import bandoristationm.composeapp.generated.resources.refreshing_room_list
 import bandoristationm.composeapp.generated.resources.room_list_title
+import bandoristationm.composeapp.generated.resources.set_filter_success
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
+import bandoristationm.composeapp.generated.resources.websocket_error_default
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
@@ -18,7 +24,7 @@ import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
-import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
+import com.eynnzerr.bandoristation.business.time.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.room.RequestRecentRoomsUseCase
@@ -27,6 +33,7 @@ import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.business.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
@@ -44,10 +51,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.isActive
+import kotlinx.datetime.Clock
 
 class HomeViewModel(
     private val connectWebSocketUseCase: ConnectWebSocketUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
+    private val getServerTimeUseCase: GetServerTimeUseCase,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
     private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
@@ -104,13 +113,13 @@ class HomeViewModel(
                             internalState.update {
                                 it.copy(title = Res.string.offline)
                             }
-                            sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
+                            sendEffect(ShowResourceSnackbar(Res.string.reconnecting_to_server))
                         }
                         is WebSocketClient.ConnectionState.Error -> {
                             internalState.update {
                                 it.copy(title = Res.string.error)
                             }
-                            sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
+                            sendEffect(ShowSnackbar(result.data.exception.message ?: Res.string.websocket_error_default.key))
                         }
                     }
                 }
@@ -144,6 +153,13 @@ class HomeViewModel(
                     is UseCaseResult.Success -> {
                         AppLogger.d(TAG, "Successfully fetched room list. length: ${result.data.size}")
                         sendEvent(HomeIntent.AppendRoomList(result.data))
+
+                        // correct server timestamp if necessary
+                        result.data.lastOrNull()?.let { lastRoom ->
+                            if (state.value.serverTimestampMillis < (lastRoom.time ?: Clock.System.now().toEpochMilliseconds())) {
+                                getServerTimeUseCase(Unit)
+                            }
+                        }
                     }
                 }
             }
@@ -220,7 +236,7 @@ class HomeViewModel(
         return when (event) {
             is HomeIntent.UpdateRoomList -> {
                 val filteredRooms = event.rooms.filterNot(state.value.roomFilter, isFilteringPJSK)
-                state.value.copy(rooms = filteredRooms) to ShowSnackbar("获取最新房间列表。")
+                state.value.copy(rooms = filteredRooms) to ShowResourceSnackbar(Res.string.fetched_latest_room_list)
             }
 
             is HomeIntent.AppendRoomList -> {
@@ -318,7 +334,7 @@ class HomeViewModel(
                             sendEffect(ShowSnackbar(informResult.error))
                         }
                         is UseCaseResult.Success -> {
-                            sendEffect(ShowSnackbar("成功举报该用户。"))
+                            sendEffect(ShowResourceSnackbar(Res.string.inform_user_success))
                         }
                     }
                 }
@@ -359,7 +375,7 @@ class HomeViewModel(
                                     roomFilter = event.filter
                                 )
                             }
-                            sendEffect(ShowSnackbar("设置过滤条件成功。"))
+                            sendEffect(ShowResourceSnackbar(Res.string.set_filter_success))
                         }
                     }
                 }
@@ -377,7 +393,7 @@ class HomeViewModel(
                     delay(500L)
                     requestRecentRoomsUseCase(Unit)
                 }
-                null to ShowSnackbar("刷新房间列表...")
+                null to ShowResourceSnackbar(Res.string.refreshing_room_list)
             }
 
             is HomeIntent.SetNoReminder -> {

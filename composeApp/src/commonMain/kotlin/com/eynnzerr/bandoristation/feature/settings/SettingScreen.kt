@@ -180,7 +180,7 @@ fun SettingScreen(
                                 viewModel.sendEvent(SettingEvent.UpdateAutoUploadInterval(v))
                             }
                         },
-                        modifier = Modifier.width(80.dp),
+                        modifier = Modifier.width(100.dp),
                         singleLine = true
                     )
                 },
@@ -209,14 +209,14 @@ fun SettingScreen(
                 }
             }
 
-            SettingItem(
-                title = stringResource(Res.string.settings_active_filter_rules_title),
-                desc = stringResource(Res.string.settings_active_filter_rules_desc),
-                icon = Icons.Outlined.FilterList,
-                // onClick = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(true)) },
-                onClick = {},
-                enable = false
-            )
+//            SettingItem(
+//                title = stringResource(Res.string.settings_active_filter_rules_title),
+//                desc = stringResource(Res.string.settings_active_filter_rules_desc),
+//                icon = Icons.Outlined.FilterList,
+//                // onClick = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(true)) },
+//                onClick = {},
+//                enable = false
+//            )
 
             SettingItem(
                 title = "术语教程",
