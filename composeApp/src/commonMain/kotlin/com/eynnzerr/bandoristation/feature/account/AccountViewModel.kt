@@ -145,6 +145,7 @@ class AccountViewModel(
                                p[PreferenceKeys.IS_TOKEN_LOGIN] = false
                            }
                            sendEvent(UpdateAccountInfo(loginResult.data))
+                           setAccessPermissionUseCase.invoke(null)
                        }
                    }
                }

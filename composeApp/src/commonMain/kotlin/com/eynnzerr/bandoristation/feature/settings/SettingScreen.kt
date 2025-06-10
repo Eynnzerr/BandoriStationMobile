@@ -169,7 +169,7 @@ fun SettingScreen(
             var intervalText by remember(state.autoUploadInterval) { mutableStateOf(state.autoUploadInterval.toString()) }
             SettingItem(
                 title = "持续发车间隔(秒)",
-                desc = "自动上传房间信息的时间间隔",
+                desc = "自动上传房间的时间间隔(>8秒)",
                 icon = Icons.Outlined.Schedule,
                 action = {
                     OutlinedTextField(
@@ -177,11 +177,14 @@ fun SettingScreen(
                         onValueChange = {
                             intervalText = it.filter { ch -> ch.isDigit() }
                             intervalText.toLongOrNull()?.let { v ->
-                                viewModel.sendEvent(SettingEvent.UpdateAutoUploadInterval(v))
+                                if (v >= 8) {
+                                    viewModel.sendEvent(SettingEvent.UpdateAutoUploadInterval(v))
+                                }
                             }
                         },
-                        modifier = Modifier.width(100.dp),
-                        singleLine = true
+                        modifier = Modifier.width(80.dp),
+                        singleLine = true,
+                        isError = intervalText.toLongOrNull()?.let { interval -> interval > 8 } ?: false
                     )
                 },
                 onClick = {}

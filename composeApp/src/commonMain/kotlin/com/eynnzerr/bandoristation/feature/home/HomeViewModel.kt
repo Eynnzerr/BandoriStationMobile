@@ -33,6 +33,8 @@ import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
 import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
+import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.business.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
@@ -41,9 +43,9 @@ import com.eynnzerr.bandoristation.model.RoomFilter
 import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
-import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform
+import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.Job
@@ -70,6 +72,8 @@ class HomeViewModel(
     private val updateRoomFilterUseCase: UpdateRoomFilterUseCase,
     private val addRoomHistoryUseCase: AddRoomHistoryUseCase,
     private val getLatestReleaseUseCase: GetLatestReleaseUseCase,
+    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val followUserUseCase: FollowUserUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
@@ -236,7 +240,7 @@ class HomeViewModel(
         return when (event) {
             is HomeIntent.UpdateRoomList -> {
                 val filteredRooms = event.rooms.filterNot(state.value.roomFilter, isFilteringPJSK)
-                state.value.copy(rooms = filteredRooms) to ShowResourceSnackbar(Res.string.fetched_latest_room_list)
+                state.value.copy(rooms = filteredRooms) to null
             }
 
             is HomeIntent.AppendRoomList -> {
@@ -400,6 +404,41 @@ class HomeViewModel(
                 viewModelScope.launch {
                     dataStore.edit { p ->
                         p[PreferenceKeys.IS_FIRST_RUN] = false
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.BrowseUser -> {
+                viewModelScope.launch {
+                    val response = getUserInfoUseCase.invoke(event.id)
+                    when (response) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(selectedUser = response.data)
+                            }
+                            sendEffect(ControlProfileDialog(true))
+                        }
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.FollowUser -> {
+                viewModelScope.launch {
+                    val response = followUserUseCase.invoke(event.id)
+                    when (response) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar(response.data))
+                        }
                     }
                 }
                 null to null

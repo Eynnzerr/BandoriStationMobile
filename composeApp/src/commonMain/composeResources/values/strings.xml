@@ -19,6 +19,7 @@
     <string name="chat_screen_title">Chat</string>
     <string name="clear_chats_snackbar">Successfully cleared all chat messages.</string>
     <string name="load_all_snackbar">All chat history has benn loaded.</string>
+    <string name="chat_message_input_placeholder">Enter message...</string>
 
     <!--  Account  -->
     <string name="account_screen_title">Account</string>

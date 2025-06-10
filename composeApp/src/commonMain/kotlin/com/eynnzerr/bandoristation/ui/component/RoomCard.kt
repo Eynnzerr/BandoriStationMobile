@@ -41,6 +41,7 @@ fun RoomCard(
     onJoin: (Boolean) -> Unit,
     onBlockUser: () -> Unit,
     onReportUser: () -> Unit,
+    onClickUserAvatar: () -> Unit = {},
     isJoined: Boolean,
     currentTimeMillis: Long = Clock.System.now().toEpochMilliseconds(),
     modifier: Modifier = Modifier,
@@ -62,7 +63,8 @@ fun RoomCard(
         ) {
             UserAvatar(
                 avatarName = roomInfo.userInfo?.avatar ?: "",
-                size = 48.dp
+                size = 48.dp,
+                onClick = onClickUserAvatar
             )
             Column(
                 modifier = Modifier

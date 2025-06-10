@@ -14,6 +14,7 @@ import kotlinx.datetime.Clock.System
 import org.jetbrains.compose.resources.StringResource
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.home_screen_title
+import com.eynnzerr.bandoristation.model.account.AccountInfo
 
 data class HomeState(
     val rooms: List<RoomInfo> = emptyList(),
@@ -26,6 +27,8 @@ data class HomeState(
     val title: StringResource = Res.string.home_screen_title,
     val isShowingPlayerBrief: Boolean = false,
     val isFirstRun: Boolean = false,
+    val selectedUser: AccountInfo = AccountInfo(),
+    val followingUsers: List<Long> = emptyList(),
 ) : UIState {
     companion object {
         fun initial() = HomeState(
@@ -49,6 +52,8 @@ sealed class HomeIntent: UIEvent {
     data class InformUser(val params: ApiRequest.InformUser): HomeIntent()
     class GetRoomFilter(): HomeIntent()
     data class UpdateRoomFilter(val filter: RoomFilter): HomeIntent()
+    data class BrowseUser(val id: Long): HomeIntent()
+    data class FollowUser(val id: Long): HomeIntent()
 }
 
 sealed class HomeEffect: UIEffect {
@@ -79,4 +84,5 @@ sealed class HomeEffect: UIEffect {
     class CloseHelpDialog(): HomeEffect()
     data class OpenUpdateDialog(val release: GithubRelease): HomeEffect()
     class CloseUpdateDialog(): HomeEffect()
+    data class ControlProfileDialog(val visible: Boolean): HomeEffect()
 }

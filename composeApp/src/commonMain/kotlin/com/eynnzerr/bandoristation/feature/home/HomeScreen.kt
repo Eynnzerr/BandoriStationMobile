@@ -63,6 +63,7 @@ import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import com.eynnzerr.bandoristation.model.GithubRelease
+import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -91,6 +92,7 @@ fun HomeScreen(
     var showBlockUserDialog by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
+    var showProfileDialog by remember { mutableStateOf(false) }
     var latestRelease by remember { mutableStateOf<GithubRelease?>(null) }
     var roomToInform : RoomInfo? by remember { mutableStateOf(null) }
     var userToBlock: UserInfo? by remember { mutableStateOf(null) }
@@ -220,6 +222,10 @@ fun HomeScreen(
                         )
                     }
                 }
+
+                is HomeEffect.ControlProfileDialog -> {
+                    showProfileDialog = action.visible
+                }
             }
         }
     }
@@ -276,6 +282,14 @@ fun HomeScreen(
             uriHandler.openUri(url)
             viewModel.sendEffect(HomeEffect.CloseUpdateDialog())
         }
+    )
+
+    UserProfileDialog(
+        isVisible = showProfileDialog,
+        accountInfo = state.selectedUser,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.ControlProfileDialog(false)) },
+        onFollow = { viewModel.sendEvent(FollowUser(it)) },
+        hasFollowed = state.selectedUser.accountSummary.userId in state.followingUsers,
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -421,6 +435,7 @@ fun HomeScreen(
                         roomInfo.userInfo?.let { viewModel.sendEffect(HomeEffect.OpenBlockUserDialog(it)) }
                     },
                     onReportUser = { viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo)) },
+                    onClickUserAvatar = { viewModel.sendEvent(BrowseUser(roomInfo.userInfo?.userId ?: -1)) },
                     isJoined = roomInfo == state.selectedRoom,
                     currentTimeMillis = state.serverTimestampMillis,
                     modifier = Modifier.animateItem()

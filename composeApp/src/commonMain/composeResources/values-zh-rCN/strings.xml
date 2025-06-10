@@ -19,6 +19,7 @@
     <string name="chat_screen_title">聊天</string>
     <string name="clear_chats_snackbar">已清空全部聊天记录。</string>
     <string name="load_all_snackbar">已加载全部历史聊天记录。</string>
+    <string name="chat_message_input_placeholder">输入消息...</string>
 
     <!--  用户页  -->
     <string name="account_screen_title">账户</string>
