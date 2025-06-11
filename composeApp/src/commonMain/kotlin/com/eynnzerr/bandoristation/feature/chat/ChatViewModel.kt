@@ -4,10 +4,14 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.chat_screen_title
 import bandoristationm.composeapp.generated.resources.clear_chats_snackbar
+import bandoristationm.composeapp.generated.resources.connecting
+import bandoristationm.composeapp.generated.resources.error
 import bandoristationm.composeapp.generated.resources.load_all_snackbar
+import bandoristationm.composeapp.generated.resources.offline
 import com.eynnzerr.bandoristation.base.BaseViewModel
-import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
+import com.eynnzerr.bandoristation.business.websocket.GetWebSocketStateUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetChatUseCase
 import com.eynnzerr.bandoristation.business.InitializeChatRoomUseCase
@@ -35,11 +39,10 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
 class ChatViewModel(
-    private val connectWebSocketUseCase: ConnectWebSocketUseCase,
+    private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
-    private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val initializeChatRoomUseCase: InitializeChatRoomUseCase,
     private val getChatUseCase: GetChatUseCase,
     private val sendChatUseCase: SendChatUseCase,
@@ -52,16 +55,16 @@ class ChatViewModel(
     initialState = ChatState.initial()
 ) {
 
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         viewModelScope.launch {
-            connectWebSocketUseCase(Unit).collect { result ->
+            getWebSocketStateUseCase(Unit).collect { result ->
                 if (result is UseCaseResult.Success) {
                     when (result.data) {
                         is WebSocketClient.ConnectionState.Connected -> {
                             AppLogger.d(TAG, "WebSocket is connected.")
 
                             internalState.update {
-                                it.copy(title = "聊天室")
+                                it.copy(title = Res.string.chat_screen_title)
                             }
                             setAccessPermissionUseCase(null)
                             setUpClientUseCase(ClientSetInfo(
@@ -73,20 +76,20 @@ class ChatViewModel(
                         }
                         is WebSocketClient.ConnectionState.Connecting -> {
                             internalState.update {
-                                it.copy(title = "连接中...")
+                                it.copy(title = Res.string.connecting)
                             }
                             AppLogger.d(TAG, "Connecting to WebSocket...")
                         }
                         is WebSocketClient.ConnectionState.Disconnected -> {
                             // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
                             internalState.update {
-                                it.copy(title = "当前离线")
+                                it.copy(title = Res.string.offline)
                             }
                             sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
                         }
                         is WebSocketClient.ConnectionState.Error -> {
                             internalState.update {
-                                it.copy(title = "错误")
+                                it.copy(title = Res.string.error)
                             }
                             sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
                         }
@@ -184,7 +187,6 @@ class ChatViewModel(
                     initialized = true,
                     unreadCount = 0,
                     isLoading = false,
-                    title = "聊天室"
                 ) to null
             }
             is ChatIntent.ClearAll -> {
@@ -262,11 +264,6 @@ class ChatViewModel(
                 null to null
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.launch { disconnectWebSocketUseCase(Unit) }
     }
 
     private fun processNewChat(newChats: List<ChatMessage>): List<ChatMessage> {

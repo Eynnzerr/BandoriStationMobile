@@ -122,6 +122,9 @@ fun AccountScreen(
                 is AccountEffect.ControlLoginDialog -> {
                     showLoginDialog = action.visible
                     loginDialogState = LoginScreenState.INITIAL
+                    if (!action.visible && !state.isLoggedIn && state.isLoading) {
+                        viewModel.sendEvent(CancelLoading())
+                    }
                 }
 
                 is AccountEffect.ControlDrawer -> {
@@ -326,7 +329,7 @@ fun AccountScreen(
                             .fillMaxSize()
                             .padding(paddingValues),
                         accountInfo = state.accountInfo,
-                        roomHistories = state.roomHistory,
+                        roomHistories = state.roomHistory.asReversed(),
                         sideButton = {
                             EditAccountButton(
                                 isLoggedIn = state.isLoggedIn,

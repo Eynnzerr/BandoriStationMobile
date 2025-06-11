@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,6 +49,12 @@ import bandoristationm.composeapp.generated.resources.settings_show_player_data_
 import bandoristationm.composeapp.generated.resources.settings_show_player_data_desc
 import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_title
 import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_desc
+import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_title
+import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_desc
+import bandoristationm.composeapp.generated.resources.settings_tutorial_title
+import bandoristationm.composeapp.generated.resources.settings_tutorial_desc
+import bandoristationm.composeapp.generated.resources.settings_version_title
+import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
 import com.eynnzerr.bandoristation.ui.component.settings.SettingDropdownItem
@@ -125,16 +133,6 @@ fun SettingScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             SettingItem(
-                title = "登录管理",
-                desc = "",
-                icon = Icons.Outlined.AccountBox,
-                action = {},
-                onClick = {
-
-                }
-            )
-
-            SettingItem(
                 title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
                 desc = stringResource(Res.string.settings_auto_clear_expired_rooms_desc),
                 icon = Icons.Outlined.Schedule,
@@ -173,6 +171,30 @@ fun SettingScreen(
                 onClick = {}
             )
 
+            var intervalText by remember(state.autoUploadInterval) { mutableStateOf(state.autoUploadInterval.toString()) }
+            SettingItem(
+                title = stringResource(Res.string.settings_auto_upload_interval_title),
+                desc = stringResource(Res.string.settings_auto_upload_interval_desc),
+                icon = Icons.Outlined.Schedule,
+                action = {
+                    OutlinedTextField(
+                        value = intervalText,
+                        onValueChange = {
+                            intervalText = it.filter { ch -> ch.isDigit() }
+                            intervalText.toLongOrNull()?.let { v ->
+                                if (v >= 8) {
+                                    viewModel.sendEvent(SettingEvent.UpdateAutoUploadInterval(v))
+                                }
+                            }
+                        },
+                        modifier = Modifier.width(80.dp),
+                        singleLine = true,
+                        isError = intervalText.toLongOrNull()?.let { interval -> interval < 8 } ?: false
+                    )
+                },
+                onClick = {}
+            )
+
             SettingDropdownItem(
                 title = stringResource(Res.string.theme),
                 desc = stringResource(Res.string.theme_desc),
@@ -195,25 +217,25 @@ fun SettingScreen(
                 }
             }
 
-            SettingItem(
-                title = stringResource(Res.string.settings_active_filter_rules_title),
-                desc = stringResource(Res.string.settings_active_filter_rules_desc),
-                icon = Icons.Outlined.FilterList,
-                // onClick = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(true)) },
-                onClick = {},
-                enable = false
-            )
+//            SettingItem(
+//                title = stringResource(Res.string.settings_active_filter_rules_title),
+//                desc = stringResource(Res.string.settings_active_filter_rules_desc),
+//                icon = Icons.Outlined.FilterList,
+//                // onClick = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(true)) },
+//                onClick = {},
+//                enable = false
+//            )
 
             SettingItem(
-                title = "术语教程",
-                desc = "关于车头常用术语的简易教程",
+                title = stringResource(Res.string.settings_tutorial_title),
+                desc = stringResource(Res.string.settings_tutorial_desc),
                 icon = Icons.Outlined.School,
                 onClick = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(true)) }
             )
 
             SettingItem(
-                title = "版本",
-                desc = "1.0.0",
+                title = stringResource(Res.string.settings_version_title),
+                desc = state.versionName,
                 icon = Icons.Outlined.Update,
                 onClick = {
                     // TODO 检查更新

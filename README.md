@@ -10,7 +10,7 @@ This is a Multiplatform client app targeting Android, iOS, Desktop, designed for
 ## Features
 
 - Same experience as the [website of BandoriStation](bandoristation.com).
-- More in WIP...
+- More to discover.
 
 ## Previews
 

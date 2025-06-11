@@ -279,7 +279,7 @@ fun UserProfile(
                                 orientation = BarOrientation.VERTICAL,
                                 config = ChartConfig(
                                     showGrid = false,
-                                    showLabels = true,
+                                    showLabels = false,
                                     showValues = true
                                 ),
                                 onBarClick = { data ->
@@ -312,7 +312,7 @@ fun UserProfile(
                                     color = MaterialTheme.colorScheme.primary
                                 )),
                                 height = 250.dp,
-                                lineType = LineType.CURVED,
+                                lineType = LineType.AREA,
                                 config = ChartConfig(
                                     showGrid = false,
                                     showLabels = false,
@@ -347,7 +347,7 @@ fun UserProfile(
                                         )
                                     },
                                 ),
-                                height = 500.dp,
+                                height = 250.dp,
                                 donutMode = false,
                                 donutWidth = 0.4f,
                                 config = ChartConfig(

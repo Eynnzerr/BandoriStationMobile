@@ -5,16 +5,25 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.connecting
+import bandoristationm.composeapp.generated.resources.error
+import bandoristationm.composeapp.generated.resources.inform_user_success
 import bandoristationm.composeapp.generated.resources.join_room_snackbar
+import bandoristationm.composeapp.generated.resources.offline
+import bandoristationm.composeapp.generated.resources.reconnecting_to_server
+import bandoristationm.composeapp.generated.resources.refreshing_room_list
+import bandoristationm.composeapp.generated.resources.room_list_title
+import bandoristationm.composeapp.generated.resources.set_filter_success
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
+import bandoristationm.composeapp.generated.resources.websocket_error_default
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
-import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
+import com.eynnzerr.bandoristation.business.websocket.GetWebSocketStateUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.business.SetUpClientUseCase
-import com.eynnzerr.bandoristation.business.UpdateTimestampUseCase
+import com.eynnzerr.bandoristation.business.time.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.business.UploadRoomUseCase
 import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.room.RequestRecentRoomsUseCase
@@ -22,6 +31,10 @@ import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
 import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
 import com.eynnzerr.bandoristation.business.social.InformUserUseCase
 import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
+import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
+import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
+import com.eynnzerr.bandoristation.business.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
@@ -29,20 +42,24 @@ import com.eynnzerr.bandoristation.model.RoomFilter
 import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
-import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.getPlatform
+import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.isActive
+import kotlinx.datetime.Clock
 
 class HomeViewModel(
-    private val connectWebSocketUseCase: ConnectWebSocketUseCase,
+    private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
+    private val getServerTimeUseCase: GetServerTimeUseCase,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
-    private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val requestRecentRoomsUseCase: RequestRecentRoomsUseCase,
     private val getRoomListUseCase: GetRoomListUseCase,
     private val updateTimestampUseCase: UpdateTimestampUseCase,
@@ -52,6 +69,9 @@ class HomeViewModel(
     private val getRoomFilterUseCase: GetRoomFilterUseCase,
     private val updateRoomFilterUseCase: UpdateRoomFilterUseCase,
     private val addRoomHistoryUseCase: AddRoomHistoryUseCase,
+    private val getLatestReleaseUseCase: GetLatestReleaseUseCase,
+    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val followUserUseCase: FollowUserUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
@@ -59,12 +79,14 @@ class HomeViewModel(
     var isFilteringPJSK = true
     var isClearingOutdatedRoom = false
     var isSavingRoomHistory = true
+    var autoUploadInterval: Long = 5L
+    private var autoUploadJob: Job? = null
 
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         sendEvent(HomeIntent.GetRoomFilter())
 
         viewModelScope.launch {
-            connectWebSocketUseCase(Unit).collect { result ->
+            getWebSocketStateUseCase(Unit).collect { result ->
                 if (result is UseCaseResult.Success) {
                     when (result.data) {
                         is WebSocketClient.ConnectionState.Connected -> {
@@ -72,7 +94,7 @@ class HomeViewModel(
 
                             // 每次重新连接到websocket时，请求最近房间列表、重新设置权限、设置客户端
                             internalState.update {
-                                it.copy(title = "房间列表")
+                                it.copy(title = Res.string.room_list_title)
                             }
                             requestRecentRoomsUseCase(Unit)
                             setAccessPermissionUseCase(null)
@@ -84,22 +106,22 @@ class HomeViewModel(
                         }
                         is WebSocketClient.ConnectionState.Connecting -> {
                             internalState.update {
-                                it.copy(title = "连接中...")
+                                it.copy(title = Res.string.connecting)
                             }
                             AppLogger.d(TAG, "Connecting to WebSocket...")
                         }
                         is WebSocketClient.ConnectionState.Disconnected -> {
                             // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
                             internalState.update {
-                                it.copy(title = "当前离线")
+                                it.copy(title = Res.string.offline)
                             }
-                            sendEffect(ShowSnackbar("正在重新连接至车站服务器..."))
+                            sendEffect(ShowResourceSnackbar(Res.string.reconnecting_to_server))
                         }
                         is WebSocketClient.ConnectionState.Error -> {
                             internalState.update {
-                                it.copy(title = "错误")
+                                it.copy(title = Res.string.error)
                             }
-                            sendEffect(ShowSnackbar(result.data.exception.message ?: "WebSocket error."))
+                            sendEffect(ShowSnackbar(result.data.exception.message ?: Res.string.websocket_error_default.key))
                         }
                     }
                 }
@@ -133,6 +155,13 @@ class HomeViewModel(
                     is UseCaseResult.Success -> {
                         AppLogger.d(TAG, "Successfully fetched room list. length: ${result.data.size}")
                         sendEvent(HomeIntent.AppendRoomList(result.data))
+
+                        // correct server timestamp if necessary
+                        result.data.lastOrNull()?.let { lastRoom ->
+                            if (state.value.serverTimestampMillis < (lastRoom.time ?: Clock.System.now().toEpochMilliseconds())) {
+                                getServerTimeUseCase(Unit)
+                            }
+                        }
                     }
                 }
             }
@@ -143,6 +172,7 @@ class HomeViewModel(
                 isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true
                 isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false
                 isSavingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
+                autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 5L
 
                 val isFirstRun = p[PreferenceKeys.IS_FIRST_RUN] ?: true
                 internalState.update {
@@ -171,6 +201,19 @@ class HomeViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            when (val result = getLatestReleaseUseCase(Unit)) {
+                is UseCaseResult.Success -> {
+                    val latest = result.data.tagName.trimStart('v', 'V')
+                    val current = getPlatform().versionName.trimStart('v', 'V')
+                    if (latest != current) {
+                        sendEffect(OpenUpdateDialog(result.data))
+                    }
+                }
+                else -> Unit
+            }
+        }
     }
 
     override suspend fun onStartStateFlow() {
@@ -195,7 +238,7 @@ class HomeViewModel(
         return when (event) {
             is HomeIntent.UpdateRoomList -> {
                 val filteredRooms = event.rooms.filterNot(state.value.roomFilter, isFilteringPJSK)
-                state.value.copy(rooms = filteredRooms) to ShowSnackbar("获取最新房间列表。")
+                state.value.copy(rooms = filteredRooms) to null
             }
 
             is HomeIntent.AppendRoomList -> {
@@ -239,10 +282,23 @@ class HomeViewModel(
             }
 
             is HomeIntent.UploadRoom -> {
-                viewModelScope.launch {
-                    uploadRoomUseCase(event.room)
+                autoUploadJob?.cancel()
+                if (event.continuous) {
+                    autoUploadJob = viewModelScope.launch {
+                        while (isActive) {
+                            uploadRoomUseCase(event.room)
+                            delay(autoUploadInterval * 1000L)
+                        }
+                    }
+                } else {
+                    viewModelScope.launch {
+                        uploadRoomUseCase(event.room)
+                    }
                 }
-                null to ShowResourceSnackbar(Res.string.upload_room_snackbar)
+
+                state.value.selectedRoom?.let {
+                    state.value.copy(selectedRoom = it.copy(event.room.number, event.room.description))
+                } to ShowResourceSnackbar(Res.string.upload_room_snackbar)
             }
 
             is HomeIntent.AddPresetWord -> {
@@ -280,7 +336,7 @@ class HomeViewModel(
                             sendEffect(ShowSnackbar(informResult.error))
                         }
                         is UseCaseResult.Success -> {
-                            sendEffect(ShowSnackbar("成功举报该用户。"))
+                            sendEffect(ShowResourceSnackbar(Res.string.inform_user_success))
                         }
                     }
                 }
@@ -321,7 +377,7 @@ class HomeViewModel(
                                     roomFilter = event.filter
                                 )
                             }
-                            sendEffect(ShowSnackbar("设置过滤条件成功。"))
+                            sendEffect(ShowResourceSnackbar(Res.string.set_filter_success))
                         }
                     }
                 }
@@ -339,7 +395,7 @@ class HomeViewModel(
                     delay(500L)
                     requestRecentRoomsUseCase(Unit)
                 }
-                null to ShowSnackbar("刷新房间列表...")
+                null to ShowResourceSnackbar(Res.string.refreshing_room_list)
             }
 
             is HomeIntent.SetNoReminder -> {
@@ -350,12 +406,47 @@ class HomeViewModel(
                 }
                 null to null
             }
+
+            is HomeIntent.BrowseUser -> {
+                viewModelScope.launch {
+                    val response = getUserInfoUseCase.invoke(event.id)
+                    when (response) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(selectedUser = response.data)
+                            }
+                            sendEffect(ControlProfileDialog(true))
+                        }
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.FollowUser -> {
+                viewModelScope.launch {
+                    val response = followUserUseCase.invoke(event.id)
+                    when (response) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar(response.data))
+                        }
+                    }
+                }
+                null to null
+            }
         }
     }
 
     override fun onCleared() {
         super.onCleared()
-        viewModelScope.launch { disconnectWebSocketUseCase(Unit) }
+        autoUploadJob?.cancel()
     }
 
     fun List<RoomInfo>.filterNot(filter: RoomFilter, isFilteringPJSK: Boolean = true): List<RoomInfo> {

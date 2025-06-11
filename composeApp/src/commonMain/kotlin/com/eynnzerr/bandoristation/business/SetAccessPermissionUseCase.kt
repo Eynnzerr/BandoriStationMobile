@@ -15,8 +15,8 @@ class SetAccessPermissionUseCase(
     private val dispatcher: CoroutineDispatcher,
     private val dataStore: DataStore<Preferences>,
 ): UseCase<String?, Unit, Unit>(dispatcher) {
-    override suspend fun execute(param: String?): UseCaseResult<Unit, Unit> {
-        val token = param ?: dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: "" }.first()
+    override suspend fun execute(parameters: String?): UseCaseResult<Unit, Unit> {
+        val token = parameters ?: dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: "" }.first()
         repository.setAccessPermission(token)
 
         return UseCaseResult.Success(Unit) // WebSocket has no sync response so just return Unit.

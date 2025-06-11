@@ -53,6 +53,12 @@ class RemoteDataSourceImpl(
     override fun disconnectWebSocket()
         = webSocketClient.disconnect()
 
+    override suspend fun getServerTimeOnce()
+        = webSocketClient.sendRequestWithRetry(
+            action = "getServerTime",
+            data = Unit,
+        )
+
     override suspend fun setWebSocketApiClient(params: ClientSetInfo)
         = webSocketClient.sendRequestWithRetry(
             action = "setClient",
@@ -116,6 +122,9 @@ class RemoteDataSourceImpl(
 
     override suspend fun sendApiRequest(request: ApiRequest)
         = httpsClient.sendApiRequest(request)
+
+    override suspend fun fetchLatestRelease(owner: String, repo: String) =
+        httpsClient.fetchLatestRelease(owner, repo)
 }
 
 private const val TAG = "RemoteDataSourceImpl"

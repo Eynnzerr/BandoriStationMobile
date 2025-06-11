@@ -16,7 +16,7 @@ class SettingViewModel(
 ) : BaseViewModel<SettingState, SettingEvent, SettingEffect>(
     initialState = SettingState.initial()
 ) {
-    override suspend fun loadInitialData() {
+    override suspend fun onInitialize() {
         dataStore.data.collect { p ->
             internalState.update {
                 it.copy(
@@ -24,7 +24,8 @@ class SettingViewModel(
                     isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true,
                     isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false,
                     isShowingPlayerInfo = p[PreferenceKeys.SHOW_PLAER_BRIEF] ?: false,
-                    isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
+                    isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true,
+                    autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 5L,
                 )
             }
         }
@@ -63,6 +64,13 @@ class SettingViewModel(
             is SettingEvent.UpdateRecordRoomHistory -> {
                 viewModelScope.launch {
                     dataStore.edit { p -> p[PreferenceKeys.RECORD_ROOM_HISTORY] = event.isRecording }
+                }
+                null to null
+            }
+
+            is SettingEvent.UpdateAutoUploadInterval -> {
+                viewModelScope.launch {
+                    dataStore.edit { p -> p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] = event.interval }
                 }
                 null to null
             }

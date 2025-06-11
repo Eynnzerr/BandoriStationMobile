@@ -39,7 +39,7 @@ class LoginUseCase(
 
                     // Store following account information.
                     dataStore.edit { p ->
-                        p[PreferenceKeys.FOLLOWING_LIST] = loginResult.followingUsers.map { l -> l.toString() }.toSet()
+                        p[PreferenceKeys.FOLLOWING_LIST] = loginResult.followingUsers.map { fu -> fu.id.toString() }.toSet()
                     }
 
                     repository.sendAuthenticHttpsRequest(

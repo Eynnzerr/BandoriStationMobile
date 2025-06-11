@@ -17,6 +17,7 @@ import com.eynnzerr.bandoristation.ui.theme.BandThemeConfig
 import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
 import com.eynnzerr.bandoristation.ui.theme.getBandConfig
 import com.eynnzerr.bandoristation.utils.ScreenInfo
+import com.eynnzerr.bandoristation.WebSocketLifecycleHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
@@ -30,10 +31,12 @@ fun App() {
     KoinApplication(
         application = { modules(appModule) }
     ) {
+        val appScope = rememberCoroutineScope()
+        WebSocketLifecycleHandler(appScope)
+
         var screenInfo by remember { mutableStateOf(ScreenInfo()) }
         var themeConfig : BandThemeConfig by remember { mutableStateOf(BandThemeConfig.Default) }
 
-        val appScope = rememberCoroutineScope()
         appScope.launch(Dispatchers.IO) {
             PreferencesManager.preferencesFlow().collect { p ->
                 val themeName = p[PreferenceKeys.BAND_THEME]

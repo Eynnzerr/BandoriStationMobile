@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -57,11 +58,15 @@ import com.eynnzerr.bandoristation.ui.dialog.BlockUserDialog
 import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
 import com.eynnzerr.bandoristation.ui.dialog.InformDialog
 import com.eynnzerr.bandoristation.ui.dialog.RoomFilterDialog
+import com.eynnzerr.bandoristation.ui.dialog.UpdateDialog
 import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
+import com.eynnzerr.bandoristation.model.GithubRelease
+import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -74,6 +79,7 @@ fun HomeScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val uriHandler = LocalUriHandler.current
     val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -85,6 +91,9 @@ fun HomeScreen(
     var showFilterRoomDialog by remember { mutableStateOf(false) }
     var showBlockUserDialog by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var showProfileDialog by remember { mutableStateOf(false) }
+    var latestRelease by remember { mutableStateOf<GithubRelease?>(null) }
     var roomToInform : RoomInfo? by remember { mutableStateOf(null) }
     var userToBlock: UserInfo? by remember { mutableStateOf(null) }
     var prefillRoomNumber by remember { mutableStateOf("") }
@@ -146,7 +155,7 @@ fun HomeScreen(
 
                 is HomeEffect.OpenSendRoomDialog -> {
                     prefillRoomNumber = action.prefillRoomNumber
-                    prefillDescription = action.prefillDescription
+                    prefillDescription = action.prefillDescription.replaceFirst("^\\d{6}\\s*".toRegex(), "")
                     showSendRoomDialog = true
                 }
 
@@ -195,6 +204,16 @@ fun HomeScreen(
                     showHelpDialog = true
                 }
 
+                is HomeEffect.OpenUpdateDialog -> {
+                    latestRelease = action.release
+                    showUpdateDialog = true
+                }
+
+                is HomeEffect.CloseUpdateDialog -> {
+                    showUpdateDialog = false
+                    latestRelease = null
+                }
+
                 is HomeEffect.ShowSnackbar -> {
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
@@ -203,6 +222,10 @@ fun HomeScreen(
                         )
                     }
                 }
+
+                is HomeEffect.ControlProfileDialog -> {
+                    showProfileDialog = action.visible
+                }
             }
         }
     }
@@ -210,7 +233,7 @@ fun HomeScreen(
     SendRoomDialog(
         isVisible = showSendRoomDialog,
         onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseSendRoomDialog()) },
-        onSendClick = { roomInfo -> viewModel.sendEvent(UploadRoom(roomInfo)) },
+        onSendClick = { roomInfo, continuous -> viewModel.sendEvent(UploadRoom(roomInfo, continuous)) },
         onAddPresetWord = { viewModel.sendEvent(AddPresetWord(it)) },
         onDeletePresetWord = { viewModel.sendEvent(RemovePresetWord(it)) },
         presetWords = state.presetWords,
@@ -251,6 +274,24 @@ fun HomeScreen(
         onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseHelpDialog()) },
     )
 
+    UpdateDialog(
+        isVisible = showUpdateDialog,
+        release = latestRelease,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseUpdateDialog()) },
+        onConfirm = { url ->
+            uriHandler.openUri(url)
+            viewModel.sendEffect(HomeEffect.CloseUpdateDialog())
+        }
+    )
+
+    UserProfileDialog(
+        isVisible = showProfileDialog,
+        accountInfo = state.selectedUser,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.ControlProfileDialog(false)) },
+        onFollow = { viewModel.sendEvent(FollowUser(it)) },
+        hasFollowed = state.selectedUser.accountSummary.userId in state.followingUsers,
+    )
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     SuiteScaffold(
         scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
@@ -261,7 +302,7 @@ fun HomeScreen(
         onNavigateTo = { viewModel.sendEffect(HomeEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
-                title = state.title,
+                title = stringResource(state.title),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(
@@ -394,6 +435,7 @@ fun HomeScreen(
                         roomInfo.userInfo?.let { viewModel.sendEffect(HomeEffect.OpenBlockUserDialog(it)) }
                     },
                     onReportUser = { viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo)) },
+                    onClickUserAvatar = { viewModel.sendEvent(BrowseUser(roomInfo.userInfo?.userId ?: -1)) },
                     isJoined = roomInfo == state.selectedRoom,
                     currentTimeMillis = state.serverTimestampMillis,
                     modifier = Modifier.animateItem()

@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Send
+// import androidx.compose.material.icons.filled.Send // Duplicate import
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,6 +46,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.chat_message_input_placeholder
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
@@ -60,6 +62,7 @@ import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -151,7 +154,7 @@ fun ChatScreen(
 
     // Remove unread bubble if scrolled to bottom
     LaunchedEffect(isAtBottom) {
-        if (state.initialized) {
+        if (state.initialized && isAtBottom) {
             viewModel.sendEvent(ChatIntent.ClearUnreadCount())
         }
     }
@@ -172,7 +175,7 @@ fun ChatScreen(
         onNavigateTo = { viewModel.sendEffect(ChatEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
-                title = state.title,
+                title = stringResource(state.title),
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(
@@ -192,7 +195,7 @@ fun ChatScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Delete,
-                            contentDescription = "clear messages"
+                            contentDescription = ""
                         )
                     }
                 }
@@ -209,7 +212,7 @@ fun ChatScreen(
                     value = messageText,
                     onValueChange = { messageText = it },
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("输入消息...") },
+                    placeholder = { Text(stringResource(Res.string.chat_message_input_placeholder)) },
                     maxLines = 3
                 )
                 IconButton(
@@ -224,7 +227,7 @@ fun ChatScreen(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = "发送"
+                        contentDescription = ""
                     )
                 }
             }
@@ -246,13 +249,7 @@ fun ChatScreen(
                 ) {
                     itemsIndexed(
                         items = state.chats,
-                        key = { index, item ->
-                            val timestampPart = item.timestamp
-                            val contentPart = item.content.hashCode()
-                            val userPart = item.userInfo.hashCode()
-
-                            "$timestampPart-$contentPart-$userPart"
-                        }
+                        key = { _, item -> item.localId }
                     ) { index, chatMessage ->
                         Row(
                             modifier = Modifier.animateItem()
@@ -312,7 +309,7 @@ fun ChatScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "滚动到底部"
+                        contentDescription = ""
                     )
                 }
             }

@@ -20,6 +20,7 @@ class AppRepository(
     fun listenWebSocketConnection() = remoteDataSource.webSocketConnectionState
 
     // page business
+    suspend fun getServerTimeOnce() = remoteDataSource.getServerTimeOnce()
     suspend fun setWebSocketApiClient(params: ClientSetInfo) = remoteDataSource.setWebSocketApiClient(params)
     suspend fun setAccessPermission(token: String) = remoteDataSource.setAccessPermission(token)
 
@@ -37,6 +38,9 @@ class AppRepository(
         token: String
     ) = remoteDataSource.sendAuthenticHttpsRequest(request, token)
     suspend fun sendApiRequest(request: ApiRequest) = remoteDataSource.sendApiRequest(request)
+
+    suspend fun fetchLatestRelease(owner: String, repo: String) =
+        remoteDataSource.fetchLatestRelease(owner, repo)
 
     // Local
     fun fetchAllHistory(loginId: Long?): Flow<List<RoomHistory>> {

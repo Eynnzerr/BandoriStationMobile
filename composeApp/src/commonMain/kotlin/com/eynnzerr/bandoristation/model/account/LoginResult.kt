@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.model.account
 
+import com.eynnzerr.bandoristation.model.social.UserId
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -13,5 +14,5 @@ import kotlinx.serialization.Serializable
 data class LoginResult(
     @SerialName("token") val token: String = "",
     @SerialName("user_id") val userId: Long = -1,
-    @SerialName("following_user") val followingUsers: List<Long> = emptyList()
+    @SerialName("following_user") val followingUsers: List<UserId> = emptyList()
 )

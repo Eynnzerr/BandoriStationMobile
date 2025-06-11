@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -22,7 +20,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import kotlin.math.*
+import kotlin.math.ceil
+import kotlin.math.max
 
 @Composable
 fun BarChart(
@@ -38,7 +37,6 @@ fun BarChart(
     var selectedBar by remember { mutableStateOf<Int?>(null) }
     var hoveredBar by remember { mutableStateOf<Int?>(null) }
 
-    val density = LocalDensity.current
     val textMeasurer = rememberTextMeasurer()
 
     // 动画进度
@@ -87,7 +85,7 @@ fun BarChart(
                     }
                 }
         ) {
-            val chartPadding = 60.dp.toPx()
+            val chartPadding = 20.dp.toPx()
             val chartWidth = size.width - chartPadding * 2
             val chartHeight = size.height - chartPadding * 2
 
@@ -399,6 +397,8 @@ private fun DrawScope.drawBarValues(
             val spacing = width / data.size * 0.2f
 
             data.forEachIndexed { index, item ->
+                if (item.value.toInt() == 0) return@forEachIndexed
+
                 val barHeight = (item.value / maxValue) * height * animationProgress[index]
                 val x = padding + index * (barWidth + spacing) + spacing / 2 + barWidth / 2
                 val y = padding + height - barHeight - 8.dp.toPx()
@@ -453,7 +453,21 @@ private fun DrawScope.drawVerticalBarLabels(
     val barWidth = width / data.size * 0.8f
     val spacing = width / data.size * 0.2f
 
+    val sample = data.maxByOrNull { it.label.length }
+    val sampleText = sample?.let {
+        textMeasurer.measure(
+            text = it.label,
+            style = textStyle,
+            constraints = Constraints(maxWidth = barWidth.toInt())
+        )
+    }
+    val step = if (sampleText != null) {
+        max(1, ceil(sampleText.size.width / (barWidth + spacing)).toInt())
+    } else 1
+
     data.forEachIndexed { index, item ->
+        if (index % step != 0) return@forEachIndexed
+
         val x = padding + index * (barWidth + spacing) + spacing / 2 + barWidth / 2
         val y = padding + height + 16.dp.toPx()
 
@@ -463,9 +477,12 @@ private fun DrawScope.drawVerticalBarLabels(
             constraints = Constraints(maxWidth = barWidth.toInt())
         )
 
+        var xPos = x - text.size.width / 2
+        xPos = xPos.coerceIn(padding, padding + width - text.size.width)
+
         drawText(
             textLayoutResult = text,
-            topLeft = Offset(x - text.size.width / 2, y)
+            topLeft = Offset(xPos, y)
         )
     }
 }

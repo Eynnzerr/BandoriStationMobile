@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
@@ -18,9 +19,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
  * 房间信息对话框组件
@@ -34,7 +37,7 @@ fun SendRoomDialog(
     isVisible: Boolean,
     presetWords: Set<String>,
     onDismissRequest: () -> Unit,
-    onSendClick: (uploadInfo: RoomUploadInfo) -> Unit,
+    onSendClick: (uploadInfo: RoomUploadInfo, continuous: Boolean) -> Unit,
     onAddPresetWord: (String) -> Unit,
     onDeletePresetWord: (String) -> Unit,
     prefillRoomNumber: String = "",
@@ -45,6 +48,7 @@ fun SendRoomDialog(
         var description by remember(prefillDescription) { mutableStateOf(prefillDescription) }
         var newPresetWord by remember { mutableStateOf("") }
         var isPresetWordsExpanded by remember { mutableStateOf(false) }
+        var continuous by remember { mutableStateOf(false) }
         var isAddWordsExpanded by remember { mutableStateOf(false) }
 
         AlertDialog(
@@ -89,7 +93,10 @@ fun SendRoomDialog(
                             IconButton(onClick = { description = "" }) {
                                 Icon(Icons.Filled.Clear, contentDescription = "清空")
                             }
-                        }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            imeAction = ImeAction.Done
+                        )
                     )
 
                     // 预选词部分
@@ -191,19 +198,28 @@ fun SendRoomDialog(
                             }
                         }
                     }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = continuous,
+                            onCheckedChange = { continuous = it }
+                        )
+                        Text("持续发送车牌直到下次发车")
+                    }
                 }
             },
             confirmButton = {
                 TextButton(
+                    enabled = roomNumber.isNotBlank() && description.isNotBlank(),
                     onClick = {
-                        if (roomNumber.isNotBlank()) {
-                            val roomInfo = RoomUploadInfo(
-                                number = roomNumber,
-                                description = description
-                            )
-                            onSendClick(roomInfo)
-                            onDismissRequest()
-                        }
+                        val roomInfo = RoomUploadInfo(
+                            number = roomNumber,
+                            description = description.trim()
+                        )
+                        onSendClick(roomInfo, continuous)
+                        onDismissRequest()
                     }
                 ) {
                     Text("发送")
@@ -216,4 +232,22 @@ fun SendRoomDialog(
             }
         )
     }
+}
+
+@Preview
+@Composable
+fun SendRoomDialogPreview() {
+    val presetWords = remember { mutableStateOf(setOf("Hello", "World", "BanG Dream!")) }
+    SendRoomDialog(
+        isVisible = true,
+        presetWords = presetWords.value,
+        onDismissRequest = {  },
+        onSendClick = { _, _ ->  },
+        onAddPresetWord = { word ->
+            presetWords.value = presetWords.value + word
+        },
+        onDeletePresetWord = { word ->
+            presetWords.value = presetWords.value - word
+        }
+    )
 }
