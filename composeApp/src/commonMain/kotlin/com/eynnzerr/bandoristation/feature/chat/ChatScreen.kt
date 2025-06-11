@@ -154,7 +154,7 @@ fun ChatScreen(
 
     // Remove unread bubble if scrolled to bottom
     LaunchedEffect(isAtBottom) {
-        if (state.initialized) {
+        if (state.initialized && isAtBottom) {
             viewModel.sendEvent(ChatIntent.ClearUnreadCount())
         }
     }

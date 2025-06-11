@@ -329,7 +329,7 @@ fun AccountScreen(
                             .fillMaxSize()
                             .padding(paddingValues),
                         accountInfo = state.accountInfo,
-                        roomHistories = state.roomHistory,
+                        roomHistories = state.roomHistory.asReversed(),
                         sideButton = {
                             EditAccountButton(
                                 isLoggedIn = state.isLoggedIn,
