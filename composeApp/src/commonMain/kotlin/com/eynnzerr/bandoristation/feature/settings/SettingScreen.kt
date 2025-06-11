@@ -49,6 +49,11 @@ import bandoristationm.composeapp.generated.resources.settings_show_player_data_
 import bandoristationm.composeapp.generated.resources.settings_show_player_data_desc
 import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_title
 import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_desc
+import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_title
+import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_desc
+import bandoristationm.composeapp.generated.resources.settings_tutorial_title
+import bandoristationm.composeapp.generated.resources.settings_tutorial_desc
+import bandoristationm.composeapp.generated.resources.settings_version_title
 import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
@@ -168,8 +173,8 @@ fun SettingScreen(
 
             var intervalText by remember(state.autoUploadInterval) { mutableStateOf(state.autoUploadInterval.toString()) }
             SettingItem(
-                title = "持续发车间隔(秒)",
-                desc = "自动上传房间的时间间隔(>8秒)",
+                title = stringResource(Res.string.settings_auto_upload_interval_title),
+                desc = stringResource(Res.string.settings_auto_upload_interval_desc),
                 icon = Icons.Outlined.Schedule,
                 action = {
                     OutlinedTextField(
@@ -184,7 +189,7 @@ fun SettingScreen(
                         },
                         modifier = Modifier.width(80.dp),
                         singleLine = true,
-                        isError = intervalText.toLongOrNull()?.let { interval -> interval > 8 } ?: false
+                        isError = intervalText.toLongOrNull()?.let { interval -> interval < 8 } ?: false
                     )
                 },
                 onClick = {}
@@ -222,14 +227,14 @@ fun SettingScreen(
 //            )
 
             SettingItem(
-                title = "术语教程",
-                desc = "关于车头常用术语的简易教程",
+                title = stringResource(Res.string.settings_tutorial_title),
+                desc = stringResource(Res.string.settings_tutorial_desc),
                 icon = Icons.Outlined.School,
                 onClick = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(true)) }
             )
 
             SettingItem(
-                title = "版本",
+                title = stringResource(Res.string.settings_version_title),
                 desc = state.versionName,
                 icon = Icons.Outlined.Update,
                 onClick = {

@@ -45,6 +45,11 @@
     <string name="connecting">Connecting...</string>
     <string name="offline">Offline</string>
     <string name="error">Error</string>
+    <string name="settings_auto_upload_interval_title">Auto-upload Interval (seconds)</string>
+    <string name="settings_auto_upload_interval_desc">Time interval for auto-uploading rooms (>8 seconds)</string>
+    <string name="settings_tutorial_title">Terminology Tutorial</string>
+    <string name="settings_tutorial_desc">A simple tutorial on common terms for room leaders</string>
+    <string name="settings_version_title">Version</string>
 
     <!--  CrashReportPage  -->
     <string name="crash_title">Oops, BandoriStationM crashes!</string>

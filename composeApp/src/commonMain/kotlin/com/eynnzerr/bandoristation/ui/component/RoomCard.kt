@@ -104,7 +104,7 @@ fun RoomCard(
         }
 
         Text(
-            text = roomInfo.rawMessage ?: "",
+            text = roomInfo.rawMessage?.trim() ?: "",
             style = MaterialTheme.typography.bodyLarge,
             overflow = TextOverflow.Ellipsis,
             fontSize = 16.sp,

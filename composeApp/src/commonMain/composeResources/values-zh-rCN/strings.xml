@@ -43,6 +43,11 @@
     <string name="connecting">连接中...</string>
     <string name="offline">当前离线</string>
     <string name="error">错误</string>
+    <string name="settings_auto_upload_interval_title">持续发车间隔(秒)</string>
+    <string name="settings_auto_upload_interval_desc">自动上传房间的时间间隔(>8秒)</string>
+    <string name="settings_tutorial_title">术语教程</string>
+    <string name="settings_tutorial_desc">关于车头常用术语的简易教程</string>
+    <string name="settings_version_title">版本</string>
 
     <!--  报错页  -->
     <string name="crash_title">移动车站崩溃了！</string>

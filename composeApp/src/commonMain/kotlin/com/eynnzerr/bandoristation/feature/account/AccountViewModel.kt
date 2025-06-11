@@ -482,7 +482,7 @@ class AccountViewModel(
 
            is UpdateRoomHistory -> {
                state.value.copy(
-                   roomHistory = event.roomHistory
+                   roomHistory = event.roomHistory.reversed()
                ) to null
            }
 
