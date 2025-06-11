@@ -1,7 +1,7 @@
 package com.eynnzerr.bandoristation.di
 
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
-import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
+import com.eynnzerr.bandoristation.business.websocket.GetWebSocketStateUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetChatUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
@@ -61,7 +61,7 @@ fun provideUseCaseModule() = module {
     }
 
     single {
-        ConnectWebSocketUseCase(
+        GetWebSocketStateUseCase(
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )

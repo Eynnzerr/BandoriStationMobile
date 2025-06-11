@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.connecting
 import bandoristationm.composeapp.generated.resources.error
-import bandoristationm.composeapp.generated.resources.fetched_latest_room_list
 import bandoristationm.composeapp.generated.resources.inform_user_success
 import bandoristationm.composeapp.generated.resources.join_room_snackbar
 import bandoristationm.composeapp.generated.resources.offline
@@ -19,7 +18,7 @@ import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import bandoristationm.composeapp.generated.resources.websocket_error_default
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
-import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
+import com.eynnzerr.bandoristation.business.websocket.GetWebSocketStateUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetRoomListUseCase
 import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
@@ -56,12 +55,11 @@ import kotlinx.coroutines.isActive
 import kotlinx.datetime.Clock
 
 class HomeViewModel(
-    private val connectWebSocketUseCase: ConnectWebSocketUseCase,
+    private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
     private val getServerTimeUseCase: GetServerTimeUseCase,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
-    private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val requestRecentRoomsUseCase: RequestRecentRoomsUseCase,
     private val getRoomListUseCase: GetRoomListUseCase,
     private val updateTimestampUseCase: UpdateTimestampUseCase,
@@ -88,7 +86,7 @@ class HomeViewModel(
         sendEvent(HomeIntent.GetRoomFilter())
 
         viewModelScope.launch {
-            connectWebSocketUseCase(Unit).collect { result ->
+            getWebSocketStateUseCase(Unit).collect { result ->
                 if (result is UseCaseResult.Success) {
                     when (result.data) {
                         is WebSocketClient.ConnectionState.Connected -> {
@@ -449,7 +447,6 @@ class HomeViewModel(
     override fun onCleared() {
         super.onCleared()
         autoUploadJob?.cancel()
-        viewModelScope.launch { disconnectWebSocketUseCase(Unit) }
     }
 
     fun List<RoomInfo>.filterNot(filter: RoomFilter, isFilteringPJSK: Boolean = true): List<RoomInfo> {

@@ -11,7 +11,7 @@ import bandoristationm.composeapp.generated.resources.error
 import bandoristationm.composeapp.generated.resources.load_all_snackbar
 import bandoristationm.composeapp.generated.resources.offline
 import com.eynnzerr.bandoristation.base.BaseViewModel
-import com.eynnzerr.bandoristation.business.ConnectWebSocketUseCase
+import com.eynnzerr.bandoristation.business.websocket.GetWebSocketStateUseCase
 import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
 import com.eynnzerr.bandoristation.business.GetChatUseCase
 import com.eynnzerr.bandoristation.business.InitializeChatRoomUseCase
@@ -39,11 +39,10 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
 class ChatViewModel(
-    private val connectWebSocketUseCase: ConnectWebSocketUseCase,
+    private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val setUpClientUseCase: SetUpClientUseCase,
-    private val disconnectWebSocketUseCase: DisconnectWebSocketUseCase,
     private val initializeChatRoomUseCase: InitializeChatRoomUseCase,
     private val getChatUseCase: GetChatUseCase,
     private val sendChatUseCase: SendChatUseCase,
@@ -58,7 +57,7 @@ class ChatViewModel(
 
     override suspend fun onInitialize() {
         viewModelScope.launch {
-            connectWebSocketUseCase(Unit).collect { result ->
+            getWebSocketStateUseCase(Unit).collect { result ->
                 if (result is UseCaseResult.Success) {
                     when (result.data) {
                         is WebSocketClient.ConnectionState.Connected -> {
@@ -265,11 +264,6 @@ class ChatViewModel(
                 null to null
             }
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelScope.launch { disconnectWebSocketUseCase(Unit) }
     }
 
     private fun processNewChat(newChats: List<ChatMessage>): List<ChatMessage> {

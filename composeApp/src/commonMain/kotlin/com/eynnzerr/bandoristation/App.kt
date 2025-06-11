@@ -31,11 +31,12 @@ fun App() {
     KoinApplication(
         application = { modules(appModule) }
     ) {
-        WebSocketLifecycleHandler()
+        val appScope = rememberCoroutineScope()
+        WebSocketLifecycleHandler(appScope)
+
         var screenInfo by remember { mutableStateOf(ScreenInfo()) }
         var themeConfig : BandThemeConfig by remember { mutableStateOf(BandThemeConfig.Default) }
 
-        val appScope = rememberCoroutineScope()
         appScope.launch(Dispatchers.IO) {
             PreferencesManager.preferencesFlow().collect { p ->
                 val themeName = p[PreferenceKeys.BAND_THEME]
