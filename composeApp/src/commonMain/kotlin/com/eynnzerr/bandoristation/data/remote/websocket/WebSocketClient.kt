@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
@@ -33,6 +35,7 @@ class WebSocketClient(
 ) {
     var session: DefaultClientWebSocketSession? = null
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private val connectMutex = Mutex()
 
     // 响应流
     private val _responseFlow = MutableSharedFlow<WebSocketResponse<JsonElement>>(
@@ -50,17 +53,21 @@ class WebSocketClient(
     private val reconnectDelayMillis = 5000L
 
     suspend fun connect() {
-        if (_connectionState.value is ConnectionState.Connected) {
-            AppLogger.d(TAG, "connect: Websocket has already been connected. Return.")
-            return
+        connectMutex.withLock {
+            if (_connectionState.value is ConnectionState.Connected ||
+                _connectionState.value is ConnectionState.Connecting) {
+                AppLogger.d(TAG, "connect: Websocket has already been connecting or connected. Return.")
+                return
+            }
+            _connectionState.value = ConnectionState.Connecting
         }
 
         try {
-            _connectionState.value = ConnectionState.Connecting
-
             client.webSocket(serverUrl) {
                 session = this
-                _connectionState.value = ConnectionState.Connected
+                connectMutex.withLock {
+                    _connectionState.value = ConnectionState.Connected
+                }
                 reconnectAttempts = 0
                 AppLogger.d(TAG, "Connected to websocket $serverUrl")
 
@@ -114,7 +121,9 @@ class WebSocketClient(
                     AppLogger.d(TAG, "WebSocketClient Websocket Error: $e")
                 } finally {
                     heartbeatJob.cancel()
-                    _connectionState.value = ConnectionState.Disconnected
+                    connectMutex.withLock {
+                        _connectionState.value = ConnectionState.Disconnected
+                    }
 
                     // Try to reconnect
                     if (reconnectAttempts < maxReconnectAttempts) {
@@ -126,7 +135,9 @@ class WebSocketClient(
             }
         } catch (e: Exception) {
             AppLogger.d(TAG, "WebSocketClient Connection Error: $e")
-            _connectionState.value = ConnectionState.Error(e)
+            connectMutex.withLock {
+                _connectionState.value = ConnectionState.Error(e)
+            }
 
             // Try to reconnect
             if (reconnectAttempts < maxReconnectAttempts) {
@@ -175,7 +186,9 @@ class WebSocketClient(
     fun disconnect() {
         scope.cancel()
         session = null
-        _connectionState.value = ConnectionState.Disconnected
+        connectMutex.withLock {
+            _connectionState.value = ConnectionState.Disconnected
+        }
         AppLogger.d(TAG, "Disconnected from websocket $serverUrl")
     }
 
