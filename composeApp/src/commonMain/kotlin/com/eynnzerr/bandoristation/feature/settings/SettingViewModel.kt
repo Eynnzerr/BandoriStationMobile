@@ -5,13 +5,16 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
+import com.eynnzerr.bandoristation.business.SetUpClientUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.*
+import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingViewModel(
+    private val setUpClientUseCase: SetUpClientUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<SettingState, SettingEvent, SettingEffect>(
     initialState = SettingState.initial()
@@ -29,6 +32,15 @@ class SettingViewModel(
                 )
             }
         }
+    }
+
+    override suspend fun onStartStateFlow() {
+        // 每次重新进入房间页，设置客户端接收条件
+        setUpClientUseCase(ClientSetInfo(
+            client = "BandoriStation",
+            sendRoomNumber = false,
+            sendChat = false,
+        ))
     }
 
     override fun reduce(event: SettingEvent): Pair<SettingState?, SettingEffect?> {

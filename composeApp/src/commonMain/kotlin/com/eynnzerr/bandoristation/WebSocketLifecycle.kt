@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
+import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,8 @@ fun WebSocketLifecycleHandler(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
+                    AppLogger.d(TAG, "App lifecycle changed to ON_START.")
+
                     val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
                         throwable.printStackTrace()
                     }
@@ -34,14 +37,20 @@ fun WebSocketLifecycleHandler(
                         webSocketClient.connect()
                     }
                 }
-                Lifecycle.Event.ON_STOP ->
+                Lifecycle.Event.ON_STOP -> {
+                    AppLogger.d(TAG, "App lifecycle changed to ON_STOP.")
                     webSocketClient.disconnect()
+                }
                 else -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
+
         onDispose {
+            AppLogger.d(TAG, "App lifecycle dispose.")
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }
+
+private const val TAG = "WebSocketLifecycle"

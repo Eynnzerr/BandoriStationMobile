@@ -111,7 +111,7 @@ class HomeViewModel(
                             AppLogger.d(TAG, "Connecting to WebSocket...")
                         }
                         is WebSocketClient.ConnectionState.Disconnected -> {
-                            // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
+                            // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接 3) WebSocketClient 报错
                             internalState.update {
                                 it.copy(title = Res.string.offline)
                             }
@@ -156,9 +156,9 @@ class HomeViewModel(
                         AppLogger.d(TAG, "Successfully fetched room list. length: ${result.data.size}")
                         sendEvent(HomeIntent.AppendRoomList(result.data))
 
-                        // correct server timestamp if necessary
+                        // correct server timestamp if local server time falls behind latest server room time for 1.5s and more.
                         result.data.lastOrNull()?.let { lastRoom ->
-                            if (state.value.serverTimestampMillis < (lastRoom.time ?: Clock.System.now().toEpochMilliseconds())) {
+                            if ((lastRoom.time ?: Clock.System.now().toEpochMilliseconds()) - state.value.serverTimestampMillis > 1500L) {
                                 getServerTimeUseCase(Unit)
                             }
                         }
