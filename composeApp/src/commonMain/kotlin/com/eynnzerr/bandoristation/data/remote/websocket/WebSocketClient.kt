@@ -36,7 +36,7 @@ class WebSocketClient(
     val json: Json, // Injected
 ) {
     var session: DefaultClientWebSocketSession? = null
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val connectMutex = Mutex()
 
     @Volatile
@@ -216,6 +216,7 @@ class WebSocketClient(
         }
 
         scope.cancel()
+        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         AppLogger.d(TAG, "Disconnected from websocket $serverUrl")
     }
 
