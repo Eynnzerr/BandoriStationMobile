@@ -14,7 +14,7 @@ class AppRepository(
 ) {
     // control websocket
     suspend fun connectWebSocket() = remoteDataSource.connectWebSocket()
-    fun disconnectWebSocket() = remoteDataSource.disconnectWebSocket()
+    suspend fun disconnectWebSocket() = remoteDataSource.disconnectWebSocket()
     fun listenWebSocketForActions(actions: List<String>) = remoteDataSource.listenWebSocketForActions(actions)
     fun listenForAll() = remoteDataSource.listenForAll()
     fun listenWebSocketConnection() = remoteDataSource.webSocketConnectionState

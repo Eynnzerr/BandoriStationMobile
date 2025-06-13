@@ -10,7 +10,9 @@ import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -18,7 +20,7 @@ import org.koin.compose.koinInject
 
 @Composable
 fun WebSocketLifecycleHandler(
-    coroutineScope: CoroutineScope = rememberCoroutineScope { Dispatchers.IO + SupervisorJob() }
+    coroutineScope: CoroutineScope = rememberCoroutineScope { Dispatchers.IO }
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val webSocketClient: WebSocketClient = koinInject()
@@ -39,7 +41,9 @@ fun WebSocketLifecycleHandler(
                 }
                 Lifecycle.Event.ON_STOP -> {
                     AppLogger.d(TAG, "App lifecycle changed to ON_STOP.")
-                    webSocketClient.disconnect()
+                    coroutineScope.launch {
+                        webSocketClient.disconnect()
+                    }
                 }
                 else -> Unit
             }
