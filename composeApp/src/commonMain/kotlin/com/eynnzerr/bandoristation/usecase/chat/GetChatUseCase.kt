@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.usecase
+package com.eynnzerr.bandoristation.usecase.chat
 
 import com.eynnzerr.bandoristation.usecase.base.FlowUseCase
 import com.eynnzerr.bandoristation.data.AppRepository

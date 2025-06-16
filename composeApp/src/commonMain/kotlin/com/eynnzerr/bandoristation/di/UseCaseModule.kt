@@ -1,18 +1,18 @@
 package com.eynnzerr.bandoristation.di
 
-import com.eynnzerr.bandoristation.usecase.CheckUnreadChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.usecase.websocket.GetWebSocketStateUseCase
-import com.eynnzerr.bandoristation.usecase.DisconnectWebSocketUseCase
-import com.eynnzerr.bandoristation.usecase.GetChatUseCase
-import com.eynnzerr.bandoristation.usecase.GetRoomListUseCase
-import com.eynnzerr.bandoristation.usecase.InitializeChatRoomUseCase
-import com.eynnzerr.bandoristation.usecase.ReceiveHistoryChatUseCase
-import com.eynnzerr.bandoristation.usecase.RequestHistoryChatUseCase
-import com.eynnzerr.bandoristation.usecase.SendChatUseCase
+import com.eynnzerr.bandoristation.usecase.websocket.DisconnectWebSocketUseCase
+import com.eynnzerr.bandoristation.usecase.chat.GetChatUseCase
+import com.eynnzerr.bandoristation.usecase.room.GetRoomListUseCase
+import com.eynnzerr.bandoristation.usecase.chat.InitializeChatRoomUseCase
+import com.eynnzerr.bandoristation.usecase.chat.ReceiveHistoryChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.RequestHistoryChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.SendChatUseCase
 import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.usecase.time.UpdateTimestampUseCase
-import com.eynnzerr.bandoristation.usecase.UploadRoomUseCase
+import com.eynnzerr.bandoristation.usecase.room.UploadRoomUseCase
 import com.eynnzerr.bandoristation.usecase.account.BindQQUseCase
 import com.eynnzerr.bandoristation.usecase.account.GetEditProfileDataUseCase
 import com.eynnzerr.bandoristation.usecase.account.GetSelfInfoUseCase

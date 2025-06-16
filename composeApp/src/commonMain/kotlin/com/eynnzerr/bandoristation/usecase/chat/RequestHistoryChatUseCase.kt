@@ -1,18 +1,16 @@
-package com.eynnzerr.bandoristation.usecase
+package com.eynnzerr.bandoristation.usecase.chat
 
 import com.eynnzerr.bandoristation.usecase.base.UseCase
 import com.eynnzerr.bandoristation.data.AppRepository
-import com.eynnzerr.bandoristation.model.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import kotlinx.coroutines.CoroutineDispatcher
 
-class UploadRoomUseCase(
+class RequestHistoryChatUseCase(
     private val repository: AppRepository,
     private val dispatcher: CoroutineDispatcher,
-) : UseCase<RoomUploadInfo, Unit, Unit>(dispatcher) {
-
-    override suspend fun execute(parameters: RoomUploadInfo): UseCaseResult<Unit, Unit> {
-        repository.uploadRoom(parameters)
+) : UseCase<Long, Unit, Unit>(dispatcher) {
+    override suspend fun execute(parameters: Long): UseCaseResult<Unit, Unit> {
+        repository.loadChatHistory(parameters)
         return UseCaseResult.Success(Unit)
     }
 }

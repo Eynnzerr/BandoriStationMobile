@@ -1,8 +1,8 @@
-package com.eynnzerr.bandoristation.usecase
+package com.eynnzerr.bandoristation.usecase.websocket
 
-import com.eynnzerr.bandoristation.usecase.base.UseCase
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.usecase.base.UseCase
 import kotlinx.coroutines.CoroutineDispatcher
 
 class DisconnectWebSocketUseCase(

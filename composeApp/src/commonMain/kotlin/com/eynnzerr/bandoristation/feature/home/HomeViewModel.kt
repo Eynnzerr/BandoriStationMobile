@@ -17,13 +17,13 @@ import bandoristationm.composeapp.generated.resources.set_filter_success
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import bandoristationm.composeapp.generated.resources.websocket_error_default
 import com.eynnzerr.bandoristation.base.BaseViewModel
-import com.eynnzerr.bandoristation.usecase.CheckUnreadChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.usecase.websocket.GetWebSocketStateUseCase
-import com.eynnzerr.bandoristation.usecase.GetRoomListUseCase
+import com.eynnzerr.bandoristation.usecase.room.GetRoomListUseCase
 import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.usecase.time.UpdateTimestampUseCase
-import com.eynnzerr.bandoristation.usecase.UploadRoomUseCase
+import com.eynnzerr.bandoristation.usecase.room.UploadRoomUseCase
 import com.eynnzerr.bandoristation.usecase.room.GetRoomFilterUseCase
 import com.eynnzerr.bandoristation.usecase.room.RequestRecentRoomsUseCase
 import com.eynnzerr.bandoristation.usecase.room.UpdateRoomFilterUseCase

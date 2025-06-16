@@ -12,11 +12,11 @@ import bandoristationm.composeapp.generated.resources.load_all_snackbar
 import bandoristationm.composeapp.generated.resources.offline
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.usecase.websocket.GetWebSocketStateUseCase
-import com.eynnzerr.bandoristation.usecase.GetChatUseCase
-import com.eynnzerr.bandoristation.usecase.InitializeChatRoomUseCase
-import com.eynnzerr.bandoristation.usecase.ReceiveHistoryChatUseCase
-import com.eynnzerr.bandoristation.usecase.RequestHistoryChatUseCase
-import com.eynnzerr.bandoristation.usecase.SendChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.GetChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.InitializeChatRoomUseCase
+import com.eynnzerr.bandoristation.usecase.chat.ReceiveHistoryChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.RequestHistoryChatUseCase
+import com.eynnzerr.bandoristation.usecase.chat.SendChatUseCase
 import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
 import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.usecase.account.GetUserInfoUseCase
