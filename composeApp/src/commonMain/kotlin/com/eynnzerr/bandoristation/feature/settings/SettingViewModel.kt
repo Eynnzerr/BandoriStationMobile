@@ -5,9 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
-import com.eynnzerr.bandoristation.business.SetUpClientUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.*
+import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.flow.update
