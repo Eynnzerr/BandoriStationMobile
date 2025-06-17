@@ -6,7 +6,6 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.desktop_icon
 import io.github.vinceglb.filekit.FileKit
 import org.jetbrains.compose.resources.painterResource
-import com.eynnzerr.bandoristation.installCrashHandler
 
 fun main() = application {
     installCrashHandler()
