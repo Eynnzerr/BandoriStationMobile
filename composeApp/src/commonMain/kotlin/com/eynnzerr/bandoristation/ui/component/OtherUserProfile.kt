@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.ui.component.room.SimpleRoomCard
 
 @Composable
 fun OtherUserProfile(

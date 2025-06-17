@@ -18,8 +18,8 @@ interface RemoteDataSource {
     val webSocketConnectionState: StateFlow<WebSocketClient.ConnectionState>
     val webSocketResponseFlow: SharedFlow<WebSocketResponse<JsonElement>>
     suspend fun connectWebSocket()
-    suspend fun <T> sendWebSocketRequest(action: String, data: T? = null) // TODO 废弃
-    suspend fun <T> sendWebSocketRequestWithRetry(action: String, data: T? = null, retryAttempts: Int = 0) // TODO 废弃
+    suspend fun <T> sendWebSocketRequest(action: String, data: T? = null)
+    suspend fun <T> sendWebSocketRequestWithRetry(action: String, data: T? = null, retryAttempts: Int = 0)
     fun listenWebSocketForActions(actions: List<String>): Flow<WebSocketResponse<JsonElement>>
     fun listenForAll(): Flow<WebSocketResponse<JsonElement>>
     fun listenWebSocketConnectionState(): Flow<WebSocketClient.ConnectionState>

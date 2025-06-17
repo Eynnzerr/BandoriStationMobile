@@ -22,7 +22,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.send_room_dialog_add_button
+import bandoristationm.composeapp.generated.resources.send_room_dialog_add_preset_words_icon_desc
+import bandoristationm.composeapp.generated.resources.send_room_dialog_cancel_button
+import bandoristationm.composeapp.generated.resources.send_room_dialog_clear_icon_desc
+import bandoristationm.composeapp.generated.resources.send_room_dialog_collapse_icon_desc
+import bandoristationm.composeapp.generated.resources.send_room_dialog_continuous_send_checkbox
+import bandoristationm.composeapp.generated.resources.send_room_dialog_description_label
+import bandoristationm.composeapp.generated.resources.send_room_dialog_expand_icon_desc
+import bandoristationm.composeapp.generated.resources.send_room_dialog_icon_desc
+import bandoristationm.composeapp.generated.resources.send_room_dialog_new_preset_word_label
+import bandoristationm.composeapp.generated.resources.send_room_dialog_no_preset_words
+import bandoristationm.composeapp.generated.resources.send_room_dialog_preset_words_button
+import bandoristationm.composeapp.generated.resources.send_room_dialog_room_number_label
+import bandoristationm.composeapp.generated.resources.send_room_dialog_send_button
+import bandoristationm.composeapp.generated.resources.send_room_dialog_title
 import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 /**
@@ -56,10 +73,10 @@ fun SendRoomDialog(
             icon = {
                 Icon(
                     imageVector = Icons.Default.Publish,
-                    contentDescription = "send room"
+                    contentDescription = stringResource(Res.string.send_room_dialog_icon_desc)
                 )
             },
-            title = { Text("上传房间信息") },
+            title = { Text(stringResource(Res.string.send_room_dialog_title)) },
             text = {
                 Column(
                     modifier = Modifier
@@ -71,12 +88,12 @@ fun SendRoomDialog(
                     OutlinedTextField(
                         value = roomNumber,
                         onValueChange = { roomNumber = it },
-                        label = { Text("房间号") },
+                        label = { Text(stringResource(Res.string.send_room_dialog_room_number_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = { roomNumber = "" }) {
-                                Icon(Icons.Filled.Clear, contentDescription = "清空")
+                                Icon(Icons.Filled.Clear, contentDescription = stringResource(Res.string.send_room_dialog_clear_icon_desc))
                             }
                         }
                     )
@@ -85,13 +102,13 @@ fun SendRoomDialog(
                     OutlinedTextField(
                         value = description,
                         onValueChange = { description = it },
-                        label = { Text("描述") },
+                        label = { Text(stringResource(Res.string.send_room_dialog_description_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2,
                         maxLines = 4,
                         trailingIcon = {
                             IconButton(onClick = { description = "" }) {
-                                Icon(Icons.Filled.Clear, contentDescription = "清空")
+                                Icon(Icons.Filled.Clear, contentDescription = stringResource(Res.string.send_room_dialog_clear_icon_desc))
                             }
                         },
                         keyboardOptions = KeyboardOptions(
@@ -109,14 +126,14 @@ fun SendRoomDialog(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "预选词",
+                                text = stringResource(Res.string.send_room_dialog_preset_words_button),
                                 modifier = Modifier.weight(1f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Icon(
                                 if (isPresetWordsExpanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                                contentDescription = if (isPresetWordsExpanded) "收起" else "展开"
+                                contentDescription = if (isPresetWordsExpanded) stringResource(Res.string.send_room_dialog_collapse_icon_desc) else stringResource(Res.string.send_room_dialog_expand_icon_desc)
                             )
                         }
 
@@ -143,12 +160,12 @@ fun SendRoomDialog(
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Add,
-                                            contentDescription = "add preset words"
+                                            contentDescription = stringResource(Res.string.send_room_dialog_add_preset_words_icon_desc)
                                         )
                                     }
 
                                     if (presetWords.isEmpty()) {
-                                        Text("暂无预选词。")
+                                        Text(stringResource(Res.string.send_room_dialog_no_preset_words))
                                     }
 
                                     presetWords.forEach { word ->
@@ -178,7 +195,7 @@ fun SendRoomDialog(
                                     OutlinedTextField(
                                         value = newPresetWord,
                                         onValueChange = { newPresetWord = it },
-                                        label = { Text("新预选词") },
+                                        label = { Text(stringResource(Res.string.send_room_dialog_new_preset_word_label)) },
                                         modifier = Modifier.weight(1f),
                                         singleLine = true,
                                         trailingIcon = {
@@ -190,7 +207,7 @@ fun SendRoomDialog(
                                                     }
                                                 },
                                             ) {
-                                                Text("添加")
+                                                Text(stringResource(Res.string.send_room_dialog_add_button))
                                             }
                                         }
                                     )
@@ -206,7 +223,7 @@ fun SendRoomDialog(
                             checked = continuous,
                             onCheckedChange = { continuous = it }
                         )
-                        Text("持续发送车牌直到下次发车")
+                        Text(stringResource(Res.string.send_room_dialog_continuous_send_checkbox))
                     }
                 }
             },
@@ -222,12 +239,12 @@ fun SendRoomDialog(
                         onDismissRequest()
                     }
                 ) {
-                    Text("发送")
+                    Text(stringResource(Res.string.send_room_dialog_send_button))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismissRequest) {
-                    Text("取消")
+                    Text(stringResource(Res.string.send_room_dialog_cancel_button))
                 }
             }
         )

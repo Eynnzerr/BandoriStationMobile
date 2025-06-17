@@ -55,4 +55,127 @@
     <string name="crash_title">Oops, BandoriStationM crashes!</string>
     <string name="copy_exit">Copy And Exit</string>
     <string name="crash_hint">It seems like something went wrong with the app. Please copy the crash report and contact author for help!</string>
+
+    <!--  Block User Dialog  -->
+    <string name="block_user_dialog_title">Block User</string>
+    <string name="block_user_dialog_confirmation_message">Are you sure you want to block user "%1$s"?</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <!-- Edit Profile Dialog -->
+    <string name="edit_profile_title">Account Information</string>
+    <string name="edit_profile_avatar">Avatar</string>
+    <string name="edit_profile_banner">Banner Background</string>
+    <string name="edit_profile_username">Username</string>
+    <string name="edit_profile_introduction">Introduction</string>
+    <string name="edit_profile_password">Password</string>
+    <string name="edit_profile_email">Email</string>
+    <string name="edit_profile_qq">QQ</string>
+    <string name="edit_username_dialog_title">Edit Username</string>
+    <string name="edit_username_placeholder">Enter username</string>
+    <string name="edit_introduction_dialog_title">Edit Introduction</string>
+    <string name="edit_introduction_placeholder">Enter introduction</string>
+    <string name="edit_password_dialog_title">Edit Password</string>
+    <string name="edit_password_old_password">Old Password</string>
+    <string name="edit_password_new_password">New Password</string>
+    <string name="edit_password_confirm_new_password">Confirm New Password</string>
+    <string name="edit_password_mismatch">Passwords do not match</string>
+    <string name="edit_email_dialog_title">Edit Email</string>
+    <string name="edit_email_current_email">Current Email: %1$s</string>
+    <string name="edit_email_new_email_placeholder">Enter new email</string>
+    <string name="edit_email_send_verification_code">Send Verification Code</string>
+    <string name="edit_email_verification_code_sent">Verification code sent</string>
+    <string name="edit_email_resend_countdown">Resend (%1$ds)</string>
+    <string name="edit_email_verification_code_placeholder">Enter verification code</string>
+    <string name="edit_qq_dialog_title">Edit QQ</string>
+    <string name="edit_qq_placeholder">Enter QQ number</string>
+    <string name="edit_password_visibility_toggle_show">Show password</string>
+    <string name="edit_password_visibility_toggle_hide">Hide password</string>
+    <string name="edit_password_length_requirement">Password must be at least 6 characters long</string>
+    <string name="edit_email_invalid_format">Please enter a valid email address</string>
+    <string name="edit_qq_length_requirement">Please enter a 5-11 digit QQ number</string>
+
+    <!-- Help Dialog -->
+    <string name="help_dialog_title">Help</string>
+    <string name="dialog_close">Close</string>
+
+    <!-- Inform Dialog -->
+    <string name="inform_dialog_title">Report User</string>
+    <string name="inform_dialog_confirmation_message">Are you sure you want to report user "%1$s"?</string>
+    <string name="inform_dialog_reason_placeholder">Reason (required)</string>
+
+    <!-- Room Filter Dialog -->
+    <string name="room_filter_dialog_title">Filter Rooms</string>
+    <string name="room_filter_block_keywords_title">Block Keywords</string>
+    <string name="room_filter_keywords_placeholder">Keywords</string>
+    <string name="room_filter_edit_icon_desc">Edit</string>
+    <string name="room_filter_add_button">Add</string>
+    <string name="room_filter_block_users_title">Block Users</string>
+    <string name="room_filter_apply_button">Apply</string>
+    <string name="room_filter_reset_button">Reset</string>
+
+    <!-- Send Room Dialog -->
+    <string name="send_room_dialog_icon_desc">Send room</string>
+    <string name="send_room_dialog_title">Upload Room Information</string>
+    <string name="send_room_dialog_room_number_label">Room Number</string>
+    <string name="send_room_dialog_clear_icon_desc">Clear</string>
+    <string name="send_room_dialog_description_label">Description</string>
+    <string name="send_room_dialog_preset_words_button">Preset Words</string>
+    <string name="send_room_dialog_collapse_icon_desc">Collapse</string>
+    <string name="send_room_dialog_expand_icon_desc">Expand</string>
+    <string name="send_room_dialog_add_preset_words_icon_desc">Add preset words</string>
+    <string name="send_room_dialog_no_preset_words">No preset words yet.</string>
+    <string name="send_room_dialog_new_preset_word_label">New Preset Word</string>
+    <string name="send_room_dialog_add_button">Add</string>
+    <string name="send_room_dialog_continuous_send_checkbox">Continuously send room number until next departure</string>
+    <string name="send_room_dialog_send_button">Send</string>
+    <string name="send_room_dialog_cancel_button">Cancel</string>
+
+    <!-- Update Dialog -->
+    <string name="update_dialog_title">New version available: %1$s</string>
+    <string name="update_dialog_confirm_button">Download</string>
+    <string name="update_dialog_dismiss_button">Later</string>
+
+    <!-- Login Dialog -->
+    <string name="login_dialog_back_arrow_desc">Back</string>
+    <string name="login_dialog_title_options">Login Options</string>
+    <string name="login_dialog_title_password_login">Password Login</string>
+    <string name="login_dialog_title_token_login">Token Login</string>
+    <string name="login_dialog_title_register">Register Account</string>
+    <string name="login_dialog_title_forgot_password">Forgot Password</string>
+    <string name="login_dialog_title_verify_email">Verify Email</string>
+    <string name="login_dialog_exit_icon_desc">Exit</string>
+    <string name="login_dialog_button_password_login_option">Password Login</string>
+    <string name="login_dialog_button_token_login_option">Token Login</string>
+    <string name="login_dialog_button_login_action">Login</string>
+    <string name="login_dialog_button_register_link">Register Account</string>
+    <string name="login_dialog_button_forgot_password_link">Forgot Password</string>
+    <string name="login_dialog_button_register_action">Register</string>
+    <string name="login_dialog_button_next">Next</string>
+    <string name="login_dialog_button_change_email">Change Email Address</string>
+    <string name="login_dialog_button_verify_action">Verify</string>
+    <string name="login_dialog_label_token">Token</string>
+    <string name="login_dialog_label_confirm_password_register">Confirm Password</string>
+    <string name="login_dialog_label_email_address">Email Address</string>
+    <string name="login_dialog_label_code">Verification Code</string>
+
+    <!-- User Profile Dialog -->
+    <string name="user_profile_dialog_unfollow_button">Unfollow</string>
+    <string name="user_profile_dialog_follow_button">Follow</string>
+    <string name="user_profile_dialog_close_button_desc">Close profile dialog</string>
+
+    <!-- User Profile Screen -->
+    <string name="user_profile_tab_posted_history">Posting History</string>
+    <string name="user_profile_tab_joined_history">Joined History</string>
+    <string name="user_profile_tab_statistics">Usage Statistics</string>
+    <string name="user_profile_uid_label">UID: %1$s</string>
+    <string name="user_profile_following_count">%1$d Following</string>
+    <string name="user_profile_follower_count">%1$d Followers</string>
+    <string name="user_profile_no_recent_posts">No recent posting history</string>
+    <string name="user_profile_no_recent_joins">No recent joined history</string>
+    <string name="user_profile_stats_join_count_title">Joined Count Statistics</string>
+    <string name="user_profile_stats_join_count_label">Count</string>
+    <string name="user_profile_stats_duration_title">Joined Duration Statistics (minutes)</string>
+    <string name="user_profile_stats_duration_label">Duration (min)</string>
+    <string name="user_profile_stats_keywords_title">Room Message Keywords Statistics</string>
 </resources>

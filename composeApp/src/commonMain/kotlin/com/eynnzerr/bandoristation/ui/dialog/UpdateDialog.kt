@@ -20,9 +20,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.update_dialog_confirm_button
+import bandoristationm.composeapp.generated.resources.update_dialog_dismiss_button
+import bandoristationm.composeapp.generated.resources.update_dialog_title
 import com.eynnzerr.bandoristation.model.GithubRelease
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun UpdateDialog(
@@ -48,7 +52,7 @@ fun UpdateDialog(
                 )
             },
             title = {
-                Text("发现新版本 ${release.tagName}")
+                Text(stringResource(Res.string.update_dialog_title, release.tagName))
             },
             text = {
                 RichText(
@@ -58,11 +62,11 @@ fun UpdateDialog(
             },
             confirmButton = {
                 TextButton(onClick = { onConfirm(release.htmlUrl) }) {
-                    Text("前往下载")
+                    Text(stringResource(Res.string.update_dialog_confirm_button))
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismissRequest) { Text("稍后") }
+                TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.update_dialog_dismiss_button)) }
             }
         )
     }

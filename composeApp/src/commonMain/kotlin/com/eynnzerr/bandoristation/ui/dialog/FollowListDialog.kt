@@ -12,8 +12,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.dialog_confirm
 import com.eynnzerr.bandoristation.model.account.AccountSummary
 import com.eynnzerr.bandoristation.ui.component.FollowerItem
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,7 +59,7 @@ fun FollowListDialog(
                 TextButton(
                     onClick = onDismissRequest
                 ) {
-                    Text("确定")
+                    Text(stringResource(Res.string.dialog_confirm))
                 }
             },
             dismissButton = {},

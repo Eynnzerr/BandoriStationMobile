@@ -30,15 +30,23 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.room_filter_add_button
+import bandoristationm.composeapp.generated.resources.room_filter_apply_button
+import bandoristationm.composeapp.generated.resources.room_filter_block_keywords_title
+import bandoristationm.composeapp.generated.resources.room_filter_block_users_title
+import bandoristationm.composeapp.generated.resources.room_filter_dialog_title
+import bandoristationm.composeapp.generated.resources.room_filter_edit_icon_desc
+import bandoristationm.composeapp.generated.resources.room_filter_keywords_placeholder
+import bandoristationm.composeapp.generated.resources.room_filter_reset_button
 import com.eynnzerr.bandoristation.model.RoomFilter
 import com.eynnzerr.bandoristation.model.UserInfo
-import com.eynnzerr.bandoristation.utils.AppLogger
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -66,13 +74,13 @@ fun RoomFilterDialog(
                 )
             },
             title = {
-                Text("房间筛选")
+                Text(stringResource(Res.string.room_filter_dialog_title))
             },
             text = {
                 Column {
                     // 屏蔽关键词部分
                     Text(
-                        text = "屏蔽关键词",
+                        text = stringResource(Res.string.room_filter_block_keywords_title),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -89,13 +97,13 @@ fun RoomFilterDialog(
                             value = keywordText,
                             onValueChange = { keywordText = it },
                             modifier = Modifier.weight(1f),
-                            placeholder = { Text("关键词") },
+                            placeholder = { Text(stringResource(Res.string.room_filter_keywords_placeholder)) },
                             shape = RoundedCornerShape(4.dp),
                             trailingIcon = {
                                 IconButton(onClick = {}) {
                                     Icon(
                                         imageVector = Icons.Default.Edit,
-                                        contentDescription = "编辑"
+                                        contentDescription = stringResource(Res.string.room_filter_edit_icon_desc)
                                     )
                                 }
                             }
@@ -111,7 +119,7 @@ fun RoomFilterDialog(
                                 }
                             },
                         ) {
-                            Text("添加")
+                            Text(stringResource(Res.string.room_filter_add_button))
                         }
                     }
 
@@ -141,7 +149,7 @@ fun RoomFilterDialog(
 
                     // 屏蔽用户部分
                     Text(
-                        text = "屏蔽用户",
+                        text = stringResource(Res.string.room_filter_block_users_title),
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -181,7 +189,7 @@ fun RoomFilterDialog(
                         onDismissRequest()
                     }
                 ) {
-                    Text("应用")
+                    Text(stringResource(Res.string.room_filter_apply_button))
                 }
             },
             dismissButton = {
@@ -198,7 +206,7 @@ fun RoomFilterDialog(
                         }
                     }
                 ) {
-                    Text("重置")
+                    Text(stringResource(Res.string.room_filter_reset_button))
                 }
             },
         )

@@ -31,6 +31,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.user_profile_follower_count
+import bandoristationm.composeapp.generated.resources.user_profile_following_count
+import bandoristationm.composeapp.generated.resources.user_profile_no_recent_joins
+import bandoristationm.composeapp.generated.resources.user_profile_no_recent_posts
+import bandoristationm.composeapp.generated.resources.user_profile_stats_duration_label
+import bandoristationm.composeapp.generated.resources.user_profile_stats_duration_title
+import bandoristationm.composeapp.generated.resources.user_profile_stats_join_count_label
+import bandoristationm.composeapp.generated.resources.user_profile_stats_join_count_title
+import bandoristationm.composeapp.generated.resources.user_profile_stats_keywords_title
+import bandoristationm.composeapp.generated.resources.user_profile_tab_joined_history
+import bandoristationm.composeapp.generated.resources.user_profile_tab_posted_history
+import bandoristationm.composeapp.generated.resources.user_profile_tab_statistics
+import bandoristationm.composeapp.generated.resources.user_profile_uid_label
 import com.eynnzerr.bandoristation.model.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.ui.component.charts.BarChart
@@ -42,10 +56,13 @@ import com.eynnzerr.bandoristation.ui.component.charts.ChartDataSet
 import com.eynnzerr.bandoristation.ui.component.charts.LineChart
 import com.eynnzerr.bandoristation.ui.component.charts.LineType
 import com.eynnzerr.bandoristation.ui.component.charts.PieChart
+import com.eynnzerr.bandoristation.ui.component.room.RoomHistoryCard
+import com.eynnzerr.bandoristation.ui.component.room.SimpleRoomCard
 import com.eynnzerr.bandoristation.utils.TimeGranularity
 import com.eynnzerr.bandoristation.utils.extractKeywordsFromRoomHistory
 import com.eynnzerr.bandoristation.utils.getCountDataByGranularity
 import com.eynnzerr.bandoristation.utils.getDurationDataByGranularity
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun UserProfile(
@@ -58,7 +75,11 @@ fun UserProfile(
     onBrowseFollowings: () -> Unit = {},
     onDeleteHistory: (RoomHistory) -> Unit = {},
 ) {
-    val tabs = listOf("发车历史", "上车历史", "使用统计")
+    val tabs = listOf(
+        stringResource(Res.string.user_profile_tab_posted_history),
+        stringResource(Res.string.user_profile_tab_joined_history),
+        stringResource(Res.string.user_profile_tab_statistics)
+    )
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Column(
@@ -106,7 +127,7 @@ fun UserProfile(
                         fontSize = 20.sp
                     )
                     Text(
-                        text = "UID: ${accountInfo.accountSummary.userId}",
+                        text = stringResource(Res.string.user_profile_uid_label, accountInfo.accountSummary.userId),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
                         modifier = Modifier.padding(top = 4.dp),
@@ -116,13 +137,13 @@ fun UserProfile(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "${accountInfo.accountSummary.following} 关注",
+                            text = stringResource(Res.string.user_profile_following_count, accountInfo.accountSummary.following),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
                             modifier = Modifier.clickable(onClick = onBrowseFollowings)
                         )
                         Text(
-                            text = "${accountInfo.accountSummary.follower} 关注者",
+                            text = stringResource(Res.string.user_profile_follower_count, accountInfo.accountSummary.follower),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
                             modifier = Modifier.clickable(onClick = onBrowseFollowers)
@@ -172,7 +193,7 @@ fun UserProfile(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "无最近发车记录",
+                            text = stringResource(Res.string.user_profile_no_recent_posts),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -205,7 +226,7 @@ fun UserProfile(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "无最近上车记录",
+                            text = stringResource(Res.string.user_profile_no_recent_joins),
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -255,7 +276,7 @@ fun UserProfile(
                     Card {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "上车次数统计",
+                                text = stringResource(Res.string.user_profile_stats_join_count_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
@@ -271,7 +292,7 @@ fun UserProfile(
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     },
-                                    label = "次数",
+                                    label = stringResource(Res.string.user_profile_stats_join_count_label),
                                     color = MaterialTheme.colorScheme.primary
                                 ),
                                 height = 250.dp,
@@ -292,7 +313,7 @@ fun UserProfile(
                     Card {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "在车时长统计/分钟",
+                                text = stringResource(Res.string.user_profile_stats_duration_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
@@ -308,7 +329,7 @@ fun UserProfile(
                                             color = MaterialTheme.colorScheme.primary
                                         )
                                     },
-                                    label = "时长/分钟",
+                                    label = stringResource(Res.string.user_profile_stats_duration_label),
                                     color = MaterialTheme.colorScheme.primary
                                 )),
                                 height = 250.dp,
@@ -329,7 +350,7 @@ fun UserProfile(
                     Card {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "车头关键词统计",
+                                text = stringResource(Res.string.user_profile_stats_keywords_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )

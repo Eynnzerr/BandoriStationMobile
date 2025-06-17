@@ -11,10 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
-import androidx.compose.material.icons.outlined.AccountBox
 import androidx.compose.material.icons.outlined.Block
-import androidx.compose.material.icons.outlined.Filter
-import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Schedule
@@ -47,20 +44,16 @@ import bandoristationm.composeapp.generated.resources.settings_auto_filter_pjsk_
 import bandoristationm.composeapp.generated.resources.settings_auto_filter_pjsk_desc
 import bandoristationm.composeapp.generated.resources.settings_show_player_data_title
 import bandoristationm.composeapp.generated.resources.settings_show_player_data_desc
-import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_title
-import bandoristationm.composeapp.generated.resources.settings_active_filter_rules_desc
 import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_title
 import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_desc
 import bandoristationm.composeapp.generated.resources.settings_tutorial_title
 import bandoristationm.composeapp.generated.resources.settings_tutorial_desc
 import bandoristationm.composeapp.generated.resources.settings_version_title
-import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
 import com.eynnzerr.bandoristation.ui.component.settings.SettingDropdownItem
 import com.eynnzerr.bandoristation.ui.component.settings.SettingItem
 import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
-import com.eynnzerr.bandoristation.ui.dialog.RegexFilterDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.ui.theme.bandThemeList
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
@@ -97,12 +90,6 @@ fun SettingScreen(
         isVisible = showTutorialDialog,
         markdownPath = "files/introduction.md",
         onDismissRequest = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(false)) },
-    )
-
-    RegexFilterDialog(
-        isVisible = showRegexDialog,
-        onDismissRequest = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(false)) },
-        onConfirm = {}
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

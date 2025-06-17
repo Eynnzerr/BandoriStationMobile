@@ -18,8 +18,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.dialog_cancel
+import bandoristationm.composeapp.generated.resources.dialog_confirm
+import bandoristationm.composeapp.generated.resources.inform_dialog_confirmation_message
+import bandoristationm.composeapp.generated.resources.inform_dialog_reason_placeholder
+import bandoristationm.composeapp.generated.resources.inform_dialog_title
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.RoomInfo
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,19 +48,19 @@ fun InformDialog(
                 )
             },
             title = {
-                Text("举报")
+                Text(stringResource(Res.string.inform_dialog_title))
             },
             text = {
                 Column {
                     Text(
-                        text = "确定举报用户“${selectedRoom?.userInfo?.username}”？",
+                        text = stringResource(Res.string.inform_dialog_confirmation_message, selectedRoom?.userInfo?.username ?: ""),
                         modifier = Modifier.padding(bottom = 12.dp)
                     )
 
                     OutlinedTextField(
                         value = reason,
                         onValueChange = { reason = it },
-                        label = { Text("理由（必填）") },
+                        label = { Text(stringResource(Res.string.inform_dialog_reason_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2,
                         maxLines = 4,
@@ -75,12 +82,12 @@ fun InformDialog(
                         }
                     }
                 ) {
-                    Text("确定")
+                    Text(stringResource(Res.string.dialog_confirm))
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismissRequest) {
-                    Text("取消")
+                    Text(stringResource(Res.string.dialog_cancel))
                 }
             },
         )

@@ -25,10 +25,44 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.dialog_cancel
+import bandoristationm.composeapp.generated.resources.dialog_confirm
+import bandoristationm.composeapp.generated.resources.edit_email_current_email
+import bandoristationm.composeapp.generated.resources.edit_email_dialog_title
+import bandoristationm.composeapp.generated.resources.edit_email_invalid_format
+import bandoristationm.composeapp.generated.resources.edit_email_new_email_placeholder
+import bandoristationm.composeapp.generated.resources.edit_email_resend_countdown
+import bandoristationm.composeapp.generated.resources.edit_email_send_verification_code
+import bandoristationm.composeapp.generated.resources.edit_email_verification_code_placeholder
+import bandoristationm.composeapp.generated.resources.edit_introduction_dialog_title
+import bandoristationm.composeapp.generated.resources.edit_introduction_placeholder
+import bandoristationm.composeapp.generated.resources.edit_password_confirm_new_password
+import bandoristationm.composeapp.generated.resources.edit_password_dialog_title
+import bandoristationm.composeapp.generated.resources.edit_password_length_requirement
+import bandoristationm.composeapp.generated.resources.edit_password_mismatch
+import bandoristationm.composeapp.generated.resources.edit_password_new_password
+import bandoristationm.composeapp.generated.resources.edit_password_old_password
+import bandoristationm.composeapp.generated.resources.edit_password_visibility_toggle_hide
+import bandoristationm.composeapp.generated.resources.edit_password_visibility_toggle_show
+import bandoristationm.composeapp.generated.resources.edit_profile_avatar
+import bandoristationm.composeapp.generated.resources.edit_profile_banner
+import bandoristationm.composeapp.generated.resources.edit_profile_email
+import bandoristationm.composeapp.generated.resources.edit_profile_introduction
+import bandoristationm.composeapp.generated.resources.edit_profile_password
+import bandoristationm.composeapp.generated.resources.edit_profile_qq
+import bandoristationm.composeapp.generated.resources.edit_profile_title
+import bandoristationm.composeapp.generated.resources.edit_profile_username
+import bandoristationm.composeapp.generated.resources.edit_qq_dialog_title
+import bandoristationm.composeapp.generated.resources.edit_qq_length_requirement
+import bandoristationm.composeapp.generated.resources.edit_qq_placeholder
+import bandoristationm.composeapp.generated.resources.edit_username_dialog_title
+import bandoristationm.composeapp.generated.resources.edit_username_placeholder
 import com.eynnzerr.bandoristation.model.account.EditProfileInfo
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
 import com.eynnzerr.bandoristation.ui.component.UserBannerImage
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,7 +111,7 @@ fun EditProfileDialog(
                         .verticalScroll(rememberScrollState())
                 ) {
                     Text(
-                        text = "账号资料",
+                        text = stringResource(Res.string.edit_profile_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -86,7 +120,7 @@ fun EditProfileDialog(
                     HorizontalDivider()
 
                     ProfileItem(
-                        title = "头像",
+                        title = stringResource(Res.string.edit_profile_avatar),
                         content = {
                             Box(
                                 modifier = Modifier
@@ -106,7 +140,7 @@ fun EditProfileDialog(
                     )
 
                     ProfileItem(
-                        title = "横幅背景",
+                        title = stringResource(Res.string.edit_profile_banner),
                         content = {
                             UserBannerImage(
                                 bannerName = profile.banner,
@@ -121,7 +155,7 @@ fun EditProfileDialog(
                     )
 
                     ProfileItem(
-                        title = "用户名",
+                        title = stringResource(Res.string.edit_profile_username),
                         content = {
                             Text(
                                 text = profile.username,
@@ -134,7 +168,7 @@ fun EditProfileDialog(
                     )
 
                     ProfileItem(
-                        title = "个性签名",
+                        title = stringResource(Res.string.edit_profile_introduction),
                         content = {
                             Text(
                                 text = profile.introduction,
@@ -147,7 +181,7 @@ fun EditProfileDialog(
                     )
 
                     ProfileItem(
-                        title = "密码",
+                        title = stringResource(Res.string.edit_profile_password),
                         content = {
                             Text(
                                 text = "********",
@@ -160,7 +194,7 @@ fun EditProfileDialog(
                     )
 
                     ProfileItem(
-                        title = "电子邮件",
+                        title = stringResource(Res.string.edit_profile_email),
                         content = {
                             Text(
                                 text = profile.email,
@@ -173,7 +207,7 @@ fun EditProfileDialog(
                     )
 
                     ProfileItem(
-                        title = "QQ",
+                        title = stringResource(Res.string.edit_profile_qq),
                         content = {
                             Text(
                                 text = profile.qq,
@@ -185,49 +219,6 @@ fun EditProfileDialog(
                         onClick = { showQQDialog = true }
                     )
 
-//                    ProfileItem(
-//                        title = "国服游戏ID",
-//                        content = {
-//                            Text(
-//                                text = if (profile.playerId.cn.isEmpty()) "未绑定" else profile.playerId.cn.first().toString(),
-//                                style = MaterialTheme.typography.bodyLarge,
-//                                maxLines = 1,
-//                                overflow = TextOverflow.Ellipsis
-//                            )
-//                        },
-//                        onClick = { /* 点击编辑国服游戏ID */ }
-//                    )
-
-//                    ProfileItem(
-//                        title = "日服游戏ID",
-//                        content = {
-//                            Text(
-//                                text = if (profile.playerId.jp.isEmpty()) "未绑定" else profile.playerId.jp.first().toString(),
-//                                style = MaterialTheme.typography.bodyLarge,
-//                                maxLines = 1,
-//                                overflow = TextOverflow.Ellipsis
-//                            )
-//                        },
-//                        onClick = { /* 点击编辑日服游戏ID */ }
-//                    )
-
-//                    ProfileItem(
-//                        title = "主游戏账号",
-//                        content = {
-//                            Row(
-//                                verticalAlignment = Alignment.CenterVertically
-//                            ) {
-//                                Text(
-//                                    text = profile.mainGameAccount.playerId.toString(),
-//                                    style = MaterialTheme.typography.bodyLarge,
-//                                    maxLines = 1,
-//                                    overflow = TextOverflow.Ellipsis
-//                                )
-//                            }
-//                        },
-//                        onClick = { /* 点击设置主游戏账号 */ }
-//                    )
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -237,7 +228,7 @@ fun EditProfileDialog(
                         Button(
                             onClick = onDismissRequest
                         ) {
-                            Text("确定")
+                            Text(stringResource(Res.string.dialog_confirm))
                         }
                     }
                 }
@@ -332,7 +323,7 @@ fun EditUsernameDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "编辑用户名",
+                    text = stringResource(Res.string.edit_username_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -345,7 +336,7 @@ fun EditUsernameDialog(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
                     singleLine = true,
-                    label = { Text("请输入用户名") },
+                    label = { Text(stringResource(Res.string.edit_username_placeholder)) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Done
@@ -367,7 +358,7 @@ fun EditUsernameDialog(
                         onClick = onDismiss,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Text("取消")
+                        Text(stringResource(Res.string.dialog_cancel))
                     }
 
                     Button(
@@ -378,7 +369,7 @@ fun EditUsernameDialog(
                         },
                         enabled = textValue.isNotBlank() && textValue != currentValue
                     ) {
-                        Text("确定")
+                        Text(stringResource(Res.string.dialog_confirm))
                     }
                 }
             }
@@ -416,7 +407,7 @@ fun EditIntroductionDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "编辑个性签名",
+                    text = stringResource(Res.string.edit_introduction_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -429,7 +420,7 @@ fun EditIntroductionDialog(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
                     maxLines = 3,
-                    label = { Text("请输入个性签名") },
+                    label = { Text(stringResource(Res.string.edit_introduction_placeholder)) },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Done
@@ -444,7 +435,7 @@ fun EditIntroductionDialog(
                         onClick = onDismiss,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Text("取消")
+                        Text(stringResource(Res.string.dialog_cancel))
                     }
 
                     Button(
@@ -455,7 +446,7 @@ fun EditIntroductionDialog(
                         },
                         enabled = textValue != currentValue
                     ) {
-                        Text("确定")
+                        Text(stringResource(Res.string.dialog_confirm))
                     }
                 }
             }
@@ -503,7 +494,7 @@ fun EditPasswordDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "修改密码",
+                    text = stringResource(Res.string.edit_password_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -516,7 +507,7 @@ fun EditPasswordDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 12.dp),
-                    label = { Text("原密码") },
+                    label = { Text(stringResource(Res.string.edit_password_old_password)) },
                     singleLine = true,
                     visualTransformation = if (oldPasswordVisible) {
                         VisualTransformation.None
@@ -531,7 +522,7 @@ fun EditPasswordDialog(
                                 } else {
                                     Icons.Filled.VisibilityOff
                                 },
-                                contentDescription = if (oldPasswordVisible) "隐藏密码" else "显示密码"
+                                contentDescription = if (oldPasswordVisible) stringResource(Res.string.edit_password_visibility_toggle_hide) else stringResource(Res.string.edit_password_visibility_toggle_show)
                             )
                         }
                     },
@@ -545,7 +536,7 @@ fun EditPasswordDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 12.dp),
-                    label = { Text("新密码") },
+                    label = { Text(stringResource(Res.string.edit_password_new_password)) },
                     singleLine = true,
                     visualTransformation = if (newPasswordVisible) {
                         VisualTransformation.None
@@ -560,14 +551,14 @@ fun EditPasswordDialog(
                                 } else {
                                     Icons.Filled.VisibilityOff
                                 },
-                                contentDescription = if (newPasswordVisible) "隐藏密码" else "显示密码"
+                                contentDescription = if (newPasswordVisible) stringResource(Res.string.edit_password_visibility_toggle_hide) else stringResource(Res.string.edit_password_visibility_toggle_show)
                             )
                         }
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     supportingText = {
                         Text(
-                            text = "密码长度至少6位",
+                            text = stringResource(Res.string.edit_password_length_requirement),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -581,7 +572,7 @@ fun EditPasswordDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
-                    label = { Text("再次输入新密码") },
+                    label = { Text(stringResource(Res.string.edit_password_confirm_new_password)) },
                     singleLine = true,
                     visualTransformation = if (confirmPasswordVisible) {
                         VisualTransformation.None
@@ -596,7 +587,7 @@ fun EditPasswordDialog(
                                 } else {
                                     Icons.Filled.VisibilityOff
                                 },
-                                contentDescription = if (confirmPasswordVisible) "隐藏密码" else "显示密码"
+                                contentDescription = if (confirmPasswordVisible) stringResource(Res.string.edit_password_visibility_toggle_hide) else stringResource(Res.string.edit_password_visibility_toggle_show)
                             )
                         }
                     },
@@ -605,7 +596,7 @@ fun EditPasswordDialog(
                     supportingText = if (confirmPassword.isNotBlank() && newPassword != confirmPassword) {
                         {
                             Text(
-                                text = "两次输入的密码不一致",
+                                text = stringResource(Res.string.edit_password_mismatch),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall
                             )
@@ -621,7 +612,7 @@ fun EditPasswordDialog(
                         onClick = onDismiss,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Text("取消")
+                        Text(stringResource(Res.string.dialog_cancel))
                     }
 
                     Button(
@@ -632,7 +623,7 @@ fun EditPasswordDialog(
                         },
                         enabled = isValid
                     ) {
-                        Text("确定")
+                        Text(stringResource(Res.string.dialog_confirm))
                     }
                 }
             }
@@ -663,7 +654,7 @@ fun EditEmailDialog(
     }
 
     fun isValidEmail(email: String): Boolean {
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\$".toRegex()
         return email.matches(emailRegex)
     }
 
@@ -691,7 +682,7 @@ fun EditEmailDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "修改邮箱",
+                    text = stringResource(Res.string.edit_email_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -699,7 +690,7 @@ fun EditEmailDialog(
 
                 // 当前邮箱提示
                 Text(
-                    text = "当前邮箱：$currentEmail",
+                    text = stringResource(Res.string.edit_email_current_email, currentEmail),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -716,7 +707,7 @@ fun EditEmailDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 12.dp),
-                    label = { Text("新邮箱地址") },
+                    label = { Text(stringResource(Res.string.edit_email_new_email_placeholder)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -726,7 +717,7 @@ fun EditEmailDialog(
                     supportingText = if (newEmail.isNotBlank() && !isEmailValid) {
                         {
                             Text(
-                                text = "请输入有效的邮箱地址",
+                                text = stringResource(Res.string.edit_email_invalid_format),
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall
                             )
@@ -746,7 +737,7 @@ fun EditEmailDialog(
                         value = verificationCode,
                         onValueChange = { verificationCode = it },
                         modifier = Modifier.weight(1f),
-                        label = { Text("验证码") },
+                        label = { Text(stringResource(Res.string.edit_email_verification_code_placeholder)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
@@ -764,7 +755,7 @@ fun EditEmailDialog(
                         modifier = Modifier.padding(top = 8.dp)
                     ) {
                         Text(
-                            text = if (countdown > 0) "${countdown}s" else "发送验证码"
+                            text = if (countdown > 0) stringResource(Res.string.edit_email_resend_countdown, countdown) else stringResource(Res.string.edit_email_send_verification_code)
                         )
                     }
                 }
@@ -777,7 +768,7 @@ fun EditEmailDialog(
                         onClick = onDismiss,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Text("取消")
+                        Text(stringResource(Res.string.dialog_cancel))
                     }
 
                     Button(
@@ -788,7 +779,7 @@ fun EditEmailDialog(
                         },
                         enabled = canConfirm
                     ) {
-                        Text("确定")
+                        Text(stringResource(Res.string.dialog_confirm))
                     }
                 }
             }
@@ -826,7 +817,7 @@ fun EditQQDialog(
                     .padding(24.dp)
             ) {
                 Text(
-                    text = "编辑QQ",
+                    text = stringResource(Res.string.edit_qq_dialog_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 16.dp)
@@ -843,7 +834,7 @@ fun EditQQDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
-                    label = { Text("QQ号码") },
+                    label = { Text(stringResource(Res.string.edit_qq_placeholder)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
@@ -858,7 +849,7 @@ fun EditQQDialog(
                     ),
                     supportingText = {
                         Text(
-                            text = "请输入5-11位QQ号码",
+                            text = stringResource(Res.string.edit_qq_length_requirement),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -873,7 +864,7 @@ fun EditQQDialog(
                         onClick = onDismiss,
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        Text("取消")
+                        Text(stringResource(Res.string.dialog_cancel))
                     }
 
                     Button(
@@ -886,7 +877,7 @@ fun EditQQDialog(
                                 textValue != currentValue &&
                                 textValue.length in 5..11
                     ) {
-                        Text("确定")
+                        Text(stringResource(Res.string.dialog_confirm))
                     }
                 }
             }
