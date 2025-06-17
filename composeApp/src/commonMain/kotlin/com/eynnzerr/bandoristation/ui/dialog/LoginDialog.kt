@@ -6,12 +6,15 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Token
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.HighlightOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import bandoristationm.composeapp.generated.resources.Res
@@ -44,6 +47,8 @@ import bandoristationm.composeapp.generated.resources.edit_profile_password
 import bandoristationm.composeapp.generated.resources.edit_profile_username
 import bandoristationm.composeapp.generated.resources.edit_password_new_password
 import bandoristationm.composeapp.generated.resources.edit_email_send_verification_code
+import bandoristationm.composeapp.generated.resources.edit_password_visibility_toggle_hide
+import bandoristationm.composeapp.generated.resources.edit_password_visibility_toggle_show
 import bandoristationm.composeapp.generated.resources.help_dialog_title
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -359,13 +364,27 @@ fun LoginDialog(
                         }
 
                         LoginScreenState.RESET_PASSWORD -> {
+                            var passwordVisible by remember { mutableStateOf(false) }
+
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 OutlinedTextField(
                                     value = password,
                                     onValueChange = { password = it },
                                     label = { Text(stringResource(Res.string.edit_password_new_password)) },
                                     modifier = Modifier.fillMaxWidth(),
-                                    visualTransformation = PasswordVisualTransformation(),
+                                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                    trailingIcon = {
+                                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                            Icon(
+                                                imageVector = if (passwordVisible) {
+                                                    Icons.Filled.Visibility
+                                                } else {
+                                                    Icons.Filled.VisibilityOff
+                                                },
+                                                contentDescription = ""
+                                            )
+                                        }
+                                    },
                                 )
 
                                 Spacer(modifier = Modifier.height(16.dp))
