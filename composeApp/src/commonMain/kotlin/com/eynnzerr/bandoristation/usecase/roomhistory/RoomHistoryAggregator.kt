@@ -1,6 +1,6 @@
 package com.eynnzerr.bandoristation.usecase.roomhistory
 
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 
 class RoomHistoryAggregator(
     private val fetchAllHistory: FetchAllHistoryUseCase,

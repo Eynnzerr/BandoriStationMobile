@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.ui.component
+package com.eynnzerr.bandoristation.ui.component.chat
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding

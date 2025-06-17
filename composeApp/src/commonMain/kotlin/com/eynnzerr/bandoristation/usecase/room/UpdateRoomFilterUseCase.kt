@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import com.eynnzerr.bandoristation.usecase.base.UseCase
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.model.ApiRequest
-import com.eynnzerr.bandoristation.model.RoomFilter
+import com.eynnzerr.bandoristation.model.room.RoomFilter
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.CoroutineDispatcher

@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import com.eynnzerr.bandoristation.data.local.dao.RoomHistoryDao
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 
 @Database(
     version = 1,

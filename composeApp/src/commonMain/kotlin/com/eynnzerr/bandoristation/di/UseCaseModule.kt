@@ -30,6 +30,9 @@ import com.eynnzerr.bandoristation.usecase.account.UpdateIntroductionUseCase
 import com.eynnzerr.bandoristation.usecase.account.UpdatePasswordUseCase
 import com.eynnzerr.bandoristation.usecase.account.UpdateUsernameUseCase
 import com.eynnzerr.bandoristation.usecase.account.VerifyEmailUseCase
+import com.eynnzerr.bandoristation.usecase.account.ResetPasswordSendVCodeUseCase
+import com.eynnzerr.bandoristation.usecase.account.ResetPasswordVerifyEmailUseCase
+import com.eynnzerr.bandoristation.usecase.account.ResetPasswordUseCase
 import com.eynnzerr.bandoristation.usecase.room.GetRoomFilterUseCase
 import com.eynnzerr.bandoristation.usecase.room.RequestRecentRoomsUseCase
 import com.eynnzerr.bandoristation.usecase.room.UpdateRoomFilterUseCase
@@ -287,6 +290,9 @@ fun provideUseCaseModule() = module {
     singleOf(::UpdatePasswordUseCase)
     singleOf(::UpdateEmailSendVCodeUseCase)
     singleOf(::UpdateEmailVerifyEmailUseCase)
+    singleOf(::ResetPasswordSendVCodeUseCase)
+    singleOf(::ResetPasswordVerifyEmailUseCase)
+    singleOf(::ResetPasswordUseCase)
     singleOf(::UpdateAccountAggregator)
 
     // Room History UseCases

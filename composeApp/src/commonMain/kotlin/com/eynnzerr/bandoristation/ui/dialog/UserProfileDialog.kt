@@ -8,7 +8,6 @@ import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
@@ -18,9 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.user_profile_dialog_close_button_desc
+import bandoristationm.composeapp.generated.resources.user_profile_dialog_follow_button
+import bandoristationm.composeapp.generated.resources.user_profile_dialog_unfollow_button
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.ui.component.OtherUserProfile
-import com.eynnzerr.bandoristation.ui.component.UserProfile
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +51,7 @@ fun UserProfileDialog(
                             onClick = { onFollow(accountInfo.accountSummary.userId) },
                             shape = MaterialTheme.shapes.medium,
                         ) {
-                            Text(if (hasFollowed) "取关" else "关注")
+                            Text(stringResource(if (hasFollowed) Res.string.user_profile_dialog_unfollow_button else Res.string.user_profile_dialog_follow_button))
                         }
                     },
                     actionButton = {
@@ -57,7 +60,7 @@ fun UserProfileDialog(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Cancel,
-                                contentDescription = null
+                                contentDescription = stringResource(Res.string.user_profile_dialog_close_button_desc)
                             )
                         }
                     }

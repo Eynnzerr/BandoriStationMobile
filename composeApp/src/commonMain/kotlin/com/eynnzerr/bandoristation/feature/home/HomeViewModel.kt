@@ -37,9 +37,9 @@ import com.eynnzerr.bandoristation.usecase.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
-import com.eynnzerr.bandoristation.model.RoomFilter
-import com.eynnzerr.bandoristation.model.RoomHistory
-import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomFilter
+import com.eynnzerr.bandoristation.model.room.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform

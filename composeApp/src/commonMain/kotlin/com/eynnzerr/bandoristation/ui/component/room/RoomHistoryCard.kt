@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.ui.component
+package com.eynnzerr.bandoristation.ui.component.room
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,7 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
+import com.eynnzerr.bandoristation.ui.component.UserAvatar
 import com.eynnzerr.bandoristation.utils.formatTimestamp
 import com.eynnzerr.bandoristation.utils.formatTimestampAsDate
 

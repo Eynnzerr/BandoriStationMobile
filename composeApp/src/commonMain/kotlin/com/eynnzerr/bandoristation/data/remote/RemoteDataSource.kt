@@ -4,7 +4,7 @@ import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
-import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
 import com.eynnzerr.bandoristation.model.GithubRelease
 import kotlinx.coroutines.flow.Flow
@@ -18,8 +18,8 @@ interface RemoteDataSource {
     val webSocketConnectionState: StateFlow<WebSocketClient.ConnectionState>
     val webSocketResponseFlow: SharedFlow<WebSocketResponse<JsonElement>>
     suspend fun connectWebSocket()
-    suspend fun <T> sendWebSocketRequest(action: String, data: T? = null) // TODO 废弃
-    suspend fun <T> sendWebSocketRequestWithRetry(action: String, data: T? = null, retryAttempts: Int = 0) // TODO 废弃
+    suspend fun <T> sendWebSocketRequest(action: String, data: T? = null)
+    suspend fun <T> sendWebSocketRequestWithRetry(action: String, data: T? = null, retryAttempts: Int = 0)
     fun listenWebSocketForActions(actions: List<String>): Flow<WebSocketResponse<JsonElement>>
     fun listenForAll(): Flow<WebSocketResponse<JsonElement>>
     fun listenWebSocketConnectionState(): Flow<WebSocketClient.ConnectionState>

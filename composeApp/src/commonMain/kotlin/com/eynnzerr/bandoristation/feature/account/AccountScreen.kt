@@ -144,6 +144,7 @@ fun AccountScreen(
                 is AccountEffect.PopBackLoginDialog -> {
                     loginDialogState = when (loginDialogState) {
                         LoginScreenState.REGISTER, LoginScreenState.FORGOT_PASSWORD -> LoginScreenState.PASSWORD_LOGIN
+                        LoginScreenState.RESET_PASSWORD -> LoginScreenState.FORGOT_PASSWORD
                         LoginScreenState.VERIFY_EMAIL -> LoginScreenState.REGISTER
                         else -> LoginScreenState.INITIAL
                     }
@@ -198,6 +199,15 @@ fun AccountScreen(
         },
         onVerifyCode = { code ->
             viewModel.sendEvent(VerifyEmail(code))
+        },
+        onSendCodeForResetPassword = {
+            viewModel.sendEvent(ResetPasswordSendVCode(it))
+        },
+        onVerifyCodeForResetPassword = { email, code ->
+            viewModel.sendEvent(ResetPasswordVerifyCode(email, code))
+        },
+        onResetPassword = {
+            viewModel.sendEvent(ResetPassword(it))
         },
         sendCountDown = state.countDown
     )

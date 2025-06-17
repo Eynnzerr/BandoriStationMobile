@@ -1,7 +1,7 @@
 package com.eynnzerr.bandoristation.usecase.room
 
 import com.eynnzerr.bandoristation.data.AppRepository
-import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.usecase.base.UseCase
 import kotlinx.coroutines.CoroutineDispatcher

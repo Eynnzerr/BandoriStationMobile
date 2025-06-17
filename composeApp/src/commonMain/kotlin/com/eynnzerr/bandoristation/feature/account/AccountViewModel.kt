@@ -15,6 +15,9 @@ import com.eynnzerr.bandoristation.usecase.account.SendVerificationCodeUseCase
 import com.eynnzerr.bandoristation.usecase.account.SignupUseCase
 import com.eynnzerr.bandoristation.usecase.account.UpdateAccountAggregator
 import com.eynnzerr.bandoristation.usecase.account.VerifyEmailUseCase
+import com.eynnzerr.bandoristation.usecase.account.ResetPasswordSendVCodeUseCase
+import com.eynnzerr.bandoristation.usecase.account.ResetPasswordVerifyEmailUseCase
+import com.eynnzerr.bandoristation.usecase.account.ResetPasswordUseCase
 import com.eynnzerr.bandoristation.usecase.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.usecase.datastore.SetPreferenceUseCase.Params
 import com.eynnzerr.bandoristation.usecase.roomhistory.RoomHistoryAggregator
@@ -23,6 +26,7 @@ import com.eynnzerr.bandoristation.usecase.social.GetFollowerBriefUseCase
 import com.eynnzerr.bandoristation.usecase.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.feature.account.AccountEffect.*
 import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
+import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
@@ -46,6 +50,9 @@ class AccountViewModel(
     private val signupUseCase: SignupUseCase,
     private val sendVerificationCodeUseCase: SendVerificationCodeUseCase,
     private val verifyEmailUseCase: VerifyEmailUseCase,
+    private val resetPasswordSendVCodeUseCase: ResetPasswordSendVCodeUseCase,
+    private val resetPasswordVerifyEmailUseCase: ResetPasswordVerifyEmailUseCase,
+    private val resetPasswordUseCase: ResetPasswordUseCase,
     private val setPreferenceUseCase: SetPreferenceUseCase,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val getFollowingBriefUseCase: GetFollowingBriefUseCase,
@@ -241,6 +248,60 @@ class AccountViewModel(
                }
                null to null
            }
+
+            is ResetPasswordSendVCode -> {
+                viewModelScope.launch {
+                    val result = resetPasswordSendVCodeUseCase.invoke(event.email)
+                    when (result) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> sendEffect(ShowSnackbar(result.error))
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar("已发送验证码至${result.data}"))
+                            var countDown = 60
+                            while (countDown >= 0) {
+                                delay(1000)
+                                sendEvent(UpdateCountDown(countDown--))
+                            }
+                        }
+                    }
+                }
+                null to null
+            }
+
+            is ResetPasswordVerifyCode -> {
+                viewModelScope.launch {
+                    val result = resetPasswordVerifyEmailUseCase.invoke(
+                        ApiRequest.ResetPasswordVerifyEmail(
+                            email = event.email,
+                            code = event.code
+                        )
+
+                    )
+                    when (result) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> sendEffect(ShowSnackbar(result.error))
+                        is UseCaseResult.Success -> {
+                            sendEffect(ControlLoginDialogScreen(LoginScreenState.RESET_PASSWORD))
+                        }
+                    }
+                }
+                null to null
+            }
+
+            is ResetPassword -> {
+                viewModelScope.launch {
+                    val response = resetPasswordUseCase.invoke(event.password)
+                    when (response) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> sendEffect(ShowSnackbar(response.error))
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar("重置密码成功。"))
+                            sendEffect(ControlLoginDialogScreen(LoginScreenState.PASSWORD_LOGIN))
+                        }
+                    }
+                }
+                null to null
+            }
 
            is UpdateCountDown -> {
                state.value.copy(countDown = event.value) to null

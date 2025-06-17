@@ -53,4 +53,124 @@
     <string name="crash_title">移动车站崩溃了！</string>
     <string name="copy_exit">复制并退出</string>
     <string name="crash_hint">看起来app出现了bug！请复制如下错误信息并联系作者以寻求帮助。</string>
+
+    <!--  屏蔽用户对话框  -->
+    <string name="block_user_dialog_title">屏蔽</string>
+    <string name="block_user_dialog_confirmation_message">确定屏蔽用户“%1$s”？</string>
+    <string name="dialog_confirm">确定</string>
+    <string name="dialog_cancel">取消</string>
+
+    <!-- 资料编辑对话框 -->
+    <string name="edit_profile_title">账号资料</string>
+    <string name="edit_profile_avatar">头像</string>
+    <string name="edit_profile_banner">横幅背景</string>
+    <string name="edit_profile_username">用户名</string>
+    <string name="edit_profile_introduction">个性签名</string>
+    <string name="edit_profile_password">密码</string>
+    <string name="edit_profile_email">电子邮件</string>
+    <string name="edit_profile_qq">QQ</string>
+    <string name="edit_username_dialog_title">编辑用户名</string>
+    <string name="edit_username_placeholder">请输入用户名</string>
+    <string name="edit_introduction_dialog_title">编辑个性签名</string>
+    <string name="edit_introduction_placeholder">请输入个性签名</string>
+    <string name="edit_password_dialog_title">编辑密码</string>
+    <string name="edit_password_old_password">原密码</string>
+    <string name="edit_password_new_password">新密码</string>
+    <string name="edit_password_confirm_new_password">请再次输入新密码</string>
+    <string name="edit_password_mismatch">密码不一致</string>
+    <string name="edit_email_dialog_title">编辑邮箱</string>
+    <string name="edit_email_current_email">当前邮箱: %1$s</string>
+    <string name="edit_email_new_email_placeholder">请输入新邮箱</string>
+    <string name="edit_email_send_verification_code">发送验证码</string>
+    <string name="edit_email_verification_code_sent">验证码已发送</string>
+    <string name="edit_email_resend_countdown">重新发送(%1$ds)</string>
+    <string name="edit_email_verification_code_placeholder">请输入验证码</string>
+    <string name="edit_qq_dialog_title">编辑QQ</string>
+    <string name="edit_qq_placeholder">请输入QQ号</string>
+    <string name="edit_password_visibility_toggle_show">显示密码</string>
+    <string name="edit_password_visibility_toggle_hide">隐藏密码</string>
+    <string name="edit_password_length_requirement">密码长度至少6位</string>
+    <string name="edit_email_invalid_format">请输入有效的邮箱地址</string>
+    <string name="edit_qq_length_requirement">请输入5-11位QQ号码</string>
+
+    <!-- 帮助对话框 -->
+    <string name="help_dialog_title">帮助</string>
+    <string name="dialog_close">关闭</string>
+
+    <!-- 举报对话框 -->
+    <string name="inform_dialog_title">举报</string>
+    <string name="inform_dialog_confirmation_message">确定举报用户“%1$s”？</string>
+    <string name="inform_dialog_reason_placeholder">理由（必填）</string>
+
+    <!-- 房间过滤对话框 -->
+    <string name="room_filter_dialog_title">房间筛选</string>
+    <string name="room_filter_block_keywords_title">屏蔽关键词</string>
+    <string name="room_filter_keywords_placeholder">关键词</string>
+    <string name="room_filter_edit_icon_desc">编辑</string>
+    <string name="room_filter_add_button">添加</string>
+    <string name="room_filter_block_users_title">屏蔽用户</string>
+    <string name="room_filter_apply_button">应用</string>
+    <string name="room_filter_reset_button">重置</string>
+
+    <!-- 房间上传对话框 -->
+    <string name="send_room_dialog_icon_desc">上传房间信息</string>
+    <string name="send_room_dialog_title">上传房间信息</string>
+    <string name="send_room_dialog_room_number_label">房间号</string>
+    <string name="send_room_dialog_clear_icon_desc">清空</string>
+    <string name="send_room_dialog_description_label">描述</string>
+    <string name="send_room_dialog_preset_words_button">预选词</string>
+    <string name="send_room_dialog_collapse_icon_desc">收起</string>
+    <string name="send_room_dialog_expand_icon_desc">展开</string>
+    <string name="send_room_dialog_add_preset_words_icon_desc">添加预选词</string>
+    <string name="send_room_dialog_no_preset_words">暂无预选词。</string>
+    <string name="send_room_dialog_new_preset_word_label">新预选词</string>
+    <string name="send_room_dialog_add_button">添加</string>
+    <string name="send_room_dialog_continuous_send_checkbox">持续发送车牌直到下次发车</string>
+    <string name="send_room_dialog_send_button">发送</string>
+    <string name="send_room_dialog_cancel_button">取消</string>
+
+    <!-- 更新通知对话框 -->
+    <string name="update_dialog_title">发现新版本 %1$s</string>
+    <string name="update_dialog_confirm_button">前往下载</string>
+    <string name="update_dialog_dismiss_button">稍后</string>
+
+    <!-- 登录对话框 -->
+    <string name="login_dialog_back_arrow_desc">返回</string>
+    <string name="login_dialog_title_options">登录选项</string>
+    <string name="login_dialog_title_password_login">密码登录</string>
+    <string name="login_dialog_title_token_login">Token登录</string>
+    <string name="login_dialog_title_register">注册账号</string>
+    <string name="login_dialog_title_forgot_password">找回密码</string>
+    <string name="login_dialog_title_reset_password">重置密码</string>
+    <string name="login_dialog_title_verify_email">验证邮箱</string>
+    <string name="login_dialog_exit_icon_desc">退出</string>
+    <string name="login_dialog_button_password_login_option">密码登录</string>
+    <string name="login_dialog_button_token_login_option">令牌登录</string>
+    <string name="login_dialog_button_login_action">登录</string>
+    <string name="login_dialog_button_register_link">注册账号</string>
+    <string name="login_dialog_button_forgot_password_link">忘记密码</string>
+    <string name="login_dialog_button_register_action">注册</string>
+    <string name="login_dialog_button_reset_action">重置密码</string>
+    <string name="login_dialog_button_next">下一步</string>
+    <string name="login_dialog_button_change_email">修改邮箱地址</string>
+    <string name="login_dialog_button_verify_action">验证</string>
+    <string name="login_dialog_label_token">Token</string>
+    <string name="login_dialog_label_confirm_password_register">再次输入密码</string>
+    <string name="login_dialog_label_email_address">邮箱地址</string>
+    <string name="login_dialog_label_code">验证码</string>
+
+    <!-- 用户资料对话框 -->
+    <string name="user_profile_tab_posted_history">发车历史</string>
+    <string name="user_profile_tab_joined_history">上车历史</string>
+    <string name="user_profile_tab_statistics">使用统计</string>
+    <string name="user_profile_uid_label">UID: %1$s</string>
+    <string name="user_profile_following_count">%1$d 关注</string>
+    <string name="user_profile_follower_count">%1$d 关注者</string>
+    <string name="user_profile_no_recent_posts">无最近发车记录</string>
+    <string name="user_profile_no_recent_joins">无最近上车记录</string>
+    <string name="user_profile_stats_join_count_title">上车次数统计</string>
+    <string name="user_profile_stats_join_count_label">次数</string>
+    <string name="user_profile_stats_duration_title">在车时长统计/分钟</string>
+    <string name="user_profile_stats_duration_label">时长/分钟</string>
+    <string name="user_profile_stats_keywords_title">车头关键词统计</string>
 </resources>

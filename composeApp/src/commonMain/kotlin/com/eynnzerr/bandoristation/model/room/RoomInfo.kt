@@ -1,5 +1,7 @@
-package com.eynnzerr.bandoristation.model
+package com.eynnzerr.bandoristation.model.room
 
+import com.eynnzerr.bandoristation.model.SourceInfo
+import com.eynnzerr.bandoristation.model.UserInfo
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 

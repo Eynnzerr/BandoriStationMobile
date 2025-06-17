@@ -6,7 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -166,8 +166,12 @@ class ChatViewModel(
         sendEvent(ChatIntent.Reset())
 
         when (val response = initializeChatRoomUseCase(Unit)) {
-            is UseCaseResult.Error -> Unit
-            is UseCaseResult.Loading -> Unit
+            is UseCaseResult.Error -> {
+                internalState.update { it.copy(isLoading = false) }
+            }
+            is UseCaseResult.Loading -> {
+                internalState.update { it.copy(isLoading = true) }
+            }
             is UseCaseResult.Success -> {
                 val initialResponse = response.data
                 sendEvent(ChatIntent.LoadInitial(initialResponse))

@@ -6,16 +6,49 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Token
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.HighlightOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.edit_email_resend_countdown
+import bandoristationm.composeapp.generated.resources.login_dialog_back_arrow_desc
+import bandoristationm.composeapp.generated.resources.login_dialog_button_forgot_password_link
+import bandoristationm.composeapp.generated.resources.login_dialog_button_login_action
+import bandoristationm.composeapp.generated.resources.login_dialog_button_next
+import bandoristationm.composeapp.generated.resources.login_dialog_button_password_login_option
+import bandoristationm.composeapp.generated.resources.login_dialog_button_register_action
+import bandoristationm.composeapp.generated.resources.login_dialog_button_register_link
+import bandoristationm.composeapp.generated.resources.login_dialog_button_token_login_option
+import bandoristationm.composeapp.generated.resources.login_dialog_button_verify_action
+import bandoristationm.composeapp.generated.resources.login_dialog_exit_icon_desc
+import bandoristationm.composeapp.generated.resources.login_dialog_label_code
+import bandoristationm.composeapp.generated.resources.login_dialog_label_confirm_password_register
+import bandoristationm.composeapp.generated.resources.login_dialog_label_email_address
+import bandoristationm.composeapp.generated.resources.login_dialog_label_token
+import bandoristationm.composeapp.generated.resources.login_dialog_title_reset_password
+import bandoristationm.composeapp.generated.resources.login_dialog_button_reset_action
+import bandoristationm.composeapp.generated.resources.login_dialog_title_forgot_password
+import bandoristationm.composeapp.generated.resources.login_dialog_title_options
+import bandoristationm.composeapp.generated.resources.login_dialog_title_password_login
+import bandoristationm.composeapp.generated.resources.login_dialog_title_register
+import bandoristationm.composeapp.generated.resources.login_dialog_title_token_login
+import bandoristationm.composeapp.generated.resources.login_dialog_title_verify_email
 import bandoristationm.composeapp.generated.resources.login_help
+import bandoristationm.composeapp.generated.resources.edit_profile_password
+import bandoristationm.composeapp.generated.resources.edit_profile_username
+import bandoristationm.composeapp.generated.resources.edit_password_new_password
+import bandoristationm.composeapp.generated.resources.edit_email_send_verification_code
+import bandoristationm.composeapp.generated.resources.edit_password_visibility_toggle_hide
+import bandoristationm.composeapp.generated.resources.edit_password_visibility_toggle_show
+import bandoristationm.composeapp.generated.resources.help_dialog_title
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -26,6 +59,7 @@ enum class LoginScreenState {
     TOKEN_LOGIN,
     REGISTER,
     FORGOT_PASSWORD,
+    RESET_PASSWORD,
     VERIFY_EMAIL,
 }
 
@@ -45,6 +79,9 @@ fun LoginDialog(
     onRegister: (username: String, password: String, email: String) -> Unit = { _, _, _ -> },
     onSendVerificationCode: () -> Unit = {},
     onVerifyCode: (code: String) -> Unit = { _ -> },
+    onSendCodeForResetPassword: (email: String) -> Unit = { _ -> },
+    onVerifyCodeForResetPassword: (email: String, code: String) -> Unit = { _, _ -> },
+    onResetPassword: (password: String) -> Unit = { _ -> },
     sendCountDown: Int = 0,
 ) {
     if (isVisible) {
@@ -78,18 +115,19 @@ fun LoginDialog(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (currentScreen != LoginScreenState.INITIAL) {
                                 IconButton(onClick = onPopBack) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(Res.string.login_dialog_back_arrow_desc))
                                 }
                             }
                             Text(
                                 text = when (currentScreen) {
-                                    LoginScreenState.INITIAL -> "登录选项"
-                                    LoginScreenState.PASSWORD_LOGIN -> "密码登录"
-                                    LoginScreenState.TOKEN_LOGIN -> "Token登录"
-                                    LoginScreenState.REGISTER -> "注册账号"
-                                    LoginScreenState.FORGOT_PASSWORD -> "找回密码"
-                                    LoginScreenState.HELP -> "帮助"
-                                    LoginScreenState.VERIFY_EMAIL -> "验证邮箱"
+                                    LoginScreenState.INITIAL -> stringResource(Res.string.login_dialog_title_options)
+                                    LoginScreenState.PASSWORD_LOGIN -> stringResource(Res.string.login_dialog_title_password_login)
+                                    LoginScreenState.TOKEN_LOGIN -> stringResource(Res.string.login_dialog_title_token_login)
+                                    LoginScreenState.REGISTER -> stringResource(Res.string.login_dialog_title_register)
+                                    LoginScreenState.FORGOT_PASSWORD -> stringResource(Res.string.login_dialog_title_forgot_password)
+                                    LoginScreenState.RESET_PASSWORD -> stringResource(Res.string.login_dialog_title_reset_password)
+                                    LoginScreenState.HELP -> stringResource(Res.string.help_dialog_title)
+                                    LoginScreenState.VERIFY_EMAIL -> stringResource(Res.string.login_dialog_title_verify_email)
                                 },
                                 style = MaterialTheme.typography.titleLarge
                             )
@@ -98,14 +136,14 @@ fun LoginDialog(
                         if (currentScreen == LoginScreenState.INITIAL) {
                             Row {
                                 IconButton(onClick = onHelp) {
-                                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = "Help")
+                                    Icon(Icons.AutoMirrored.Filled.HelpOutline, contentDescription = stringResource(Res.string.help_dialog_title))
                                 }
                                 IconButton(
                                     onClick = onDismissRequest
                                 ) {
                                     Icon(
                                         Icons.Outlined.HighlightOff,
-                                        contentDescription = "Exit",
+                                        contentDescription = stringResource(Res.string.login_dialog_exit_icon_desc),
                                         tint = MaterialTheme.colorScheme.error
                                     )
                                 }
@@ -134,7 +172,7 @@ fun LoginDialog(
                                         modifier = Modifier.size(ButtonDefaults.IconSize)
                                     )
                                     Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text("密码登录")
+                                    Text(stringResource(Res.string.login_dialog_button_password_login_option))
                                 }
 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -149,7 +187,7 @@ fun LoginDialog(
                                         modifier = Modifier.size(ButtonDefaults.IconSize)
                                     )
                                     Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                                    Text("令牌登录")
+                                    Text(stringResource(Res.string.login_dialog_button_token_login_option))
                                 }
                             }
                         }
@@ -160,7 +198,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = username,
                                     onValueChange = { username = it },
-                                    label = { Text("用户名") },
+                                    label = { Text(stringResource(Res.string.edit_profile_username)) },
                                     modifier = Modifier.fillMaxWidth()
                                 )
 
@@ -169,7 +207,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = password,
                                     onValueChange = { password = it },
-                                    label = { Text("密码") },
+                                    label = { Text(stringResource(Res.string.edit_profile_password)) },
                                     visualTransformation = PasswordVisualTransformation(),
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -181,7 +219,7 @@ fun LoginDialog(
                                     modifier = Modifier.fillMaxWidth(),
                                     enabled = username.isNotBlank() && password.isNotBlank()
                                 ) {
-                                    Text("登录")
+                                    Text(stringResource(Res.string.login_dialog_button_login_action))
                                 }
 
                                 Spacer(modifier = Modifier.height(8.dp))
@@ -191,11 +229,11 @@ fun LoginDialog(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     TextButton(onClick = onEnterRegister) {
-                                        Text("注册账号")
+                                        Text(stringResource(Res.string.login_dialog_button_register_link))
                                     }
 
                                     TextButton(onClick = onEnterForgot) {
-                                        Text("忘记密码")
+                                        Text(stringResource(Res.string.login_dialog_button_forgot_password_link))
                                     }
                                 }
                             }
@@ -206,7 +244,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = token,
                                     onValueChange = { token = it },
-                                    label = { Text("Token") },
+                                    label = { Text(stringResource(Res.string.login_dialog_label_token)) },
                                     modifier = Modifier.fillMaxWidth()
                                 )
 
@@ -217,7 +255,7 @@ fun LoginDialog(
                                     enabled = token.isNotBlank(),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("登录")
+                                    Text(stringResource(Res.string.login_dialog_button_login_action))
                                 }
                             }
                         }
@@ -227,7 +265,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = username,
                                     onValueChange = { username = it },
-                                    label = { Text("用户名") },
+                                    label = { Text(stringResource(Res.string.edit_profile_username)) },
                                     modifier = Modifier.fillMaxWidth()
                                 )
 
@@ -236,7 +274,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = password,
                                     onValueChange = { password = it },
-                                    label = { Text("密码") },
+                                    label = { Text(stringResource(Res.string.edit_profile_password)) },
                                     visualTransformation = PasswordVisualTransformation(),
                                     modifier = Modifier.fillMaxWidth()
                                 )
@@ -246,7 +284,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = confirmPassword,
                                     onValueChange = { confirmPassword = it },
-                                    label = { Text("再次输入密码") },
+                                    label = { Text(stringResource(Res.string.login_dialog_label_confirm_password_register)) },
                                     visualTransformation = PasswordVisualTransformation(),
                                     modifier = Modifier.fillMaxWidth(),
                                     isError = password != confirmPassword && confirmPassword.isNotEmpty()
@@ -257,7 +295,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = email,
                                     onValueChange = { email = it },
-                                    label = { Text("邮箱地址") },
+                                    label = { Text(stringResource(Res.string.login_dialog_label_email_address)) },
                                     modifier = Modifier.fillMaxWidth()
                                 )
 
@@ -271,7 +309,7 @@ fun LoginDialog(
                                             username.isNotEmpty() &&
                                             email.isNotEmpty()
                                 ) {
-                                    Text("注册")
+                                    Text(stringResource(Res.string.login_dialog_button_register_action))
                                 }
                             }
                         }
@@ -281,7 +319,7 @@ fun LoginDialog(
                                 OutlinedTextField(
                                     value = email,
                                     onValueChange = { email = it },
-                                    label = { Text("邮箱地址") },
+                                    label = { Text(stringResource(Res.string.login_dialog_label_email_address)) },
                                     modifier = Modifier.fillMaxWidth()
                                 )
 
@@ -295,31 +333,67 @@ fun LoginDialog(
                                     OutlinedTextField(
                                         value = verificationCode,
                                         onValueChange = { verificationCode = it },
-                                        label = { Text("验证码") },
+                                        label = { Text(stringResource(Res.string.login_dialog_label_code)) },
                                         modifier = Modifier.weight(1f)
                                     )
 
                                     Spacer(modifier = Modifier.width(8.dp))
 
                                     Button(
-                                        onClick = {
-                                            // TODO 找回密码-发送验证码
-                                        },
-                                        enabled = email.isNotEmpty(),
-                                        shape = MaterialTheme.shapes.medium
+                                        onClick = { onSendCodeForResetPassword(email) },
+                                        shape = MaterialTheme.shapes.medium,
+                                        enabled = email.isNotEmpty() && sendCountDown <= 0
                                     ) {
-                                        Text("发送验证码")
+                                        Text(text = if (sendCountDown <= 0) stringResource(Res.string.edit_email_send_verification_code) else stringResource(Res.string.edit_email_resend_countdown, sendCountDown))
                                     }
                                 }
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 Button(
-                                    onClick = { onVerifyCode(verificationCode) },
+                                    onClick = {
+                                        onVerifyCodeForResetPassword(email, verificationCode)
+                                    },
                                     modifier = Modifier.fillMaxWidth(),
                                     enabled = email.isNotEmpty() && verificationCode.isNotEmpty()
                                 ) {
-                                    Text("下一步")
+                                    Text(stringResource(Res.string.login_dialog_button_next))
+                                }
+                            }
+                        }
+
+                        LoginScreenState.RESET_PASSWORD -> {
+                            var passwordVisible by remember { mutableStateOf(false) }
+
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                OutlinedTextField(
+                                    value = password,
+                                    onValueChange = { password = it },
+                                    label = { Text(stringResource(Res.string.edit_password_new_password)) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                                    trailingIcon = {
+                                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                            Icon(
+                                                imageVector = if (passwordVisible) {
+                                                    Icons.Filled.Visibility
+                                                } else {
+                                                    Icons.Filled.VisibilityOff
+                                                },
+                                                contentDescription = ""
+                                            )
+                                        }
+                                    },
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Button(
+                                    onClick = { onResetPassword(password) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = password.isNotEmpty(),
+                                ) {
+                                    Text(stringResource(Res.string.login_dialog_button_reset_action))
                                 }
                             }
                         }
@@ -330,15 +404,11 @@ fun LoginDialog(
 
                         LoginScreenState.VERIFY_EMAIL -> {
                             Column(modifier = Modifier.fillMaxWidth()) {
-                                Button(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = {
-                                        // TODO 修改邮箱地址
-                                    },
-                                    shape = MaterialTheme.shapes.medium
-                                ) {
-                                    Text("修改邮箱地址")
-                                }
+                                Text(
+                                    text = "当前邮箱：$email",
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -350,7 +420,7 @@ fun LoginDialog(
                                     OutlinedTextField(
                                         value = verificationCode,
                                         onValueChange = { verificationCode = it },
-                                        label = { Text("验证码") },
+                                        label = { Text(stringResource(Res.string.login_dialog_label_code)) },
                                         modifier = Modifier.weight(1f)
                                     )
 
@@ -360,7 +430,7 @@ fun LoginDialog(
                                         shape = MaterialTheme.shapes.medium,
                                         enabled = sendCountDown <= 0
                                     ) {
-                                        Text(text = if (sendCountDown <= 0) "发送验证码" else "${sendCountDown}s")
+                                        Text(text = if (sendCountDown <= 0) stringResource(Res.string.edit_email_send_verification_code) else stringResource(Res.string.edit_email_resend_countdown, sendCountDown))
                                     }
                                 }
 
@@ -371,7 +441,7 @@ fun LoginDialog(
                                     modifier = Modifier.fillMaxWidth(),
                                     enabled = verificationCode.isNotEmpty()
                                 ) {
-                                    Text("验证")
+                                    Text(stringResource(Res.string.login_dialog_button_verify_action))
                                 }
                             }
                         }

@@ -3,7 +3,7 @@ package com.eynnzerr.bandoristation.feature.account
 import com.eynnzerr.bandoristation.base.UIEffect
 import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.account.AccountSummary
 import com.eynnzerr.bandoristation.model.account.EditProfileInfo
@@ -39,6 +39,9 @@ sealed class AccountIntent: UIEvent {
     ) : AccountIntent()
     class SendVerificationCode(): AccountIntent()
     data class VerifyEmail(val code: String): AccountIntent()
+    data class ResetPasswordSendVCode(val email: String): AccountIntent()
+    data class ResetPasswordVerifyCode(val email: String, val code: String): AccountIntent()
+    data class ResetPassword(val password: String): AccountIntent()
     data class UpdateCountDown(val value: Int): AccountIntent()
     class GetFollowers : AccountIntent()
     class GetFollowings : AccountIntent()

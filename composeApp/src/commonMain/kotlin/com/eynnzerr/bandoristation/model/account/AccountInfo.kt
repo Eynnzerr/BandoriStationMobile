@@ -21,9 +21,3 @@ data class RoomNumberHistory(
     @SerialName("time") val time: Long = 0,
     @SerialName("source_name") val sourceName: String = ""
 )
-
-@Serializable
-data class BandoriProfile(
-    @SerialName("jp") val jp: ArrayList<String> = arrayListOf(),
-    @SerialName("cn") val cn: ArrayList<String> = arrayListOf() // TODO
-)

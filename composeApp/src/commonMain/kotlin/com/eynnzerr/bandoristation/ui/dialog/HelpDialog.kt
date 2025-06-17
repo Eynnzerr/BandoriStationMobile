@@ -16,9 +16,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.dialog_close
+import bandoristationm.composeapp.generated.resources.help_dialog_title
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -44,7 +47,7 @@ fun HelpDialog(
                 )
             },
             title = {
-                Text("帮助")
+                Text(stringResource(Res.string.help_dialog_title))
             },
             text = {
                 RichText(
@@ -56,7 +59,7 @@ fun HelpDialog(
                 TextButton(
                     onClick = onDismissRequest
                 ) {
-                    Text("关闭")
+                    Text(stringResource(Res.string.dialog_close))
                 }
             },
         )

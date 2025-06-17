@@ -1,7 +1,7 @@
 package com.eynnzerr.bandoristation.utils
 
 import com.eynnzerr.bandoristation.model.ChatMessage
-import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 

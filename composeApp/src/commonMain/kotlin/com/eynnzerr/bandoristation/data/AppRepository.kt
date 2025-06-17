@@ -4,8 +4,8 @@ import com.eynnzerr.bandoristation.data.local.LocalDataSource
 import com.eynnzerr.bandoristation.data.remote.RemoteDataSource
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ClientSetInfo
-import com.eynnzerr.bandoristation.model.RoomHistory
-import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import com.eynnzerr.bandoristation.model.room.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import kotlinx.coroutines.flow.Flow
 
 class AppRepository(

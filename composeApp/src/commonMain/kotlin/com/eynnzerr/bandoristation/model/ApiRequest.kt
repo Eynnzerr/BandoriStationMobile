@@ -1,10 +1,10 @@
 package com.eynnzerr.bandoristation.model
 
+import com.eynnzerr.bandoristation.model.room.RoomFilter
 import com.eynnzerr.bandoristation.utils.ResponseContentSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 
 /**
  * Https请求消息，API/HTTPS通用
@@ -185,6 +185,31 @@ sealed class ApiRequest(
     ) : ApiRequest(
         group = "AccountManage",
         function = "bindQQ",
+    )
+
+    @Serializable
+    data class ResetPasswordSendVCode(
+        val email: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "resetPasswordSendEmailVerificationCode",
+    )
+
+    @Serializable
+    data class ResetPasswordVerifyEmail(
+        val email: String,
+        @SerialName("verification_code") val code: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "resetPasswordVerifyEmail",
+    )
+
+    @Serializable
+    data class ResetPassword(
+        val password: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "resetPassword",
     )
 }
 

@@ -2,7 +2,7 @@ package com.eynnzerr.bandoristation.usecase.room
 
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
-import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.usecase.base.FlowUseCase
 import kotlinx.coroutines.CoroutineDispatcher
