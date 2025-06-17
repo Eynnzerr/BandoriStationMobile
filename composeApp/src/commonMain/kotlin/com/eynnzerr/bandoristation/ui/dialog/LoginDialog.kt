@@ -20,7 +20,6 @@ import androidx.compose.ui.window.Dialog
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.edit_email_resend_countdown
 import bandoristationm.composeapp.generated.resources.login_dialog_back_arrow_desc
-import bandoristationm.composeapp.generated.resources.login_dialog_button_change_email
 import bandoristationm.composeapp.generated.resources.login_dialog_button_forgot_password_link
 import bandoristationm.composeapp.generated.resources.login_dialog_button_login_action
 import bandoristationm.composeapp.generated.resources.login_dialog_button_next
@@ -405,15 +404,11 @@ fun LoginDialog(
 
                         LoginScreenState.VERIFY_EMAIL -> {
                             Column(modifier = Modifier.fillMaxWidth()) {
-                                Button(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = {
-                                        // TODO 修改邮箱地址
-                                    },
-                                    shape = MaterialTheme.shapes.medium
-                                ) {
-                                    Text(stringResource(Res.string.login_dialog_button_change_email))
-                                }
+                                Text(
+                                    text = "当前邮箱：$email",
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
