@@ -11,7 +11,7 @@ data class SettingState(
     val isClearingOutdatedRoom: Boolean = false,
     val isShowingPlayerInfo: Boolean = false,
     val isRecordingRoomHistory: Boolean = true,
-    val autoUploadInterval: Long = 5,
+    val autoUploadInterval: Long = 10,
     val versionName: String = "",
 ) : UIState {
     companion object {

@@ -26,7 +26,7 @@ class SettingViewModel(
                     isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false,
                     isShowingPlayerInfo = p[PreferenceKeys.SHOW_PLAER_BRIEF] ?: false,
                     isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true,
-                    autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 5L,
+                    autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 10L,
                 )
             }
         }
