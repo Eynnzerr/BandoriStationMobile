@@ -152,13 +152,13 @@ compose.desktop {
 
         buildTypes.release.proguard {
             version = "7.7.0"
-            obfuscate.set(false)
             isEnabled.set(false)
         }
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "com.eynnzerr.bandoristation"
+            modules("java.instrument", "java.management", "jdk.security.auth", "jdk.unsupported")
+            packageName = "BandoristationM"
             packageVersion = "1.0.0"
 
             macOS {
