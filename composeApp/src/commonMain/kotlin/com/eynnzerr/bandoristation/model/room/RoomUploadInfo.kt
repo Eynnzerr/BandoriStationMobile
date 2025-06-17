@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.model
+package com.eynnzerr.bandoristation.model.room
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

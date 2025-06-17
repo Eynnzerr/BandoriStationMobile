@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.ui.component.UserAvatar

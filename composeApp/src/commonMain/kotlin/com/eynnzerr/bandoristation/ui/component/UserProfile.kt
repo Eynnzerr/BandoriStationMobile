@@ -45,7 +45,7 @@ import bandoristationm.composeapp.generated.resources.user_profile_tab_joined_hi
 import bandoristationm.composeapp.generated.resources.user_profile_tab_posted_history
 import bandoristationm.composeapp.generated.resources.user_profile_tab_statistics
 import bandoristationm.composeapp.generated.resources.user_profile_uid_label
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.ui.component.charts.BarChart
 import com.eynnzerr.bandoristation.ui.component.charts.BarOrientation

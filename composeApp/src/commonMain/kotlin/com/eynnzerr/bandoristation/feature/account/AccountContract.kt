@@ -3,7 +3,7 @@ package com.eynnzerr.bandoristation.feature.account
 import com.eynnzerr.bandoristation.base.UIEffect
 import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.account.AccountSummary
 import com.eynnzerr.bandoristation.model.account.EditProfileInfo

@@ -2,7 +2,7 @@ package com.eynnzerr.bandoristation.usecase.roomhistory
 
 import com.eynnzerr.bandoristation.usecase.base.FlowUseCase
 import com.eynnzerr.bandoristation.data.AppRepository
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

@@ -25,7 +25,7 @@ import bandoristationm.composeapp.generated.resources.inform_dialog_confirmation
 import bandoristationm.composeapp.generated.resources.inform_dialog_reason_placeholder
 import bandoristationm.composeapp.generated.resources.inform_dialog_title
 import com.eynnzerr.bandoristation.model.ApiRequest
-import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomInfo
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)

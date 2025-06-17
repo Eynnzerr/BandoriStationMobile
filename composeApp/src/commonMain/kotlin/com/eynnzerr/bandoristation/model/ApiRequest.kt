@@ -1,10 +1,10 @@
 package com.eynnzerr.bandoristation.model
 
+import com.eynnzerr.bandoristation.model.room.RoomFilter
 import com.eynnzerr.bandoristation.utils.ResponseContentSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 
 /**
  * Https请求消息，API/HTTPS通用

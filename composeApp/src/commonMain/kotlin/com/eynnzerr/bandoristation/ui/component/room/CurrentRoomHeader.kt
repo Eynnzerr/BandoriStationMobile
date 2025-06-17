@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.joined
-import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.utils.formatTimeDifference

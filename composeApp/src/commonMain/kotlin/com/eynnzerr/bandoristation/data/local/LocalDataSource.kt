@@ -1,6 +1,6 @@
 package com.eynnzerr.bandoristation.data.local
 
-import com.eynnzerr.bandoristation.model.RoomHistory
+import com.eynnzerr.bandoristation.model.room.RoomHistory
 import kotlinx.coroutines.flow.Flow
 
 interface LocalDataSource {

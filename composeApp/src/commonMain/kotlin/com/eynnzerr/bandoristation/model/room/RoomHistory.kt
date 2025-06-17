@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation.model
+package com.eynnzerr.bandoristation.model.room
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -6,6 +6,8 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.eynnzerr.bandoristation.data.local.converter.SourceInfoConverter
 import com.eynnzerr.bandoristation.data.local.converter.UserInfoConverter
+import com.eynnzerr.bandoristation.model.SourceInfo
+import com.eynnzerr.bandoristation.model.UserInfo
 import kotlinx.serialization.Serializable
 
 @Serializable

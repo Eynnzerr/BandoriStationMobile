@@ -5,7 +5,7 @@ import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
-import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
 

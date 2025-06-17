@@ -44,7 +44,7 @@ import bandoristationm.composeapp.generated.resources.room_filter_dialog_title
 import bandoristationm.composeapp.generated.resources.room_filter_edit_icon_desc
 import bandoristationm.composeapp.generated.resources.room_filter_keywords_placeholder
 import bandoristationm.composeapp.generated.resources.room_filter_reset_button
-import com.eynnzerr.bandoristation.model.RoomFilter
+import com.eynnzerr.bandoristation.model.room.RoomFilter
 import com.eynnzerr.bandoristation.model.UserInfo
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview

@@ -38,7 +38,7 @@ import bandoristationm.composeapp.generated.resources.send_room_dialog_preset_wo
 import bandoristationm.composeapp.generated.resources.send_room_dialog_room_number_label
 import bandoristationm.composeapp.generated.resources.send_room_dialog_send_button
 import bandoristationm.composeapp.generated.resources.send_room_dialog_title
-import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 

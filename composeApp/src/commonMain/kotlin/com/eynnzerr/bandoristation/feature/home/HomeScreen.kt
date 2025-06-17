@@ -45,7 +45,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
-import com.eynnzerr.bandoristation.model.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo

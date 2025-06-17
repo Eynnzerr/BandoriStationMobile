@@ -4,9 +4,9 @@ import com.eynnzerr.bandoristation.base.UIEffect
 import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
 import com.eynnzerr.bandoristation.model.ApiRequest
-import com.eynnzerr.bandoristation.model.RoomFilter
-import com.eynnzerr.bandoristation.model.RoomInfo
-import com.eynnzerr.bandoristation.model.RoomUploadInfo
+import com.eynnzerr.bandoristation.model.room.RoomFilter
+import com.eynnzerr.bandoristation.model.room.RoomInfo
+import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.model.GithubRelease
 import com.eynnzerr.bandoristation.navigation.Screen
