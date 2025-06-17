@@ -199,6 +199,15 @@ fun AccountScreen(
         onVerifyCode = { code ->
             viewModel.sendEvent(VerifyEmail(code))
         },
+        onSendCodeForResetPassword = {
+            // TODO 忘记密码 - 重置密码 - 发送验证码
+        },
+        onVerifyCodeForResetPassword = {
+            // TODO 忘记密码 - 重置密码 - 验证邮箱验证码
+        },
+        onResetPassword = {
+            // TODO 使用临时token，设置新密码，转回 PASSWORD_LOGIN 页
+        },
         sendCountDown = state.countDown
     )
 

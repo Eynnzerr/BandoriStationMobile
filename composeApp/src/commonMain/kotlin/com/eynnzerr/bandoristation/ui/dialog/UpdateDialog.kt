@@ -1,8 +1,5 @@
 package com.eynnzerr.bandoristation.ui.dialog
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -18,7 +15,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.update_dialog_confirm_button
 import bandoristationm.composeapp.generated.resources.update_dialog_dismiss_button

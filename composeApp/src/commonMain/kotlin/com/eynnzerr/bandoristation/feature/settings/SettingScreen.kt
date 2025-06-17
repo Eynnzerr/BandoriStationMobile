@@ -70,7 +70,6 @@ fun SettingScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     var showTutorialDialog by remember { mutableStateOf(false) }
-    var showRegexDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -79,9 +78,7 @@ fun SettingScreen(
                     showTutorialDialog = action.isShowing
                 }
 
-                is SettingEffect.ControlRegexDialog -> {
-                    showRegexDialog = action.isShowing
-                }
+                is SettingEffect.ControlRegexDialog -> Unit
             }
         }
     }

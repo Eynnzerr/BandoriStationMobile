@@ -71,6 +71,9 @@ fun LoginDialog(
     onRegister: (username: String, password: String, email: String) -> Unit = { _, _, _ -> },
     onSendVerificationCode: () -> Unit = {},
     onVerifyCode: (code: String) -> Unit = { _ -> },
+    onSendCodeForResetPassword: (email: String) -> Unit = { _ -> },
+    onVerifyCodeForResetPassword: (code: String) -> Unit = { _ -> },
+    onResetPassword: (password: String) -> Unit = { _ -> },
     sendCountDown: Int = 0,
 ) {
     if (isVisible) {
@@ -328,20 +331,20 @@ fun LoginDialog(
                                     Spacer(modifier = Modifier.width(8.dp))
 
                                     Button(
-                                        onClick = {
-                                            // TODO 找回密码-发送验证码
-                                        },
-                                        enabled = email.isNotEmpty(),
-                                        shape = MaterialTheme.shapes.medium
+                                        onClick = { onSendCodeForResetPassword(email) },
+                                        shape = MaterialTheme.shapes.medium,
+                                        enabled = email.isNotEmpty() && sendCountDown <= 0
                                     ) {
-                                        Text(stringResource(Res.string.edit_email_send_verification_code))
+                                        Text(text = if (sendCountDown <= 0) stringResource(Res.string.edit_email_send_verification_code) else stringResource(Res.string.edit_email_resend_countdown, sendCountDown))
                                     }
                                 }
 
                                 Spacer(modifier = Modifier.height(16.dp))
 
                                 Button(
-                                    onClick = { onVerifyCode(verificationCode) },
+                                    onClick = {
+                                        onVerifyCodeForResetPassword(verificationCode)
+                                    },
                                     modifier = Modifier.fillMaxWidth(),
                                     enabled = email.isNotEmpty() && verificationCode.isNotEmpty()
                                 ) {
