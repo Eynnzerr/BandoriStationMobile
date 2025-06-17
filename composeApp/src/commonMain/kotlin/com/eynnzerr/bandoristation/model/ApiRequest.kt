@@ -186,6 +186,22 @@ sealed class ApiRequest(
         group = "AccountManage",
         function = "bindQQ",
     )
+
+    @Serializable
+    data class ResetPasswordSendVCode(
+        val email: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "resetPasswordSendEmailVerificationCode",
+    )
+
+    @Serializable
+    data class ResetPassword(
+        val password: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "resetPassword",
+    )
 }
 
 /**

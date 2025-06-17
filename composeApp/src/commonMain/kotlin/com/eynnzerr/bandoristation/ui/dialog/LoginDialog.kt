@@ -31,6 +31,8 @@ import bandoristationm.composeapp.generated.resources.login_dialog_label_code
 import bandoristationm.composeapp.generated.resources.login_dialog_label_confirm_password_register
 import bandoristationm.composeapp.generated.resources.login_dialog_label_email_address
 import bandoristationm.composeapp.generated.resources.login_dialog_label_token
+import bandoristationm.composeapp.generated.resources.login_dialog_title_reset_password
+import bandoristationm.composeapp.generated.resources.login_dialog_button_reset_action
 import bandoristationm.composeapp.generated.resources.login_dialog_title_forgot_password
 import bandoristationm.composeapp.generated.resources.login_dialog_title_options
 import bandoristationm.composeapp.generated.resources.login_dialog_title_password_login
@@ -40,6 +42,7 @@ import bandoristationm.composeapp.generated.resources.login_dialog_title_verify_
 import bandoristationm.composeapp.generated.resources.login_help
 import bandoristationm.composeapp.generated.resources.edit_profile_password
 import bandoristationm.composeapp.generated.resources.edit_profile_username
+import bandoristationm.composeapp.generated.resources.edit_password_new_password
 import bandoristationm.composeapp.generated.resources.edit_email_send_verification_code
 import bandoristationm.composeapp.generated.resources.help_dialog_title
 import org.jetbrains.compose.resources.stringResource
@@ -52,6 +55,7 @@ enum class LoginScreenState {
     TOKEN_LOGIN,
     REGISTER,
     FORGOT_PASSWORD,
+    RESET_PASSWORD,
     VERIFY_EMAIL,
 }
 
@@ -117,6 +121,7 @@ fun LoginDialog(
                                     LoginScreenState.TOKEN_LOGIN -> stringResource(Res.string.login_dialog_title_token_login)
                                     LoginScreenState.REGISTER -> stringResource(Res.string.login_dialog_title_register)
                                     LoginScreenState.FORGOT_PASSWORD -> stringResource(Res.string.login_dialog_title_forgot_password)
+                                    LoginScreenState.RESET_PASSWORD -> stringResource(Res.string.login_dialog_title_reset_password)
                                     LoginScreenState.HELP -> stringResource(Res.string.help_dialog_title)
                                     LoginScreenState.VERIFY_EMAIL -> stringResource(Res.string.login_dialog_title_verify_email)
                                 },
@@ -349,6 +354,28 @@ fun LoginDialog(
                                     enabled = email.isNotEmpty() && verificationCode.isNotEmpty()
                                 ) {
                                     Text(stringResource(Res.string.login_dialog_button_next))
+                                }
+                            }
+                        }
+
+                        LoginScreenState.RESET_PASSWORD -> {
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                OutlinedTextField(
+                                    value = password,
+                                    onValueChange = { password = it },
+                                    label = { Text(stringResource(Res.string.edit_password_new_password)) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    visualTransformation = PasswordVisualTransformation(),
+                                )
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                Button(
+                                    onClick = { onResetPassword(password) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    enabled = password.isNotEmpty(),
+                                ) {
+                                    Text(stringResource(Res.string.login_dialog_button_reset_action))
                                 }
                             }
                         }

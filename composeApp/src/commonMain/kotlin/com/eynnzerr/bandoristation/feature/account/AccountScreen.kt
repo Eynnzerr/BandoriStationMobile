@@ -144,6 +144,7 @@ fun AccountScreen(
                 is AccountEffect.PopBackLoginDialog -> {
                     loginDialogState = when (loginDialogState) {
                         LoginScreenState.REGISTER, LoginScreenState.FORGOT_PASSWORD -> LoginScreenState.PASSWORD_LOGIN
+                        LoginScreenState.RESET_PASSWORD -> LoginScreenState.FORGOT_PASSWORD
                         LoginScreenState.VERIFY_EMAIL -> LoginScreenState.REGISTER
                         else -> LoginScreenState.INITIAL
                     }
@@ -200,13 +201,13 @@ fun AccountScreen(
             viewModel.sendEvent(VerifyEmail(code))
         },
         onSendCodeForResetPassword = {
-            // TODO 忘记密码 - 重置密码 - 发送验证码
+            viewModel.sendEvent(ResetPasswordSendVCode(it))
         },
         onVerifyCodeForResetPassword = {
-            // TODO 忘记密码 - 重置密码 - 验证邮箱验证码
+            viewModel.sendEvent(ResetPasswordVerifyCode(it))
         },
         onResetPassword = {
-            // TODO 使用临时token，设置新密码，转回 PASSWORD_LOGIN 页
+            viewModel.sendEvent(ResetPassword(it))
         },
         sendCountDown = state.countDown
     )

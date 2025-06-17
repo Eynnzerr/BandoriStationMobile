@@ -143,6 +143,7 @@
     <string name="login_dialog_title_token_login">Token Login</string>
     <string name="login_dialog_title_register">Register Account</string>
     <string name="login_dialog_title_forgot_password">Forgot Password</string>
+    <string name="login_dialog_title_reset_password">Reset Password</string>
     <string name="login_dialog_title_verify_email">Verify Email</string>
     <string name="login_dialog_exit_icon_desc">Exit</string>
     <string name="login_dialog_button_password_login_option">Password Login</string>
@@ -151,6 +152,7 @@
     <string name="login_dialog_button_register_link">Register Account</string>
     <string name="login_dialog_button_forgot_password_link">Forgot Password</string>
     <string name="login_dialog_button_register_action">Register</string>
+    <string name="login_dialog_button_reset_action">Reset Password</string>
     <string name="login_dialog_button_next">Next</string>
     <string name="login_dialog_button_change_email">Change Email Address</string>
     <string name="login_dialog_button_verify_action">Verify</string>
