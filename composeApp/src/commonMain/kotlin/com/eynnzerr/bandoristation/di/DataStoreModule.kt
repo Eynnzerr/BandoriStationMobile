@@ -1,7 +1,7 @@
 package com.eynnzerr.bandoristation.di
 
-import com.eynnzerr.bandoristation.business.datastore.GetPreferenceUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
+import com.eynnzerr.bandoristation.usecase.datastore.GetPreferenceUseCase
+import com.eynnzerr.bandoristation.usecase.datastore.SetPreferenceUseCase
 import com.eynnzerr.bandoristation.preferences.createDataStore
 import org.koin.core.qualifier.named
 import org.koin.dsl.module

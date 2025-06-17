@@ -12,18 +12,6 @@ import org.koin.dsl.module
 fun provideKtorClientModule() = module {
     single {
         HttpClient {
-//            install(Logging) {
-//                logger = object : Logger {
-//                    override fun log(message: String) {
-//                        // 只记录包含 POST 请求信息的日志
-//                        if (message.contains("METHOD: POST")) {
-//                            AppLogger.d("KtorClient", "send POST request: $message")
-//                        }
-//                    }
-//                }
-//                level = LogLevel.ALL  // 记录所有级别的日志
-//                sanitizeHeader { header -> false }
-//            }
             install(ContentNegotiation) {
                 json(
                     json = get(),

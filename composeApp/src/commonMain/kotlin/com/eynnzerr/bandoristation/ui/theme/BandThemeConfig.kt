@@ -1,21 +1,13 @@
 package com.eynnzerr.bandoristation.ui.theme
 
 import bandoristationm.composeapp.generated.resources.Res
-import bandoristationm.composeapp.generated.resources.ag_banner
 import bandoristationm.composeapp.generated.resources.ag_logo
-import bandoristationm.composeapp.generated.resources.hhw_banner
 import bandoristationm.composeapp.generated.resources.hhw_logo
-import bandoristationm.composeapp.generated.resources.monica_banner
 import bandoristationm.composeapp.generated.resources.monica_logo
-import bandoristationm.composeapp.generated.resources.mygo_banner
 import bandoristationm.composeapp.generated.resources.mygo_logo
-import bandoristationm.composeapp.generated.resources.pp_banner
 import bandoristationm.composeapp.generated.resources.pp_logo
-import bandoristationm.composeapp.generated.resources.ppp_banner
 import bandoristationm.composeapp.generated.resources.ppp_logo
-import bandoristationm.composeapp.generated.resources.r_banner
 import bandoristationm.composeapp.generated.resources.r_logo
-import bandoristationm.composeapp.generated.resources.ras_banner
 import bandoristationm.composeapp.generated.resources.ras_logo
 import org.jetbrains.compose.resources.DrawableResource
 
@@ -45,56 +37,56 @@ sealed class BandThemeConfig(
         name = POPPIN_PARTY_NAME,
         seedColorLong = 0xFFFFDDEE, // FF3377
         bandIcon = Res.drawable.ppp_logo,
-        bandLogo = Res.drawable.ppp_banner,
+        bandLogo = Res.drawable.ppp_logo,
     )
 
     object Roselia : BandThemeConfig(
         name = ROSELIA_NAME,
         seedColorLong = 0xFF3344AA, // 3344AA
         bandIcon = Res.drawable.r_logo,
-        bandLogo = Res.drawable.r_banner,
+        bandLogo = Res.drawable.r_logo,
     )
 
     object Afterglow : BandThemeConfig(
         name = AFTERGLOW_NAME,
         seedColorLong = 0xFFEE3344, // EE3344
         bandIcon = Res.drawable.ag_logo,
-        bandLogo = Res.drawable.ag_banner,
+        bandLogo = Res.drawable.ag_logo,
     )
 
     object HelloHappyWorld : BandThemeConfig(
         name = HELLO_HAPPY_WORLD_NAME,
         seedColorLong = 0xFFFFDD00, // FFDD00
         bandIcon = Res.drawable.hhw_logo,
-        bandLogo = Res.drawable.hhw_banner,
+        bandLogo = Res.drawable.hhw_logo,
     )
 
     object PastelPalettes : BandThemeConfig(
         name = PASTEL_PALETTES_NAME,
         seedColorLong = 0xFF33DDAA, // 33DDAA
         bandIcon = Res.drawable.pp_logo,
-        bandLogo = Res.drawable.pp_banner,
+        bandLogo = Res.drawable.pp_logo,
     )
 
     object RaiseASuilen : BandThemeConfig(
         name = RAS_NAME,
         seedColorLong = 0xFF8844DD, // 33CCCC 8844DD
         bandIcon = Res.drawable.ras_logo,
-        bandLogo = Res.drawable.ras_banner,
+        bandLogo = Res.drawable.ras_logo,
     )
 
     object Morfonica : BandThemeConfig(
         name = MONICA_NAME,
         seedColorLong = 0xFF33AAFF,
         bandIcon = Res.drawable.monica_logo,
-        bandLogo = Res.drawable.monica_banner,
+        bandLogo = Res.drawable.monica_logo,
     )
 
     object Mygo : BandThemeConfig(
         name = MYGO_NAME,
         seedColorLong = 0xFF3388BB,
         bandIcon = Res.drawable.mygo_logo,
-        bandLogo = Res.drawable.mygo_banner,
+        bandLogo = Res.drawable.mygo_logo,
     )
 }
 

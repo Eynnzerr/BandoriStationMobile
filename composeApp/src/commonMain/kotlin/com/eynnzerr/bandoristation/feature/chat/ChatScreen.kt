@@ -281,8 +281,7 @@ fun ChatScreen(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(
-                        start = 24.dp,
-                        bottom = innerPadding.calculateBottomPadding() + 32.dp
+                        end = 8.dp
                     )
                     .zIndex(1f)
             ) {

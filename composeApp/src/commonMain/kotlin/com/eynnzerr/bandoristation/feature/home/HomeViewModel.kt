@@ -17,24 +17,23 @@ import bandoristationm.composeapp.generated.resources.set_filter_success
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import bandoristationm.composeapp.generated.resources.websocket_error_default
 import com.eynnzerr.bandoristation.base.BaseViewModel
-import com.eynnzerr.bandoristation.business.CheckUnreadChatUseCase
-import com.eynnzerr.bandoristation.business.websocket.GetWebSocketStateUseCase
-import com.eynnzerr.bandoristation.business.DisconnectWebSocketUseCase
-import com.eynnzerr.bandoristation.business.GetRoomListUseCase
-import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
-import com.eynnzerr.bandoristation.business.SetUpClientUseCase
-import com.eynnzerr.bandoristation.business.time.UpdateTimestampUseCase
-import com.eynnzerr.bandoristation.business.UploadRoomUseCase
-import com.eynnzerr.bandoristation.business.room.GetRoomFilterUseCase
-import com.eynnzerr.bandoristation.business.room.RequestRecentRoomsUseCase
-import com.eynnzerr.bandoristation.business.room.UpdateRoomFilterUseCase
-import com.eynnzerr.bandoristation.business.roomhistory.AddRoomHistoryUseCase
-import com.eynnzerr.bandoristation.business.social.InformUserUseCase
-import com.eynnzerr.bandoristation.business.websocket.ReceiveNoticeUseCase
-import com.eynnzerr.bandoristation.business.GetLatestReleaseUseCase
-import com.eynnzerr.bandoristation.business.account.GetUserInfoUseCase
-import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
-import com.eynnzerr.bandoristation.business.time.GetServerTimeUseCase
+import com.eynnzerr.bandoristation.usecase.chat.CheckUnreadChatUseCase
+import com.eynnzerr.bandoristation.usecase.websocket.GetWebSocketStateUseCase
+import com.eynnzerr.bandoristation.usecase.room.GetRoomListUseCase
+import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
+import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
+import com.eynnzerr.bandoristation.usecase.time.UpdateTimestampUseCase
+import com.eynnzerr.bandoristation.usecase.room.UploadRoomUseCase
+import com.eynnzerr.bandoristation.usecase.room.GetRoomFilterUseCase
+import com.eynnzerr.bandoristation.usecase.room.RequestRecentRoomsUseCase
+import com.eynnzerr.bandoristation.usecase.room.UpdateRoomFilterUseCase
+import com.eynnzerr.bandoristation.usecase.roomhistory.AddRoomHistoryUseCase
+import com.eynnzerr.bandoristation.usecase.social.InformUserUseCase
+import com.eynnzerr.bandoristation.usecase.websocket.ReceiveNoticeUseCase
+import com.eynnzerr.bandoristation.usecase.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.usecase.account.GetUserInfoUseCase
+import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
+import com.eynnzerr.bandoristation.usecase.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
 import com.eynnzerr.bandoristation.model.ClientSetInfo
@@ -111,7 +110,7 @@ class HomeViewModel(
                             AppLogger.d(TAG, "Connecting to WebSocket...")
                         }
                         is WebSocketClient.ConnectionState.Disconnected -> {
-                            // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接
+                            // 出现Disconnected的情况：1) 断网 2) 进入后台超过30秒，服务器断开连接 3) WebSocketClient 报错
                             internalState.update {
                                 it.copy(title = Res.string.offline)
                             }
@@ -156,9 +155,9 @@ class HomeViewModel(
                         AppLogger.d(TAG, "Successfully fetched room list. length: ${result.data.size}")
                         sendEvent(HomeIntent.AppendRoomList(result.data))
 
-                        // correct server timestamp if necessary
+                        // correct server timestamp if local server time falls behind latest server room time for 1.5s and more.
                         result.data.lastOrNull()?.let { lastRoom ->
-                            if (state.value.serverTimestampMillis < (lastRoom.time ?: Clock.System.now().toEpochMilliseconds())) {
+                            if ((lastRoom.time ?: Clock.System.now().toEpochMilliseconds()) - state.value.serverTimestampMillis > 1500L) {
                                 getServerTimeUseCase(Unit)
                             }
                         }

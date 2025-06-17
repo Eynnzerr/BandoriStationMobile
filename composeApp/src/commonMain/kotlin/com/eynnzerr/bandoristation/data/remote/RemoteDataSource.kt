@@ -23,7 +23,7 @@ interface RemoteDataSource {
     fun listenWebSocketForActions(actions: List<String>): Flow<WebSocketResponse<JsonElement>>
     fun listenForAll(): Flow<WebSocketResponse<JsonElement>>
     fun listenWebSocketConnectionState(): Flow<WebSocketClient.ConnectionState>
-    fun disconnectWebSocket()
+    suspend fun disconnectWebSocket()
 
     // websocket concrete business
     suspend fun getServerTimeOnce()

@@ -5,23 +5,25 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
-import com.eynnzerr.bandoristation.business.SetAccessPermissionUseCase
-import com.eynnzerr.bandoristation.business.account.GetEditProfileDataUseCase
-import com.eynnzerr.bandoristation.business.account.GetSelfInfoUseCase
-import com.eynnzerr.bandoristation.business.account.LoginUseCase
-import com.eynnzerr.bandoristation.business.account.LogoutUseCase
-import com.eynnzerr.bandoristation.business.account.SendVerificationCodeUseCase
-import com.eynnzerr.bandoristation.business.account.SignupUseCase
-import com.eynnzerr.bandoristation.business.account.UpdateAccountAggregator
-import com.eynnzerr.bandoristation.business.account.VerifyEmailUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase
-import com.eynnzerr.bandoristation.business.datastore.SetPreferenceUseCase.Params
-import com.eynnzerr.bandoristation.business.roomhistory.RoomHistoryAggregator
-import com.eynnzerr.bandoristation.business.social.FollowUserUseCase
-import com.eynnzerr.bandoristation.business.social.GetFollowerBriefUseCase
-import com.eynnzerr.bandoristation.business.social.GetFollowingBriefUseCase
+import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
+import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
+import com.eynnzerr.bandoristation.usecase.account.GetEditProfileDataUseCase
+import com.eynnzerr.bandoristation.usecase.account.GetSelfInfoUseCase
+import com.eynnzerr.bandoristation.usecase.account.LoginUseCase
+import com.eynnzerr.bandoristation.usecase.account.LogoutUseCase
+import com.eynnzerr.bandoristation.usecase.account.SendVerificationCodeUseCase
+import com.eynnzerr.bandoristation.usecase.account.SignupUseCase
+import com.eynnzerr.bandoristation.usecase.account.UpdateAccountAggregator
+import com.eynnzerr.bandoristation.usecase.account.VerifyEmailUseCase
+import com.eynnzerr.bandoristation.usecase.datastore.SetPreferenceUseCase
+import com.eynnzerr.bandoristation.usecase.datastore.SetPreferenceUseCase.Params
+import com.eynnzerr.bandoristation.usecase.roomhistory.RoomHistoryAggregator
+import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
+import com.eynnzerr.bandoristation.usecase.social.GetFollowerBriefUseCase
+import com.eynnzerr.bandoristation.usecase.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.feature.account.AccountEffect.*
 import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
+import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.account.LoginError
@@ -37,6 +39,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
+    private val setUpClientUseCase: SetUpClientUseCase,
     private val loginUseCase: LoginUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val getSelfInfoUseCase: GetSelfInfoUseCase,
@@ -77,6 +80,14 @@ class AccountViewModel(
                 }
             }
         }
+    }
+
+    override suspend fun onStartStateFlow() {
+        setUpClientUseCase(ClientSetInfo(
+            client = "BandoriStation",
+            sendRoomNumber = false,
+            sendChat = false,
+        ))
     }
 
     override fun reduce(event: AccountIntent): Pair<AccountState?, AccountEffect?> {

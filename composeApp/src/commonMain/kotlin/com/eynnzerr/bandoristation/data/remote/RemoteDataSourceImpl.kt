@@ -50,7 +50,7 @@ class RemoteDataSourceImpl(
     override fun listenWebSocketConnectionState()
         = webSocketClient.connectionState
 
-    override fun disconnectWebSocket()
+    override suspend fun disconnectWebSocket()
         = webSocketClient.disconnect()
 
     override suspend fun getServerTimeOnce()

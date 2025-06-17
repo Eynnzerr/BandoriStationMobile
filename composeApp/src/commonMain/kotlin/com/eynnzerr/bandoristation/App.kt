@@ -20,6 +20,7 @@ import com.eynnzerr.bandoristation.utils.ScreenInfo
 import com.eynnzerr.bandoristation.WebSocketLifecycleHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
@@ -32,7 +33,7 @@ fun App() {
         application = { modules(appModule) }
     ) {
         val appScope = rememberCoroutineScope()
-        WebSocketLifecycleHandler(appScope)
+        WebSocketLifecycleHandler()
 
         var screenInfo by remember { mutableStateOf(ScreenInfo()) }
         var themeConfig : BandThemeConfig by remember { mutableStateOf(BandThemeConfig.Default) }

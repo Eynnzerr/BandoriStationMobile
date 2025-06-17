@@ -49,7 +49,7 @@ fun ChatPiece(
                     fontSize = 16.sp
                 )
                 ChatBubble(
-                    text = chatMessage.content,
+                    text = chatMessage.content.trimEnd(),
                     isMyMessage = false,
                 )
             }
