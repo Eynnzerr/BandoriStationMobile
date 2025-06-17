@@ -160,6 +160,16 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "com.eynnzerr.bandoristation"
             packageVersion = "1.0.0"
+
+            macOS {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/desktop_icon.icns"))
+            }
+            windows {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/desktop_icon.ico"))
+            }
+            linux {
+                iconFile.set(project.file("src/commonMain/composeResources/drawable/desktop_icon.png"))
+            }
         }
     }
 }
