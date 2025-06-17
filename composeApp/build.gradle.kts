@@ -157,18 +157,19 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            modules("java.instrument", "java.management", "jdk.security.auth", "jdk.unsupported")
+            includeAllModules = true
+            // modules("java.instrument", "java.management", "jdk.security.auth", "jdk.unsupported")
             packageName = "BandoristationM"
             packageVersion = "1.0.0"
 
             macOS {
-                iconFile.set(project.file("src/commonMain/composeResources/drawable/desktop_icon.icns"))
+                iconFile.set(project.file("desktop_icons/desktop_icon_macos.icns"))
             }
             windows {
-                iconFile.set(project.file("src/commonMain/composeResources/drawable/desktop_icon.ico"))
+                iconFile.set(project.file("desktop_icons/desktop_icon_windows.ico"))
             }
             linux {
-                iconFile.set(project.file("src/commonMain/composeResources/drawable/desktop_icon.png"))
+                iconFile.set(project.file("desktop_icons/desktop_icon_linux.png"))
             }
         }
     }
