@@ -11,14 +11,15 @@ import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.account.VerifyEmailResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 
 class ResetPasswordVerifyEmailUseCase(
     private val repository: AppRepository,
     private val dataStore: DataStore<Preferences>,
-) : UseCase<String, String, String>(Dispatchers.IO) {
-    override suspend fun execute(parameters: String): UseCaseResult<String, String> {
+) : UseCase<ApiRequest.ResetPasswordVerifyEmail, String, String>(Dispatchers.IO) {
+    override suspend fun execute(parameters: ApiRequest.ResetPasswordVerifyEmail): UseCaseResult<String, String> {
         repository.sendHttpsRequest(
-            request = ApiRequest.VerifyEmail(parameters)
+            request = parameters,
         ).handle(
             onSuccess = { response ->
                 val result = NetResponseHelper.parseApiResponse<VerifyEmailResult>(response)

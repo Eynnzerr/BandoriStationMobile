@@ -8,6 +8,7 @@ import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -17,7 +18,7 @@ class ResetPasswordUseCase(
 ) : UseCase<String, Unit, String>(Dispatchers.IO) {
     override suspend fun execute(parameters: String): UseCaseResult<Unit, String> {
         val token = dataStore.data.map { it[PreferenceKeys.TEMP_TOKEN] ?: "" }.first()
-        repository.sendAuthenticatedHttpsRequest(
+        repository.sendAuthenticHttpsRequest(
             request = ApiRequest.ResetPassword(parameters),
             token = token
         ).handle(

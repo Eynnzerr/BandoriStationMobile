@@ -203,8 +203,8 @@ fun AccountScreen(
         onSendCodeForResetPassword = {
             viewModel.sendEvent(ResetPasswordSendVCode(it))
         },
-        onVerifyCodeForResetPassword = {
-            viewModel.sendEvent(ResetPasswordVerifyCode(it))
+        onVerifyCodeForResetPassword = { email, code ->
+            viewModel.sendEvent(ResetPasswordVerifyCode(email, code))
         },
         onResetPassword = {
             viewModel.sendEvent(ResetPassword(it))

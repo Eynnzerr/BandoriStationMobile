@@ -26,6 +26,7 @@ import com.eynnzerr.bandoristation.usecase.social.GetFollowerBriefUseCase
 import com.eynnzerr.bandoristation.usecase.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.feature.account.AccountEffect.*
 import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
+import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
@@ -269,7 +270,13 @@ class AccountViewModel(
 
             is ResetPasswordVerifyCode -> {
                 viewModelScope.launch {
-                    val result = resetPasswordVerifyEmailUseCase.invoke(event.code)
+                    val result = resetPasswordVerifyEmailUseCase.invoke(
+                        ApiRequest.ResetPasswordVerifyEmail(
+                            email = event.email,
+                            code = event.code
+                        )
+
+                    )
                     when (result) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> sendEffect(ShowSnackbar(result.error))

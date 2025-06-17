@@ -40,7 +40,7 @@ sealed class AccountIntent: UIEvent {
     class SendVerificationCode(): AccountIntent()
     data class VerifyEmail(val code: String): AccountIntent()
     data class ResetPasswordSendVCode(val email: String): AccountIntent()
-    data class ResetPasswordVerifyCode(val code: String): AccountIntent()
+    data class ResetPasswordVerifyCode(val email: String, val code: String): AccountIntent()
     data class ResetPassword(val password: String): AccountIntent()
     data class UpdateCountDown(val value: Int): AccountIntent()
     class GetFollowers : AccountIntent()

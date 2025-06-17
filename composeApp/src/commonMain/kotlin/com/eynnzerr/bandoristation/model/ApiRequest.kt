@@ -196,6 +196,15 @@ sealed class ApiRequest(
     )
 
     @Serializable
+    data class ResetPasswordVerifyEmail(
+        val email: String,
+        @SerialName("verification_code") val code: String,
+    ) : ApiRequest(
+        group = "UserLogin",
+        function = "resetPasswordVerifyEmail",
+    )
+
+    @Serializable
     data class ResetPassword(
         val password: String,
     ) : ApiRequest(

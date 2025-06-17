@@ -76,7 +76,7 @@ fun LoginDialog(
     onSendVerificationCode: () -> Unit = {},
     onVerifyCode: (code: String) -> Unit = { _ -> },
     onSendCodeForResetPassword: (email: String) -> Unit = { _ -> },
-    onVerifyCodeForResetPassword: (code: String) -> Unit = { _ -> },
+    onVerifyCodeForResetPassword: (email: String, code: String) -> Unit = { _, _ -> },
     onResetPassword: (password: String) -> Unit = { _ -> },
     sendCountDown: Int = 0,
 ) {
@@ -348,7 +348,7 @@ fun LoginDialog(
 
                                 Button(
                                     onClick = {
-                                        onVerifyCodeForResetPassword(verificationCode)
+                                        onVerifyCodeForResetPassword(email, verificationCode)
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     enabled = email.isNotEmpty() && verificationCode.isNotEmpty()

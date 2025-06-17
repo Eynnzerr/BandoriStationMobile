@@ -7,6 +7,7 @@ import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.account.SendVerificationResult
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 
 class ResetPasswordSendVCodeUseCase(
     private val repository: AppRepository,
