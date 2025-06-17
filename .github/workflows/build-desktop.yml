@@ -40,8 +40,8 @@ jobs:
         with:
           name: desktop-${{ runner.os }}-${{ github.run_number }}
           path: |
-            composeApp/build/compose/binaries/main/dmg/
-            composeApp/build/compose/binaries/main/msi/
-            composeApp/build/compose/binaries/main/deb/
+            composeApp/build/compose/binaries/main-release/dmg/
+            composeApp/build/compose/binaries/main-release/msi/
+            composeApp/build/compose/binaries/main-release/deb/
           if-no-files-found: ignore
           retention-days: 30
