@@ -131,7 +131,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk-${{ env.BUILD_TYPE }}-${{ github.run_number }}
+          name: BandoriStationM-${{ env.BUILD_TYPE }}-${{ github.run_number }}
           path: ${{ env.FINAL_APK_NAME }}
           retention-days: 30
 
