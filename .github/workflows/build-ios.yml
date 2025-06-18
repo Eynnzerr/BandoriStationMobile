@@ -1,0 +1,66 @@
+name: Build iOS IPA
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ closed ]
+
+jobs:
+  build-ios:
+    if: github.event.pull_request.merged == true
+    runs-on: macos-latest
+    steps:
+      - name: Checkout merge commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Grant permissions for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build Compose frameworks
+        run: |
+          ./gradlew \
+            :composeApp:linkReleaseFrameworkIosArm64 \
+            :composeApp:linkReleaseFrameworkIosX64 \
+            :composeApp:linkReleaseFrameworkIosSimulatorArm64
+
+      - name: Create XCFramework
+        run: |
+          xcodebuild -create-xcframework \
+            -framework composeApp/build/bin/iosArm64/releaseFramework/ComposeApp.framework \
+            -framework composeApp/build/bin/iosX64/releaseFramework/ComposeApp.framework \
+            -framework composeApp/build/bin/iosSimulatorArm64/releaseFramework/ComposeApp.framework \
+            -output ComposeApp.xcframework
+
+      - name: Build iOS app
+        run: |
+          xcodebuild -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO \
+            BUILD_DIR=$PWD/build
+
+      - name: Prepare IPA
+        run: |
+          APP_PATH=$(find build -name '*.app' -type d | head -n 1)
+          mkdir Payload
+          cp -R "$APP_PATH" Payload/
+          zip -r BandoriStationM.ipa Payload
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-${{ github.run_number }}
+          path: BandoriStationM.ipa
+          retention-days: 30
