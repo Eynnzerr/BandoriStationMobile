@@ -29,8 +29,6 @@
     <string name="settings_screen_title">Settings</string>
     <string name="theme">Theme</string>
     <string name="theme_desc">app appearance, colors, palette</string>
-    <string name="pip">Picture in Picture</string>
-    <string name="pip_desc">overlay window configuration</string>
     <string name="settings_auto_clear_expired_rooms_title">Auto-clear expired rooms</string>
     <string name="settings_auto_clear_expired_rooms_desc">Automatically clear rooms created more than 60 seconds ago</string>
     <string name="settings_auto_filter_pjsk_title">Filter PJSK</string>
