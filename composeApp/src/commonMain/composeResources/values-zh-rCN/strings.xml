@@ -160,6 +160,11 @@
     <string name="login_dialog_label_code">验证码</string>
 
     <!-- 用户资料对话框 -->
+    <string name="user_profile_dialog_unfollow_button">取关</string>
+    <string name="user_profile_dialog_follow_button">关注</string>
+    <string name="user_profile_dialog_close_button_desc">关闭对话框</string>
+
+    <!-- 用户资料组件 -->
     <string name="user_profile_tab_posted_history">发车历史</string>
     <string name="user_profile_tab_joined_history">上车历史</string>
     <string name="user_profile_tab_statistics">使用统计</string>

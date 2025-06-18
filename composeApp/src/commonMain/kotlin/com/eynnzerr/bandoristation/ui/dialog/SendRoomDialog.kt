@@ -19,7 +19,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import bandoristationm.composeapp.generated.resources.Res
@@ -62,11 +66,13 @@ fun SendRoomDialog(
 ) {
     if (isVisible) {
         var roomNumber by remember(prefillRoomNumber) { mutableStateOf(prefillRoomNumber) }
-        var description by remember(prefillDescription) { mutableStateOf(prefillDescription) }
+        var description by remember(prefillDescription) { mutableStateOf(TextFieldValue(prefillDescription)) }
         var newPresetWord by remember { mutableStateOf("") }
         var isPresetWordsExpanded by remember { mutableStateOf(false) }
         var continuous by remember { mutableStateOf(false) }
         var isAddWordsExpanded by remember { mutableStateOf(false) }
+        val focusRequester = remember { FocusRequester() }
+
 
         AlertDialog(
             onDismissRequest = onDismissRequest,
@@ -103,11 +109,13 @@ fun SendRoomDialog(
                         value = description,
                         onValueChange = { description = it },
                         label = { Text(stringResource(Res.string.send_room_dialog_description_label)) },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
                         minLines = 2,
                         maxLines = 4,
                         trailingIcon = {
-                            IconButton(onClick = { description = "" }) {
+                            IconButton(onClick = { description = TextFieldValue("") }) {
                                 Icon(Icons.Filled.Clear, contentDescription = stringResource(Res.string.send_room_dialog_clear_icon_desc))
                             }
                         },
@@ -172,7 +180,12 @@ fun SendRoomDialog(
                                         InputChip(
                                             selected = false,
                                             onClick = {
-                                                description += word
+                                                val newText = description.text + word
+                                                description = TextFieldValue(
+                                                    text = newText,
+                                                    selection = TextRange(newText.length)
+                                                )
+                                                focusRequester.requestFocus()
                                             },
                                             label = { Text(word) },
                                             trailingIcon = {
@@ -229,11 +242,11 @@ fun SendRoomDialog(
             },
             confirmButton = {
                 TextButton(
-                    enabled = roomNumber.isNotBlank() && description.isNotBlank(),
+                    enabled = roomNumber.isNotBlank() && description.text.isNotBlank(),
                     onClick = {
                         val roomInfo = RoomUploadInfo(
                             number = roomNumber,
-                            description = description.trim()
+                            description = description.text.trim()
                         )
                         onSendClick(roomInfo, continuous)
                         onDismissRequest()
