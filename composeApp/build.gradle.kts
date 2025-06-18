@@ -142,12 +142,13 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            isShrinkResources = true
+            isShrinkResources = false
             signingConfig = signingConfigs.getByName("release")
         }
 
         debug {
             isDebuggable = true
+            isShrinkResources = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
         }
