@@ -120,19 +120,39 @@ android {
         applicationId = "com.eynnzerr.bandoristation"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
+
+    signingConfigs {
+        create("release") {
+            keyAlias = System.getenv("ANDROID_KEY_ALIAS")
+            keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            storeFile = file("../keystore.jks")
+            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
         }
     }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
+        }
+
+        debug {
+            isDebuggable = true
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -160,7 +180,7 @@ compose.desktop {
             includeAllModules = true
             // modules("java.instrument", "java.management", "jdk.security.auth", "jdk.unsupported")
             packageName = "BandoristationM"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.1"
 
             macOS {
                 iconFile.set(project.file("desktop_icons/desktop_icon_macos.icns"))
@@ -190,4 +210,16 @@ room {
 
 dependencies {
     ksp(libs.room.compiler)
+}
+
+tasks.register("printVersionName") {
+    doLast {
+        println(android.defaultConfig.versionName ?: "unknown")
+    }
+}
+
+tasks.register("printVersionCode") {
+    doLast {
+        println(android.defaultConfig.versionCode ?: 0)
+    }
 }
