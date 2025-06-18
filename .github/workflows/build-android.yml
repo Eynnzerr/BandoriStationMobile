@@ -1,0 +1,55 @@
+name: Build Android APK
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ closed ]
+
+jobs:
+  build-android:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout merge commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Grant permissions for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Build release APK
+        run: ./gradlew :composeApp:assembleRelease
+
+      - name: Sign APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > keystore.jks
+          ZIPALIGN=$ANDROID_HOME/build-tools/*/zipalign
+          APKSIGNER=$ANDROID_HOME/build-tools/*/apksigner
+          unsigned_apk="composeApp/build/outputs/apk/release/composeApp-release-unsigned.apk"
+          $ZIPALIGN -f 4 "$unsigned_apk" aligned.apk
+          $APKSIGNER sign --ks keystore.jks --ks-pass pass:$KEYSTORE_PASSWORD --key-pass pass:$KEY_PASSWORD --out composeApp-release.apk aligned.apk
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ github.run_number }}
+          path: composeApp-release.apk
+          retention-days: 30
