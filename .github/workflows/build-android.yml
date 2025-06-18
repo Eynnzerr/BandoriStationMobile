@@ -1,0 +1,169 @@
+name: Build Android APK
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ closed ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - release
+        - debug
+
+jobs:
+  build-android:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ 
+            github.event_name == 'pull_request' && github.event.pull_request.merge_commit_sha ||
+            github.event_name == 'push' && github.ref ||
+            github.sha
+          }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant permissions for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # 创建 keystore 文件（使用 Gradle 内置签名）
+      - name: Create keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > keystore.jks
+          echo "✅ Keystore created successfully"
+
+      # 使用 Gradle 内置签名构建
+      - name: Build signed APK
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          BUILD_TYPE=${{ github.event.inputs.build_type || 'release' }}
+          echo "🔨 Building $BUILD_TYPE APK..."
+          ./gradlew :composeApp:assemble${BUILD_TYPE^} --no-daemon --stacktrace
+          echo "✅ Signed APK build completed"
+
+      # 查找并重命名APK文件
+      - name: Prepare APK
+        run: |
+          BUILD_TYPE=${{ github.event.inputs.build_type || 'release' }}
+          
+          # 查找APK文件
+          if [[ "$BUILD_TYPE" == "release" ]]; then
+            APK_PATH="composeApp/build/outputs/apk/release/composeApp-release.apk"
+          else
+            APK_PATH="composeApp/build/outputs/apk/debug/composeApp-debug.apk"
+          fi
+          
+          if [[ ! -f "$APK_PATH" ]]; then
+            echo "❌ APK file not found at $APK_PATH"
+            exit 1
+          fi
+          
+          # 获取版本信息
+          VERSION_NAME=$(./gradlew -q printVersionName | tail -n 1)
+          VERSION_CODE=$(./gradlew -q printVersionCode | tail -n 1)
+          
+          # 创建最终APK文件名
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          FINAL_APK_NAME="composeApp-${BUILD_TYPE}-v${VERSION_NAME:-unknown}-${VERSION_CODE:-0}-${TIMESTAMP}.apk"
+          
+          # 复制并重命名APK
+          cp "$APK_PATH" "$FINAL_APK_NAME"
+          
+          # 获取APK信息
+          APK_SIZE=$(du -h "$FINAL_APK_NAME" | cut -f1)
+          
+          # 设置环境变量
+          echo "FINAL_APK_NAME=$FINAL_APK_NAME" >> $GITHUB_ENV
+          echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
+          
+          echo "✅ APK prepared: $FINAL_APK_NAME (Size: $APK_SIZE)"
+
+      # 验证APK签名（仅对release版本）
+      - name: Verify APK signature
+        if: env.BUILD_TYPE == 'release'
+        run: |
+          # 查找最新的build-tools版本
+          BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | sort -V | tail -n 1)
+          APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner"
+          
+          if [[ ! -f "$APKSIGNER" ]]; then
+            echo "❌ apksigner not found at $APKSIGNER"
+            exit 1
+          fi
+          
+          # 验证签名
+          "$APKSIGNER" verify "$FINAL_APK_NAME"
+          echo "✅ APK signature verified successfully"
+
+      # 清理敏感文件
+      - name: Cleanup sensitive files
+        if: always()
+        run: |
+          rm -f keystore.jks
+          echo "🧹 Sensitive files cleaned up"
+
+      # 上传构建产物
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ env.BUILD_TYPE }}-${{ github.run_number }}
+          path: ${{ env.FINAL_APK_NAME }}
+          retention-days: 30
+
+      # 成功通知
+      - name: Notify build success
+        if: success()
+        run: |
+          echo "🎉 APK 构建成功！"
+          echo "📦 文件名: ${{ env.FINAL_APK_NAME }}"
+          echo "📏 大小: ${{ env.APK_SIZE }}"
+          echo "🏷️ 版本: ${{ env.VERSION_NAME }} (Build ${{ env.VERSION_CODE }})"
+          echo "🔧 构建类型: ${{ env.BUILD_TYPE }}"
+
+      # 失败通知
+      - name: Notify build failure
+        if: failure()
+        run: |
+          echo "❌ APK 构建失败！"
+          echo "🔍 请检查构建日志以获取详细错误信息"
+          echo "📋 构建参数:"
+          echo "  - 构建类型: ${{ env.BUILD_TYPE || 'release' }}"
+          echo "  - 触发方式: ${{ github.event_name }}"
+          echo "  - 分支/标签: ${{ github.ref }}"
