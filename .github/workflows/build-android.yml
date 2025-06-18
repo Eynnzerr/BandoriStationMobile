@@ -24,11 +24,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ 
-            github.event_name == 'pull_request' && github.event.pull_request.merge_commit_sha ||
-            github.event_name == 'push' && github.ref ||
-            github.sha
-          }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.merge_commit_sha || github.sha }}
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -80,7 +76,6 @@ jobs:
         run: |
           BUILD_TYPE=${{ github.event.inputs.build_type || 'release' }}
           
-          # 查找APK文件
           if [[ "$BUILD_TYPE" == "release" ]]; then
             APK_PATH="composeApp/build/outputs/apk/release/composeApp-release.apk"
           else
@@ -92,21 +87,16 @@ jobs:
             exit 1
           fi
           
-          # 获取版本信息
           VERSION_NAME=$(./gradlew -q printVersionName | tail -n 1)
           VERSION_CODE=$(./gradlew -q printVersionCode | tail -n 1)
           
-          # 创建最终APK文件名
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
           FINAL_APK_NAME="composeApp-${BUILD_TYPE}-v${VERSION_NAME:-unknown}-${VERSION_CODE:-0}-${TIMESTAMP}.apk"
           
-          # 复制并重命名APK
           cp "$APK_PATH" "$FINAL_APK_NAME"
           
-          # 获取APK信息
           APK_SIZE=$(du -h "$FINAL_APK_NAME" | cut -f1)
           
-          # 设置环境变量
           echo "FINAL_APK_NAME=$FINAL_APK_NAME" >> $GITHUB_ENV
           echo "APK_SIZE=$APK_SIZE" >> $GITHUB_ENV
           echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
@@ -119,7 +109,6 @@ jobs:
       - name: Verify APK signature
         if: env.BUILD_TYPE == 'release'
         run: |
-          # 查找最新的build-tools版本
           BUILD_TOOLS_VERSION=$(ls $ANDROID_HOME/build-tools | sort -V | tail -n 1)
           APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS_VERSION/apksigner"
           
@@ -128,7 +117,6 @@ jobs:
             exit 1
           fi
           
-          # 验证签名
           "$APKSIGNER" verify "$FINAL_APK_NAME"
           echo "✅ APK signature verified successfully"
 
@@ -147,7 +135,6 @@ jobs:
           path: ${{ env.FINAL_APK_NAME }}
           retention-days: 30
 
-      # 成功通知
       - name: Notify build success
         if: success()
         run: |
@@ -157,7 +144,6 @@ jobs:
           echo "🏷️ 版本: ${{ env.VERSION_NAME }} (Build ${{ env.VERSION_CODE }})"
           echo "🔧 构建类型: ${{ env.BUILD_TYPE }}"
 
-      # 失败通知
       - name: Notify build failure
         if: failure()
         run: |
