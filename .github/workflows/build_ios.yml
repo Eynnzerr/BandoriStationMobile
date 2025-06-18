@@ -1,0 +1,262 @@
+name: Build Unsigned iOS IPA
+
+on:
+  pull_request:
+    branches: [ master ]
+    types: [ closed ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - release
+        - debug
+
+jobs:
+  build-ios:
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.merge_commit_sha || github.sha }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Grant permissions for Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Cache Kotlin/Native
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: ${{ runner.os }}-konan-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-konan-
+
+      - name: Set build variables
+        run: |
+          BUILD_TYPE=${{ github.event.inputs.build_type || 'release' }}
+          BUILD_TYPE_CAPITALIZED=$(echo "$BUILD_TYPE" | sed 's/./\U&/')
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          
+          echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
+          echo "BUILD_TYPE_CAPITALIZED=$BUILD_TYPE_CAPITALIZED" >> $GITHUB_ENV
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
+          
+          echo "🔧 Build type: $BUILD_TYPE"
+
+      - name: Get version info
+        run: |
+          VERSION_NAME=$(./gradlew -q printVersionName | tail -n 1 || echo "unknown")
+          VERSION_CODE=$(./gradlew -q printVersionCode | tail -n 1 || echo "0")
+          
+          echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          
+          echo "📱 Version: $VERSION_NAME (Build $VERSION_CODE)"
+
+      - name: Build Compose frameworks
+        run: |
+          echo "🔨 Building Compose frameworks for $BUILD_TYPE..."
+          
+          if [[ "$BUILD_TYPE" == "release" ]]; then
+            ./gradlew \
+              :composeApp:linkReleaseFrameworkIosArm64 \
+              :composeApp:linkReleaseFrameworkIosX64 \
+              :composeApp:linkReleaseFrameworkIosSimulatorArm64 \
+              --no-daemon --stacktrace
+          else
+            ./gradlew \
+              :composeApp:linkDebugFrameworkIosArm64 \
+              :composeApp:linkDebugFrameworkIosX64 \
+              :composeApp:linkDebugFrameworkIosSimulatorArm64 \
+              --no-daemon --stacktrace
+          fi
+          
+          echo "✅ Compose frameworks built successfully"
+
+      - name: Verify frameworks
+        run: |
+          echo "🔍 Verifying built frameworks..."
+          
+          FRAMEWORK_DIR="composeApp/build/bin"
+          FRAMEWORK_NAME="ComposeApp.framework"
+          
+          TARGETS=("iosArm64" "iosX64" "iosSimulatorArm64")
+          
+          for target in "${TARGETS[@]}"; do
+            FRAMEWORK_PATH="$FRAMEWORK_DIR/$target/${BUILD_TYPE}Framework/$FRAMEWORK_NAME"
+            if [[ -d "$FRAMEWORK_PATH" ]]; then
+              echo "✅ Found framework: $FRAMEWORK_PATH"
+              file "$FRAMEWORK_PATH/ComposeApp" || echo "⚠️ Could not read framework binary"
+            else
+              echo "❌ Missing framework: $FRAMEWORK_PATH"
+              exit 1
+            fi
+          done
+
+      - name: Create XCFramework
+        run: |
+          echo "📦 Creating XCFramework..."
+          
+          FRAMEWORK_DIR="composeApp/build/bin"
+          XCFRAMEWORK_NAME="ComposeApp.xcframework"
+          
+          rm -rf "$XCFRAMEWORK_NAME"
+          
+          xcodebuild -create-xcframework \
+            -framework "$FRAMEWORK_DIR/iosArm64/${BUILD_TYPE}Framework/ComposeApp.framework" \
+            -framework "$FRAMEWORK_DIR/iosX64/${BUILD_TYPE}Framework/ComposeApp.framework" \
+            -framework "$FRAMEWORK_DIR/iosSimulatorArm64/${BUILD_TYPE}Framework/ComposeApp.framework" \
+            -output "$XCFRAMEWORK_NAME"
+          
+          echo "✅ XCFramework created successfully"
+          
+          ls -la "$XCFRAMEWORK_NAME"
+
+      - name: Verify Xcode project
+        run: |
+          echo "🔍 Verifying Xcode project..."
+          
+          if [[ ! -f "iosApp/iosApp.xcodeproj/project.pbxproj" ]]; then
+            echo "❌ Xcode project not found"
+            exit 1
+          fi
+          
+          xcodebuild -project iosApp/iosApp.xcodeproj -list
+          
+          echo "✅ Xcode project verified"
+
+      - name: Build iOS app
+        run: |
+          echo "🔨 Building iOS app ($BUILD_TYPE)..."
+          
+          rm -rf build
+          
+          xcodebuild -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -configuration $BUILD_TYPE_CAPITALIZED \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE="" \
+            BUILD_DIR=$PWD/build \
+            SYMROOT=$PWD/build \
+            ONLY_ACTIVE_ARCH=NO \
+            -quiet
+          
+          echo "✅ iOS app built successfully"
+
+      - name: Verify build output
+        run: |
+          echo "🔍 Verifying build output..."
+          
+          find build -name '*.app' -type d | while read app_path; do
+            echo "📱 Found app: $app_path"
+            ls -la "$app_path"
+            
+            APP_NAME=$(basename "$app_path" .app)
+            if [[ -f "$app_path/$APP_NAME" ]]; then
+              echo "✅ Executable found: $app_path/$APP_NAME"
+              file "$app_path/$APP_NAME"
+            else
+              echo "❌ Executable not found in $app_path"
+            fi
+          done
+
+      - name: Create IPA
+        run: |
+          echo "📦 Creating IPA package..."
+          
+          APP_PATH=$(find build -name '*.app' -type d | head -n 1)
+          
+          if [[ -z "$APP_PATH" ]]; then
+            echo "❌ No .app file found"
+            exit 1
+          fi
+          
+          echo "📱 Using app: $APP_PATH"
+          
+          rm -rf Payload
+          mkdir Payload
+          cp -R "$APP_PATH" Payload/
+          
+          IPA_NAME="BandoriStationM-${BUILD_TYPE}-v${VERSION_NAME}-${VERSION_CODE}-${TIMESTAMP}.ipa"
+          
+          zip -r "$IPA_NAME" Payload
+          
+          IPA_SIZE=$(du -h "$IPA_NAME" | cut -f1)
+          
+          echo "IPA_NAME=$IPA_NAME" >> $GITHUB_ENV
+          echo "IPA_SIZE=$IPA_SIZE" >> $GITHUB_ENV
+          
+          echo "✅ IPA created: $IPA_NAME (Size: $IPA_SIZE)"
+          
+          rm -rf Payload
+
+      - name: Verify IPA
+        run: |
+          echo "🔍 Verifying IPA structure..."
+          
+          unzip -l "$IPA_NAME" | head -20
+          
+          if [[ $(stat -f%z "$IPA_NAME") -lt 1000000 ]]; then
+            echo "⚠️ IPA size seems too small (< 1MB), please verify"
+          fi
+          
+          echo "✅ IPA verification completed"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa-${{ env.BUILD_TYPE }}-${{ github.run_number }}
+          path: ${{ env.IPA_NAME }}
+          retention-days: 30
+
+      - name: Notify build success
+        if: success()
+        run: |
+          echo "🎉 iOS IPA 构建成功！"
+          echo "📦 文件名: ${{ env.IPA_NAME }}"
+          echo "📏 大小: ${{ env.IPA_SIZE }}"
+          echo "🏷️ 版本: ${{ env.VERSION_NAME }} (Build ${{ env.VERSION_CODE }})"
+          echo "🔧 构建类型: ${{ env.BUILD_TYPE }}"
+          echo ""
+          echo "📱 侧载安装说明："
+          echo "1. 下载 IPA 文件"
+          echo "2. 使用 AltStore、Sideloadly 等工具"
+
+      - name: Notify build failure
+        if: failure()
+        run: |
+          echo "❌ iOS IPA 构建失败！"
+          echo "🔍 请检查构建日志以获取详细错误信息"
+          echo "📋 构建参数:"
+          echo "  - 构建类型: ${{ env.BUILD_TYPE || 'release' }}"
+          echo "  - 触发方式: ${{ github.event_name }}"
+          echo "  - 分支: ${{ github.ref }}"
