@@ -131,7 +131,7 @@ android {
     }
 
     signingConfigs {
-        create("workflow_release") {
+        create("release") {
             keyAlias = System.getenv("ANDROID_KEY_ALIAS")
             keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
             storeFile = file("../keystore.jks")
@@ -144,6 +144,12 @@ android {
             isMinifyEnabled = false
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
+        }
+
+        debug {
+            isDebuggable = true
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-debug"
         }
     }
 
