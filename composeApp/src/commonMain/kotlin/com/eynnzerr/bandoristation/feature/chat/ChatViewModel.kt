@@ -29,6 +29,7 @@ import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
+import com.eynnzerr.bandoristation.usecase.clientName
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.formatTimestampAsDate
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +68,6 @@ class ChatViewModel(
                             }
                             setAccessPermissionUseCase(null)
                             setUpClientUseCase(ClientSetInfo(
-                                client = "BandoriStation",
                                 sendRoomNumber = false,
                                 sendChat = true,
                             ))
@@ -156,7 +156,6 @@ class ChatViewModel(
         initializeChatRoom()
 
         setUpClientUseCase(ClientSetInfo(
-            client = "BandoriStation",
             sendRoomNumber = false,
             sendChat = true,
         ))

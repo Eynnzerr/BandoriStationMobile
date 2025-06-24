@@ -45,6 +45,7 @@ import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
+import com.eynnzerr.bandoristation.usecase.clientName
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -98,7 +99,7 @@ class HomeViewModel(
                             requestRecentRoomsUseCase(Unit)
                             setAccessPermissionUseCase(null)
                             setUpClientUseCase(ClientSetInfo(
-                                client = "BandoriStation",
+                                client = clientName,
                                 sendRoomNumber = true,
                                 sendChat = false,
                             ))
@@ -218,7 +219,7 @@ class HomeViewModel(
     override suspend fun onStartStateFlow() {
         // 每次重新进入房间页，设置客户端接收条件
         setUpClientUseCase(ClientSetInfo(
-            client = "BandoriStation",
+            client = clientName,
             sendRoomNumber = true,
             sendChat = false,
         ))

@@ -33,9 +33,7 @@ class SettingViewModel(
     }
 
     override suspend fun onStartStateFlow() {
-        // 每次重新进入房间页，设置客户端接收条件
         setUpClientUseCase(ClientSetInfo(
-            client = "BandoriStation",
             sendRoomNumber = false,
             sendChat = false,
         ))

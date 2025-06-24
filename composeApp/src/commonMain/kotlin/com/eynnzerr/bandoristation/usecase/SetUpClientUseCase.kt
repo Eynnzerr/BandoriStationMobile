@@ -17,3 +17,5 @@ class SetUpClientUseCase(
         return UseCaseResult.Success(Unit) // WebSocket has no sync response so just return Unit.
     }
 }
+
+val clientName = "Mobile Station"

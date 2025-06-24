@@ -55,7 +55,7 @@ fun RoomHistoryCard(
                         fontSize = 18.sp,
                     )
                     Text(
-                        text = (if (roomHistory.sourceInfo.name == "BandoriStation") "来自本站" else "来自Bot"),
+                        text = "来自${roomHistory.sourceInfo.name ?: " Bot"}",
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

@@ -35,6 +35,7 @@ import com.eynnzerr.bandoristation.model.account.LoginParams
 import com.eynnzerr.bandoristation.model.account.SignupParams
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
+import com.eynnzerr.bandoristation.usecase.clientName
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -91,7 +92,7 @@ class AccountViewModel(
 
     override suspend fun onStartStateFlow() {
         setUpClientUseCase(ClientSetInfo(
-            client = "BandoriStation",
+            client = clientName,
             sendRoomNumber = false,
             sendChat = false,
         ))
