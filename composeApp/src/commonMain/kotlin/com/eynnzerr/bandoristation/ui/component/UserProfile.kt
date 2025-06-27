@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.ui.component
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,11 +18,13 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.user_profile_follower_count
 import bandoristationm.composeapp.generated.resources.user_profile_following_count
@@ -65,6 +69,7 @@ import com.eynnzerr.bandoristation.utils.getCountDataByGranularity
 import com.eynnzerr.bandoristation.utils.getDurationDataByGranularity
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserProfile(
     modifier: Modifier = Modifier,
@@ -83,22 +88,28 @@ fun UserProfile(
     )
     var selectedTabIndex by remember { mutableStateOf(0) }
 
-    Column(
-        modifier = modifier,
-    ) {
-        Box(
-            contentAlignment = Alignment.TopEnd,
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(3f / 1f)
-        ) {
-            UserBannerImage(
-                bannerName = accountInfo.accountSummary.banner,
-                modifier = Modifier.fillMaxSize()
-            )
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
-            actionButton()
-        }
+    BoxWithConstraints(
+        modifier = modifier.appBarScroll(true, scrollBehavior)
+    ) {
+        val maxBannerHeight = maxWidth / 3f
+        val bannerHeight = maxBannerHeight * (1f - scrollBehavior.state.collapsedFraction)
+
+        Column {
+            Box(
+                contentAlignment = Alignment.TopEnd,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(bannerHeight)
+            ) {
+                UserBannerImage(
+                    bannerName = accountInfo.accountSummary.banner,
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                actionButton()
+            }
 
         // 用户信息区域
         Row(
@@ -200,7 +211,9 @@ fun UserProfile(
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .appBarScroll(true, scrollBehavior),
                         contentPadding = PaddingValues(8.dp)
                     ) {
                         itemsIndexed(accountInfo.roomNumberHistory) { index, roomInfo ->
@@ -233,7 +246,9 @@ fun UserProfile(
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .appBarScroll(true, scrollBehavior),
                         contentPadding = PaddingValues(8.dp),
                     ) {
                         itemsIndexed(
@@ -257,6 +272,7 @@ fun UserProfile(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
+                        .appBarScroll(true, scrollBehavior)
                         .padding(horizontal = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -387,4 +403,6 @@ fun UserProfile(
             }
         }
     }
+}
+
 }
