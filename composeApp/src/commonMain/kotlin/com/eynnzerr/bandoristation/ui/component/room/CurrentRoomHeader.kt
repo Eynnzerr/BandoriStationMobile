@@ -1,6 +1,8 @@
 package com.eynnzerr.bandoristation.ui.component.room
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.is_auto_uploading
 import bandoristationm.composeapp.generated.resources.joined
 import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
@@ -172,5 +175,10 @@ private fun CurrentRoomHeaderPreview() {
         )
     )
 
-    CurrentRoomHeader(mockRoom, {}, {}, {})
+    CurrentRoomHeader(
+        mockRoom,
+        {},
+        {},
+        {},
+    )
 }

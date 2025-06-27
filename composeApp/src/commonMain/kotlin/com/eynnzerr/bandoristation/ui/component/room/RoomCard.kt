@@ -124,7 +124,7 @@ fun RoomCard(
             )
 
             Text(
-                text = if (roomInfo.sourceInfo?.name == "Tsugu") "来自茨菇" else "来自本站",
+                text = "来自${roomInfo.sourceInfo?.name ?: " Bot"}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f)

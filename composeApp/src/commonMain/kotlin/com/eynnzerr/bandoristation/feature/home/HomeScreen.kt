@@ -146,7 +146,7 @@ fun HomeScreen(
 
                 is HomeEffect.ShowResourceSnackbar -> {
                     coroutineScope.launch {
-                        val result = snackbarHostState.showSnackbar(
+                        snackbarHostState.showSnackbar(
                             message = getString(action.textRes),
                             duration = SnackbarDuration.Short
                         )
@@ -396,6 +396,7 @@ fun HomeScreen(
                         roomInfo = state.selectedRoom!!,
                         currentTimeMillis = state.serverTimestampMillis,
                         startTimeMillis = state.joinedTimestampMillis,
+                        // isAutoUploading = state.,
                         onCopy = { roomNumber ->
                             viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
                         },

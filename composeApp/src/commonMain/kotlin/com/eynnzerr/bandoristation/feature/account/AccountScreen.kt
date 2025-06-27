@@ -34,14 +34,22 @@ import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
 import com.eynnzerr.bandoristation.ui.dialog.FollowListDialog
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
+import com.eynnzerr.bandoristation.utils.resizeTo
 import com.eynnzerr.bandoristation.utils.toBase64String
-import io.github.vinceglb.filekit.dialogs.FileKitMode
-import io.github.vinceglb.filekit.dialogs.FileKitType
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.coroutines.launch
+import network.chaintech.cmpimagepickncrop.CMPImagePickNCropDialog
+import network.chaintech.cmpimagepickncrop.imagecropper.ImageAspectRatio
+import network.chaintech.cmpimagepickncrop.imagecropper.rememberImageCropper
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
+import bandoristationm.composeapp.generated.resources.account_following_list_title
+import bandoristationm.composeapp.generated.resources.account_no_followers_placeholder
+import bandoristationm.composeapp.generated.resources.account_no_followings_placeholder
+import bandoristationm.composeapp.generated.resources.account_follower_list_title
+import bandoristationm.composeapp.generated.resources.account_logout_button
+import bandoristationm.composeapp.generated.resources.account_reset_token_button
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,6 +64,9 @@ fun AccountScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val clipboardManager = LocalClipboardManager.current
+    val imageCropper = rememberImageCropper()
+    var showAvatarPickerDialog by remember { mutableStateOf(false) }
+    var showBannerPickerDialog by remember { mutableStateOf(false) }
     var showFollowerDialog by remember { mutableStateOf(false) }
     var showFollowingDialog by remember { mutableStateOf(false) }
     var showEditProfileDialog by remember { mutableStateOf(false) }
@@ -64,34 +75,6 @@ fun AccountScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val coroutineScope = rememberCoroutineScope()
-
-    val avatarPickerLauncher = rememberFilePickerLauncher(
-        mode = FileKitMode.Single,
-        type = FileKitType.Image,
-    ) { file ->
-        file?.let { avatarFile ->
-            // 转为base64字符串，进行后续操作
-            coroutineScope.launch {
-                avatarFile.toBase64String()?.let { base64 ->
-                    viewModel.sendEvent(UpdateAvatar(base64))
-                }
-            }
-        }
-    }
-
-    val bannerPickerLauncher = rememberFilePickerLauncher(
-        mode = FileKitMode.Single,
-        type = FileKitType.Image,
-    ) { file ->
-        file?.let { bannerFile ->
-            // 转为base64字符串，进行后续操作
-            coroutineScope.launch {
-                bannerFile.toBase64String()?.let { base64 ->
-                    viewModel.sendEvent(UpdateBanner(base64))
-                }
-            }
-        }
-    }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -218,10 +201,10 @@ fun AccountScreen(
         avatar = state.accountInfo.accountSummary.avatar,
         profile = state.editProfileData,
         onAvatarClick = {
-            avatarPickerLauncher.launch()
+            showAvatarPickerDialog = true
         },
         onBannerClick = {
-            bannerPickerLauncher.launch()
+            showBannerPickerDialog = true
         },
         onUsernameEdit = {
             viewModel.sendEvent(UpdateUsername(it))
@@ -245,7 +228,7 @@ fun AccountScreen(
 
     FollowListDialog(
         isVisible = showFollowingDialog,
-        title = "关注列表",
+        title = stringResource(Res.string.account_following_list_title),
         onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(false)) },
         followList = state.followings,
         onFollow = { viewModel.sendEvent(FollowUser(it)) },
@@ -253,14 +236,14 @@ fun AccountScreen(
             Box(
                 contentAlignment = Alignment.Center,
             ) {
-                Text("暂无")
+                Text(stringResource(Res.string.account_no_followings_placeholder))
             }
         }
     )
 
     FollowListDialog(
         isVisible = showFollowerDialog,
-        title = "粉丝列表",
+        title = stringResource(Res.string.account_follower_list_title),
         onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(false)) },
         followList = state.followers,
         onFollow = { viewModel.sendEvent(FollowUser(it)) },
@@ -268,9 +251,67 @@ fun AccountScreen(
             Box(
                 contentAlignment = Alignment.Center,
             ) {
-                Text("暂无（若仅使用Token登录，请注意本客户端无法获取账号原有粉丝列表）")
+                Text(stringResource(Res.string.account_no_followers_placeholder))
             }
         }
+    )
+
+    CMPImagePickNCropDialog(
+        imageCropper = imageCropper,
+        openImagePicker = showAvatarPickerDialog,
+        defaultAspectRatio = ImageAspectRatio(1, 1),
+        cropEnable = true,
+        autoZoom = false,
+        enabledFlipOption = false,
+        enableRotationOption = false,
+        aspects = null,
+        showCameraOption = true,
+        showGalleryOption = true,
+        shapes = null,
+        selectedImageFileCallback = { file ->
+            // Do nothing with file.
+        },
+        imagePickerDialogHandler = { isOpen ->
+            showAvatarPickerDialog = isOpen
+        },
+        selectedImageCallback = { imageBitmap ->
+            coroutineScope.launch {
+                imageBitmap
+                    .resizeTo(200, 200) // 同网页端
+                    .toBase64String()?.let { base64 ->
+                        viewModel.sendEvent(UpdateAvatar(base64))
+                    }
+            }
+        },
+    )
+
+    CMPImagePickNCropDialog(
+        imageCropper = imageCropper,
+        openImagePicker = showBannerPickerDialog,
+        defaultAspectRatio = ImageAspectRatio(3, 1),
+        cropEnable = true,
+        autoZoom = false,
+        enabledFlipOption = false,
+        enableRotationOption = false,
+        aspects = null,
+        showCameraOption = true,
+        showGalleryOption = true,
+        shapes = null,
+        selectedImageFileCallback = { file ->
+            // Do nothing with file.
+        },
+        imagePickerDialogHandler = { isOpen ->
+            showBannerPickerDialog = isOpen
+        },
+        selectedImageCallback = { imageBitmap ->
+            coroutineScope.launch {
+                imageBitmap
+                    .resizeTo(900, 300) // 同网页端
+                    .toBase64String()?.let { base64 ->
+                        viewModel.sendEvent(UpdateBanner(base64))
+                    }
+            }
+        },
     )
 
     ModalNavigationDrawer(
@@ -290,14 +331,14 @@ fun AccountScreen(
                     Spacer(Modifier.height(12.dp))
                     NavigationDrawerItem(
                         icon = { Icon(Icons.AutoMirrored.Default.Logout, contentDescription = null) },
-                        label = { Text("退出登录") },
+                        label = { Text(stringResource(Res.string.account_logout_button)) },
                         onClick = { viewModel.sendEvent(Logout()) },
                         selected = false,
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
                     NavigationDrawerItem(
                         icon = { Icon(Icons.Default.Token, contentDescription = null) },
-                        label = { Text("重置令牌") },
+                        label = { Text(stringResource(Res.string.account_reset_token_button)) },
                         onClick = {
                             viewModel.sendEffect(AccountEffect.ControlLoginDialog(true))
                             viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.TOKEN_LOGIN))

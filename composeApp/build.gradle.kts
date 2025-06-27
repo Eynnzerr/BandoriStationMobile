@@ -9,7 +9,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.ksp)
-    // alias(libs.plugins.room)
+    alias(libs.plugins.room)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.composeHotReload)
 }
@@ -92,6 +92,7 @@ kotlin {
 
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialogs.compose)
+            implementation(libs.imagePickNCrop)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
@@ -205,9 +206,9 @@ composeCompiler {
     featureFlags.add(ComposeFeatureFlag.OptimizeNonSkippingGroups)
 }
 
-//room {
-//    schemaDirectory("$projectDir/schemas")
-//}
+room {
+    schemaDirectory("$projectDir/schemas")
+}
 
 dependencies {
     ksp(libs.room.compiler)

@@ -29,7 +29,7 @@ fun SimpleRoomCard(
     number: String = "",
     rawMessage: String = "",
     timestamp: Long = 0,
-    sourceName: String = "",
+    sourceName: String = "Bot",
     avatarName: String = "",
     userName: String = "",
     onCopy: (String) -> Unit,
@@ -69,7 +69,7 @@ fun SimpleRoomCard(
                         fontSize = 18.sp,
                     )
                     Text(
-                        text = (if (sourceName == "BandoriStation") "来自本站" else "来自Bot"),
+                        text = "来自$sourceName",
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,

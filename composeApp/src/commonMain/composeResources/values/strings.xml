@@ -8,6 +8,7 @@
     <string name="join_room_snackbar">Marked as joining the selected room.</string>
     <string name="upload_room_snackbar">Successfully upload room information.</string>
     <string name="joined">Joined</string>
+    <string name="is_auto_uploading">is auto-uploading</string>">
     <string name="reconnecting_to_server">Reconnecting to server...</string>
     <string name="websocket_error_default">WebSocket error.</string>
     <string name="fetched_latest_room_list">Fetched the latest room list.</string>
@@ -24,6 +25,12 @@
     <!--  Account  -->
     <string name="account_screen_title">Account</string>
     <string name="login_help">BandoriStation Mobile offers two ways of login. If you have logged in on the website: 1. Token: You can open the control panel by F12, choose console, and type document.cookie. Copy the token part in the cookie to the input field and confirm. 2. Password: You have to log out on the website. Then, type your username or email, and your password and confirm.</string>
+    <string name="account_following_list_title">Following List</string>
+    <string name="account_no_followings_placeholder">No followings yet.</string>
+    <string name="account_follower_list_title">Follower List</string>
+    <string name="account_no_followers_placeholder">No followers yet (If you are logged in with a token, please note that this client cannot retrieve the original follower list of the account).</string>
+    <string name="account_logout_button">Logout</string>
+    <string name="account_reset_token_button">Reset Token</string>
 
     <!--  Settings  -->
     <string name="settings_screen_title">Settings</string>
