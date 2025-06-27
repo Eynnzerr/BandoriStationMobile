@@ -92,6 +92,7 @@ kotlin {
 
             implementation(libs.filekit.core)
             implementation(libs.filekit.dialogs.compose)
+            implementation(libs.imagePickNCrop)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

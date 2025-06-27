@@ -29,6 +29,7 @@ data class HomeState(
     val isFirstRun: Boolean = false,
     val selectedUser: AccountInfo = AccountInfo(),
     val followingUsers: List<Long> = emptyList(),
+    val isAutoUploading: Boolean = false,
 ) : UIState {
     companion object {
         fun initial() = HomeState(
