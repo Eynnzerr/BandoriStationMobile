@@ -90,8 +90,8 @@ kotlin {
             implementation(libs.materialKolor)
             implementation(libs.richEditor.compose)
 
-            implementation(libs.filekit.core)
-            implementation(libs.filekit.dialogs.compose)
+            // implementation(libs.filekit.core)
+            // implementation(libs.filekit.dialogs.compose)
             implementation(libs.imagePickNCrop)
         }
         desktopMain.dependencies {
