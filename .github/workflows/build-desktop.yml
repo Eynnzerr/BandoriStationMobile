@@ -4,26 +4,33 @@ on:
   pull_request:
     branches: [ master ]
     types: [ closed ]
+  workflow_dispatch:
+    inputs:
+      build_reason:
+        description: 'Manual build'
+        required: false
+        default: 'Manual trigger'
+        type: string
 
 jobs:
   build-desktop:
-    if: github.event.pull_request.merged == true
+    if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     
     steps:
-      - name: Checkout merge commit
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.ref || github.event.pull_request.merge_commit_sha }}
           
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
           
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
@@ -38,10 +45,11 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: desktop-${{ runner.os }}-${{ github.run_number }}
+          name: desktop-${{ runner.os }}-${{ github.event_name == 'workflow_dispatch' && 'manual' || github.run_number }}
           path: |
             composeApp/build/compose/binaries/main-release/dmg/
             composeApp/build/compose/binaries/main-release/msi/
             composeApp/build/compose/binaries/main-release/deb/
           if-no-files-found: ignore
           retention-days: 30
+
