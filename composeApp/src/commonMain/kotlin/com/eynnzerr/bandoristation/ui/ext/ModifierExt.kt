@@ -6,5 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
-fun Modifier.appBarScroll(scrollable: Boolean, topAppBarScrollBehavior: TopAppBarScrollBehavior)
-    = if (scrollable) Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection) else Modifier
+fun Modifier.appBarScroll(
+    scrollable: Boolean,
+    topAppBarScrollBehavior: TopAppBarScrollBehavior
+) =
+    if (scrollable) this.then(Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)) else this
