@@ -127,6 +127,8 @@ fun RoomCard(
                 text = "来自${roomInfo.sourceInfo?.name ?: " Bot"}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.StartEllipsis,
                 modifier = Modifier.weight(1f)
             )
 
@@ -157,11 +159,11 @@ private fun RoomCardPreview() {
         number = "114514",
         rawMessage = "114514 5w 130+ 大e长 禁hdfc 欢迎清火 q1",
         sourceInfo = SourceInfo(
-            name = "Tsugu",
+            name = "BandoriStationM",
             type = "qq"
         ),
         type = "other",
-        time = 1743581164274,
+        time = 1751097162635,
         userInfo = UserInfo(
             type = "local",
             userId = 8146,
