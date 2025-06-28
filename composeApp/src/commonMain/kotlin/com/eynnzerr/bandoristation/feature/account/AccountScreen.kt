@@ -229,6 +229,7 @@ fun AccountScreen(
         isVisible = showFollowingDialog,
         title = stringResource(Res.string.account_following_list_title),
         onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(false)) },
+        followingIds = state.followingIdList,
         followList = state.followings,
         onFollow = { viewModel.sendEvent(FollowUser(it)) },
         placeholder = {
@@ -244,6 +245,7 @@ fun AccountScreen(
         isVisible = showFollowerDialog,
         title = stringResource(Res.string.account_follower_list_title),
         onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(false)) },
+        followingIds = state.followingIdList,
         followList = state.followers,
         onFollow = { viewModel.sendEvent(FollowUser(it)) },
         placeholder = {

@@ -76,15 +76,34 @@ class AccountViewModel(
             sendEffect(ControlLoginDialog(true))
         }
 
-        roomHistoryAggregator.fetchAllHistory(null).collect { result ->
-            when (result) {
-                is UseCaseResult.Loading -> Unit
-                is UseCaseResult.Error -> {
-                    sendEffect(ShowSnackbar(result.error.message ?: ""))
+        viewModelScope.launch {
+            roomHistoryAggregator.fetchAllHistory(null).collect { result ->
+                when (result) {
+                    is UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Error -> {
+                        sendEffect(ShowSnackbar(result.error.message ?: ""))
+                    }
+                    is UseCaseResult.Success -> {
+                        AppLogger.d(TAG, "Successfully fetched room history. length: ${result.data.size}")
+                        sendEvent(UpdateRoomHistory(result.data))
+                    }
                 }
-                is UseCaseResult.Success -> {
-                    AppLogger.d(TAG, "Successfully fetched room history. length: ${result.data.size}")
-                    sendEvent(UpdateRoomHistory(result.data))
+            }
+        }
+
+        viewModelScope.launch {
+            dataStore.data.collect { p ->
+                val followingSet = p[PreferenceKeys.FOLLOWING_LIST] ?: emptySet()
+                AppLogger.d(TAG, "Fetch following user id set: $followingSet")
+                internalState.update {
+                    it.copy(
+                        followingIdList = followingSet.map { item -> item.toLongOrNull() ?: 0 }.toSet(),
+                        accountInfo = it.accountInfo.copy(
+                            accountSummary = it.accountInfo.accountSummary.copy(
+                                following = followingSet.size
+                            )
+                        )
+                    )
                 }
             }
         }

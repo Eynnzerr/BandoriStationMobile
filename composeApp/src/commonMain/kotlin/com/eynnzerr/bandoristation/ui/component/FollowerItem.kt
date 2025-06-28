@@ -70,9 +70,6 @@ fun FollowerItem(
             Button(
                 onClick = onFollow,
                 shape = MaterialTheme.shapes.medium,
-//                colors = ButtonDefaults.buttonColors(
-//                    containerColor = if (hasFollowed) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
-//                )
             ) {
                 Text(if (hasFollowed) "取关" else "关注")
             }

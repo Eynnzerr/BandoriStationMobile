@@ -178,7 +178,8 @@ class HomeViewModel(
                 internalState.update {
                     it.copy(
                         isFirstRun = isFirstRun,
-                        presetWords = p[PreferenceKeys.PRESET_WORDS] ?: emptySet()
+                        presetWords = p[PreferenceKeys.PRESET_WORDS] ?: emptySet(),
+                        followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList()
                     )
                 }
 
