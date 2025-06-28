@@ -9,7 +9,7 @@ class AndroidPlatform : Platform {
         get() = AppApplication.context.packageManager.getPackageInfo(
             AppApplication.context.packageName,
             0
-        ).versionName ?: "1.0.0-Unknown"
+        ).versionName ?: "1.0.0"
 }
 
 actual fun getPlatform(): Platform = AndroidPlatform()
