@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -49,7 +50,7 @@ fun OtherUserProfile(
             contentAlignment = Alignment.TopEnd,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp)
+                .aspectRatio(3f / 1f)
         ) {
             UserBannerImage(
                 bannerName = accountInfo.accountSummary.banner,

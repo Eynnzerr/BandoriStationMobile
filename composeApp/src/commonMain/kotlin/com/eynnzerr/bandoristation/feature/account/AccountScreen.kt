@@ -34,7 +34,6 @@ import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
 import com.eynnzerr.bandoristation.ui.dialog.FollowListDialog
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
-import com.eynnzerr.bandoristation.utils.resizeTo
 import com.eynnzerr.bandoristation.utils.toBase64String
 import kotlinx.coroutines.launch
 import network.chaintech.cmpimagepickncrop.CMPImagePickNCropDialog
@@ -49,6 +48,7 @@ import bandoristationm.composeapp.generated.resources.account_no_followings_plac
 import bandoristationm.composeapp.generated.resources.account_follower_list_title
 import bandoristationm.composeapp.generated.resources.account_logout_button
 import bandoristationm.composeapp.generated.resources.account_reset_token_button
+import com.eynnzerr.bandoristation.utils.resizeCenterCrop
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +64,6 @@ fun AccountScreen(
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
     val clipboardManager = LocalClipboardManager.current
-    val imageCropper = rememberImageCropper()
     var showAvatarPickerDialog by remember { mutableStateOf(false) }
     var showBannerPickerDialog by remember { mutableStateOf(false) }
     var showFollowerDialog by remember { mutableStateOf(false) }
@@ -230,6 +229,7 @@ fun AccountScreen(
         isVisible = showFollowingDialog,
         title = stringResource(Res.string.account_following_list_title),
         onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowingDialog(false)) },
+        followingIds = state.followingIdList,
         followList = state.followings,
         onFollow = { viewModel.sendEvent(FollowUser(it)) },
         placeholder = {
@@ -245,6 +245,7 @@ fun AccountScreen(
         isVisible = showFollowerDialog,
         title = stringResource(Res.string.account_follower_list_title),
         onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlFollowerDialog(false)) },
+        followingIds = state.followingIdList,
         followList = state.followers,
         onFollow = { viewModel.sendEvent(FollowUser(it)) },
         placeholder = {
@@ -257,15 +258,15 @@ fun AccountScreen(
     )
 
     CMPImagePickNCropDialog(
-        imageCropper = imageCropper,
+        imageCropper = rememberImageCropper(),
         openImagePicker = showAvatarPickerDialog,
         defaultAspectRatio = ImageAspectRatio(1, 1),
         cropEnable = true,
         autoZoom = false,
-        enabledFlipOption = false,
-        enableRotationOption = false,
-        aspects = null,
-        showCameraOption = true,
+        enabledFlipOption = true,
+        enableRotationOption = true,
+        aspects = listOf(ImageAspectRatio(1, 1)),
+        showCameraOption = false,
         showGalleryOption = true,
         shapes = null,
         selectedImageFileCallback = { file ->
@@ -277,7 +278,7 @@ fun AccountScreen(
         selectedImageCallback = { imageBitmap ->
             coroutineScope.launch {
                 imageBitmap
-                    .resizeTo(200, 200) // 同网页端
+                    .resizeCenterCrop(200, 200) // 同网页端
                     .toBase64String()?.let { base64 ->
                         viewModel.sendEvent(UpdateAvatar(base64))
                     }
@@ -286,15 +287,15 @@ fun AccountScreen(
     )
 
     CMPImagePickNCropDialog(
-        imageCropper = imageCropper,
+        imageCropper = rememberImageCropper(),
         openImagePicker = showBannerPickerDialog,
         defaultAspectRatio = ImageAspectRatio(3, 1),
         cropEnable = true,
         autoZoom = false,
-        enabledFlipOption = false,
-        enableRotationOption = false,
-        aspects = null,
-        showCameraOption = true,
+        enabledFlipOption = true,
+        enableRotationOption = true,
+        aspects = listOf(ImageAspectRatio(3, 1)),
+        showCameraOption = false,
         showGalleryOption = true,
         shapes = null,
         selectedImageFileCallback = { file ->
@@ -306,7 +307,7 @@ fun AccountScreen(
         selectedImageCallback = { imageBitmap ->
             coroutineScope.launch {
                 imageBitmap
-                    .resizeTo(900, 300) // 同网页端
+                    .resizeCenterCrop(900, 300) // 同网页端
                     .toBase64String()?.let { base64 ->
                         viewModel.sendEvent(UpdateBanner(base64))
                     }

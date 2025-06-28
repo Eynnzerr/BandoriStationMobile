@@ -15,6 +15,7 @@ data class AccountState(
     val accountInfo: AccountInfo = AccountInfo(),
     val isLoggedIn: Boolean = false,
     val countDown: Int = 0,
+    val followingIdList : Set<Long> = emptySet(),
     val followers: List<AccountSummary> = emptyList(),
     val followings: List<AccountSummary> = emptyList(),
     val editProfileData: EditProfileInfo = EditProfileInfo(),

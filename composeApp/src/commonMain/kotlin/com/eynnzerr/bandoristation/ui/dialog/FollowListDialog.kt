@@ -14,6 +14,7 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.dialog_confirm
 import com.eynnzerr.bandoristation.model.account.AccountSummary
 import com.eynnzerr.bandoristation.ui.component.FollowerItem
+import com.eynnzerr.bandoristation.utils.AppLogger
 import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -22,6 +23,7 @@ fun FollowListDialog(
     isVisible: Boolean,
     onDismissRequest: () -> Unit,
     title: String = "",
+    followingIds: Set<Long>,
     followList: List<AccountSummary>,
     onFollow: (Long) -> Unit,
     placeholder: @Composable () -> Unit = {},
@@ -47,8 +49,11 @@ fun FollowListDialog(
                                 avatar = it.avatar,
                                 username = it.username,
                                 introduction = it.introduction,
+                                hasFollowed = it.userId in followingIds,
                                 onFollow = { onFollow(it.userId) }
                             )
+
+                            AppLogger.d(TAG, "id: ${it.userId}, followingIds: ${followingIds}")
                         }
                     }
                 }
@@ -64,3 +69,5 @@ fun FollowListDialog(
         )
     }
 }
+
+private const val TAG = "FollowListDialog"

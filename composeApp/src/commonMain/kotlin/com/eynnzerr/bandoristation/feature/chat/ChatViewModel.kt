@@ -68,6 +68,7 @@ class ChatViewModel(
                             }
                             setAccessPermissionUseCase(null)
                             setUpClientUseCase(ClientSetInfo(
+                                client = clientName,
                                 sendRoomNumber = false,
                                 sendChat = true,
                             ))
@@ -156,6 +157,7 @@ class ChatViewModel(
         initializeChatRoom()
 
         setUpClientUseCase(ClientSetInfo(
+            client = clientName,
             sendRoomNumber = false,
             sendChat = true,
         ))

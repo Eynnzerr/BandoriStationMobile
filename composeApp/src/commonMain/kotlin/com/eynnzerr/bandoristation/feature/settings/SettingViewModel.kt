@@ -8,6 +8,7 @@ import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
+import com.eynnzerr.bandoristation.usecase.clientName
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -34,6 +35,7 @@ class SettingViewModel(
 
     override suspend fun onStartStateFlow() {
         setUpClientUseCase(ClientSetInfo(
+            client = clientName,
             sendRoomNumber = false,
             sendChat = false,
         ))
