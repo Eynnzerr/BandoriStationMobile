@@ -4,6 +4,7 @@ import android.os.Build
 import com.eynnzerr.bandoristation.AppApplication
 
 class AndroidPlatform : Platform {
+    override val type: String = "Android"
     override val name: String = "Android ${Build.VERSION.SDK_INT}"
     override val versionName: String
         get() = AppApplication.context.packageManager.getPackageInfo(

@@ -39,13 +39,21 @@ class HttpsClient(
         }
         AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}.")
 
-        val response: HttpResponse = client.post(httpsUrl) {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }
+        try {
+            val response: HttpResponse = client.post(httpsUrl) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
 
-        AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
-        return response.body()
+            AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
+            return response.body()
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Error sending request: ${e.message}")
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("Network error: ${e.message}")
+            )
+        }
     }
 
     /**
@@ -63,14 +71,22 @@ class HttpsClient(
         // val token = dataStore.data.map { p -> p[PreferenceKeys.USER_TOKEN] ?: testToken }.first()
         AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}; using token: $token.")
 
-        val response: HttpResponse = client.post(httpsUrl) {
-            header("Auth-Token", token)
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }
+        try {
+            val response: HttpResponse = client.post(httpsUrl) {
+                header("Auth-Token", token)
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
 
-        AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
-        return response.body()
+            AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
+            return response.body()
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Error sending authenticated request: ${e.message}")
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("Network error: ${e.message}")
+            )
+        }
     }
 
     suspend fun sendApiRequest(request: ApiRequest): ApiResponse {
@@ -82,20 +98,21 @@ class HttpsClient(
         }
         AppLogger.d(TAG, "Send https request: ${json.encodeToString(request)}.")
 
-        val response: HttpResponse = client.post(apiUrl) {
-            contentType(ContentType.Application.Json)
-            setBody(request)
-        }
-
-        AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
         try {
+            val response: HttpResponse = client.post(apiUrl) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
             val apiResponse: ApiResponse = response.body()
             return apiResponse
         } catch (e: Exception) {
+            AppLogger.e(TAG, "Error sending api request: ${e.message}")
             e.printStackTrace()
             return ApiResponse(
                 status = "failure",
-                response = ApiResponseContent.StringContent("ktor client json parse error")
+                response = ApiResponseContent.StringContent("Network error: ${e.message}")
             )
         }
     }
@@ -104,10 +121,15 @@ class HttpsClient(
         if (!isNetworkAvailable()) {
             return GithubRelease()
         }
-        val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
-        val response: HttpResponse = client.get(url)
-        AppLogger.d(TAG, "fetchLatestRelease response: ${response.bodyAsText()}")
-        return response.body()
+        try {
+            val url = "https://api.github.com/repos/$owner/$repo/releases/latest"
+            val response: HttpResponse = client.get(url)
+            AppLogger.d(TAG, "fetchLatestRelease response: ${response.bodyAsText()}")
+            return response.body()
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Error fetching latest release: ${e.message}")
+            return GithubRelease() // return empty release on error
+        }
     }
 }
 
