@@ -1,6 +1,7 @@
 package com.eynnzerr.bandoristation.di
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.http.ContentType
@@ -12,6 +13,11 @@ import org.koin.dsl.module
 fun provideKtorClientModule() = module {
     single {
         HttpClient {
+            install(HttpRequestRetry) {
+                retryOnServerErrors(maxRetries = 5)
+                retryOnException(maxRetries = 5)
+                exponentialDelay()
+            }
             install(ContentNegotiation) {
                 json(
                     json = get(),

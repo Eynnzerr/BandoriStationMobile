@@ -208,7 +208,24 @@ class HomeViewModel(
                 is UseCaseResult.Success -> {
                     val latest = result.data.tagName.trimStart('v', 'V')
                     val current = getPlatform().versionName.trimStart('v', 'V')
-                    if (latest != current) {
+
+                    val latestParts = latest.split(".").map { it.toIntOrNull() ?: 0 }
+                    val currentParts = current.split(".").map { it.toIntOrNull() ?: 0 }
+
+                    var shouldUpdate = false
+                    for (i in 0 until maxOf(latestParts.size, currentParts.size)) {
+                        val latestPart = latestParts.getOrElse(i) { 0 }
+                        val currentPart = currentParts.getOrElse(i) { 0 }
+                        if (latestPart > currentPart) {
+                            shouldUpdate = true
+                            break
+                        }
+                        if (latestPart < currentPart) {
+                            break
+                        }
+                    }
+
+                    if (shouldUpdate) {
                         sendEffect(OpenUpdateDialog(result.data))
                     }
                 }
