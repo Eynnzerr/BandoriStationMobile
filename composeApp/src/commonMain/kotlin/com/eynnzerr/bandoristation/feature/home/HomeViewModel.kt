@@ -17,6 +17,7 @@ import bandoristationm.composeapp.generated.resources.set_filter_success
 import bandoristationm.composeapp.generated.resources.upload_room_snackbar
 import bandoristationm.composeapp.generated.resources.websocket_error_default
 import com.eynnzerr.bandoristation.base.BaseViewModel
+import com.eynnzerr.bandoristation.ui.dialog.RequestRoomState
 import com.eynnzerr.bandoristation.usecase.chat.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.usecase.websocket.GetWebSocketStateUseCase
 import com.eynnzerr.bandoristation.usecase.room.GetRoomListUseCase
@@ -43,9 +44,13 @@ import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform
+import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.usecase.clientName
+import com.eynnzerr.bandoristation.usecase.encryption.UploadEncryptedRoomUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.VerifyInviteCodeUseCase
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -72,6 +77,8 @@ class HomeViewModel(
     private val getLatestReleaseUseCase: GetLatestReleaseUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val followUserUseCase: FollowUserUseCase,
+    private val verifyInviteCodeUseCase: VerifyInviteCodeUseCase,
+    private val uploadEncryptedRoomUseCase: UploadEncryptedRoomUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
@@ -301,21 +308,33 @@ class HomeViewModel(
 
             is HomeIntent.UploadRoom -> {
                 autoUploadJob?.cancel()
+
+                val uploadInfo = RoomUploadInfo(
+                    number = if (event.encrypted) "999999" else event.number,
+                    description = event.description
+                )
+
                 if (event.continuous) {
                     autoUploadJob = viewModelScope.launch {
                         while (isActive) {
-                            uploadRoomUseCase(event.room)
+                            uploadRoomUseCase(uploadInfo)
                             delay(autoUploadInterval * 1000L)
                         }
                     }
                 } else {
                     viewModelScope.launch {
-                        uploadRoomUseCase(event.room)
+                        uploadRoomUseCase(uploadInfo)
+                    }
+                }
+
+                if (event.encrypted) {
+                    viewModelScope.launch {
+                        uploadEncryptedRoomUseCase(event.number)
                     }
                 }
 
                 state.value.selectedRoom?.let {
-                    state.value.copy(selectedRoom = it.copy(event.room.number, event.room.description))
+                    state.value.copy(selectedRoom = it.copy(event.number, event.description))
                 } to ShowResourceSnackbar(Res.string.upload_room_snackbar)
             }
 
@@ -455,6 +474,65 @@ class HomeViewModel(
                         is UseCaseResult.Success -> {
                             sendEffect(ShowSnackbar(response.data))
                         }
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.OnRequestRoom -> {
+                state.value.copy(
+                    showRequestRoomDialog = true,
+                    requestingRoomInfo = event.room,
+                    requestRoomState = RequestRoomState.INITIAL,
+                    decryptedRoomNumber = null,
+                    requestRoomError = null
+                ) to null
+            }
+
+            is HomeIntent.OnDismissRequestRoomDialog -> {
+                state.value.copy(showRequestRoomDialog = false) to null
+            }
+
+            is HomeIntent.OnSubmitInviteCode -> {
+                viewModelScope.launch {
+                    val request = ApiRequest.VerifyInviteCodeRequest(
+                        targetUserId = event.targetUser,
+                        inviteCode = event.code,
+                    )
+                    val result = verifyInviteCodeUseCase.invoke(request)
+                    when (result) {
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(
+                                    requestRoomState = RequestRoomState.SUCCESS,
+                                    decryptedRoomNumber = result.data
+                                )
+                            }
+                        }
+                        is UseCaseResult.Error -> {
+                            internalState.update {
+                                it.copy(
+                                    requestRoomState = RequestRoomState.ERROR,
+                                    requestRoomError = result.error
+                                )
+                            }
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+
+                null to null
+            }
+
+            is HomeIntent.OnApplyOnline -> {
+                internalState.update { it.copy(requestRoomState = RequestRoomState.PENDING_APPROVAL) }
+                viewModelScope.launch {
+                    delay(3000) // simulate network delay
+                    internalState.update {
+                        it.copy(
+                            requestRoomState = RequestRoomState.SUCCESS,
+                            decryptedRoomNumber = "191981"
+                        )
                     }
                 }
                 null to null

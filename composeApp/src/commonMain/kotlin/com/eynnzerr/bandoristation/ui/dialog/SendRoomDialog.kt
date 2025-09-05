@@ -34,6 +34,7 @@ import bandoristationm.composeapp.generated.resources.send_room_dialog_clear_ico
 import bandoristationm.composeapp.generated.resources.send_room_dialog_collapse_icon_desc
 import bandoristationm.composeapp.generated.resources.send_room_dialog_continuous_send_checkbox
 import bandoristationm.composeapp.generated.resources.send_room_dialog_description_label
+import bandoristationm.composeapp.generated.resources.send_room_dialog_encrypt_checkbox
 import bandoristationm.composeapp.generated.resources.send_room_dialog_expand_icon_desc
 import bandoristationm.composeapp.generated.resources.send_room_dialog_icon_desc
 import bandoristationm.composeapp.generated.resources.send_room_dialog_new_preset_word_label
@@ -58,7 +59,7 @@ fun SendRoomDialog(
     isVisible: Boolean,
     presetWords: Set<String>,
     onDismissRequest: () -> Unit,
-    onSendClick: (uploadInfo: RoomUploadInfo, continuous: Boolean) -> Unit,
+    onSendClick: (number: String, desc: String, continuous: Boolean, encrypted: Boolean) -> Unit,
     onAddPresetWord: (String) -> Unit,
     onDeletePresetWord: (String) -> Unit,
     prefillRoomNumber: String = "",
@@ -70,6 +71,7 @@ fun SendRoomDialog(
         var newPresetWord by remember { mutableStateOf("") }
         var isPresetWordsExpanded by remember { mutableStateOf(false) }
         var continuous by remember { mutableStateOf(false) }
+        var isEncrypted by remember { mutableStateOf(false) }
         var isAddWordsExpanded by remember { mutableStateOf(false) }
         val focusRequester = remember { FocusRequester() }
 
@@ -229,14 +231,25 @@ fun SendRoomDialog(
                         }
                     }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Checkbox(
-                            checked = continuous,
-                            onCheckedChange = { continuous = it }
-                        )
-                        Text(stringResource(Res.string.send_room_dialog_continuous_send_checkbox))
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = continuous,
+                                onCheckedChange = { continuous = it }
+                            )
+                            Text(stringResource(Res.string.send_room_dialog_continuous_send_checkbox))
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = isEncrypted,
+                                onCheckedChange = { isEncrypted = it }
+                            )
+                            Text(stringResource(Res.string.send_room_dialog_encrypt_checkbox))
+                        }
                     }
                 }
             },
@@ -244,11 +257,7 @@ fun SendRoomDialog(
                 TextButton(
                     enabled = roomNumber.isNotBlank() && description.text.isNotBlank(),
                     onClick = {
-                        val roomInfo = RoomUploadInfo(
-                            number = roomNumber,
-                            description = description.text.trim()
-                        )
-                        onSendClick(roomInfo, continuous)
+                        onSendClick(roomNumber, description.text.trim(), continuous, isEncrypted)
                         onDismissRequest()
                     }
                 ) {
@@ -272,7 +281,7 @@ fun SendRoomDialogPreview() {
         isVisible = true,
         presetWords = presetWords.value,
         onDismissRequest = {  },
-        onSendClick = { _, _ ->  },
+        onSendClick = { _, _, _ , _->  },
         onAddPresetWord = { word ->
             presetWords.value = presetWords.value + word
         },

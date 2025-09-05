@@ -47,6 +47,10 @@ import com.eynnzerr.bandoristation.usecase.roomhistory.EditRoomHistoryUseCase
 import com.eynnzerr.bandoristation.usecase.roomhistory.FetchAllHistoryUseCase
 import com.eynnzerr.bandoristation.usecase.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.usecase.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.RegisterEncryptionUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.UpdateInviteCodeUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.UploadEncryptedRoomUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.VerifyInviteCodeUseCase
 import com.eynnzerr.bandoristation.usecase.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.usecase.websocket.ReceiveNoticeUseCase
 import org.koin.core.module.dsl.singleOf
@@ -302,4 +306,10 @@ fun provideUseCaseModule() = module {
     singleOf(::DeleteRoomHistoryUseCase)
     singleOf(::DeleteRoomHistoriesUseCase)
     singleOf(::RoomHistoryAggregator)
+
+    // Encryption UseCases
+    singleOf(::RegisterEncryptionUseCase)
+    singleOf(::UpdateInviteCodeUseCase)
+    singleOf(::VerifyInviteCodeUseCase)
+    singleOf(::UploadEncryptedRoomUseCase)
 }

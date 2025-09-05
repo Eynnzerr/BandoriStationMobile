@@ -43,4 +43,11 @@ interface RemoteDataSource {
     suspend fun sendApiRequest(request: ApiRequest): ApiResponse
 
     suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease
+
+    // Encryption related
+    suspend fun sendEncryptionRequest(
+        path: String,
+        request: ApiRequest,
+        token: String? = null,
+    ): ApiResponse
 }

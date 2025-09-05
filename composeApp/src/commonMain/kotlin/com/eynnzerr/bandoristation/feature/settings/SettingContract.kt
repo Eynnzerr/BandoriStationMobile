@@ -13,6 +13,8 @@ data class SettingState(
     val isRecordingRoomHistory: Boolean = true,
     val autoUploadInterval: Long = 10,
     val versionName: String = "",
+    val isEncryptionEnabled: Boolean = false,
+    val inviteCode: String = "",
 ) : UIState {
     companion object {
         fun initial() = SettingState(
@@ -28,9 +30,13 @@ sealed class SettingEvent : UIEvent {
     data class UpdateShowPlayerInfo(val isShowing: Boolean): SettingEvent()
     data class UpdateRecordRoomHistory(val isRecording: Boolean): SettingEvent()
     data class UpdateAutoUploadInterval(val interval: Long): SettingEvent()
+    data class UpdateEnableEncryption(val enabled: Boolean): SettingEvent()
+    class RegisterEncryption: SettingEvent()
+    data class UpdateInviteCode(val code: String): SettingEvent()
 }
 
 sealed class SettingEffect : UIEffect {
     data class ControlTutorialDialog(val isShowing: Boolean): SettingEffect()
     data class ControlRegexDialog(val isShowing: Boolean): SettingEffect()
+    data class ShowSnackbar(val text: String): SettingEffect()
 }

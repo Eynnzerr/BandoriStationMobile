@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.data
 import com.eynnzerr.bandoristation.data.local.LocalDataSource
 import com.eynnzerr.bandoristation.data.remote.RemoteDataSource
 import com.eynnzerr.bandoristation.model.ApiRequest
+import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
@@ -50,4 +51,11 @@ class AppRepository(
     suspend fun updateHistory(roomHistory: RoomHistory) = localDataSource.editHistory(roomHistory)
     suspend fun deleteFromHistory(roomHistory: RoomHistory) = localDataSource.deleteFromHistory(roomHistory)
     suspend fun deleteFromHistory(roomHistories: List<RoomHistory>) = localDataSource.deleteFromHistory(roomHistories)
+
+    // Encryption related
+    suspend fun sendEncryptionRequest(
+        path: String,
+        request: ApiRequest,
+        token: String? = null,
+    ) = remoteDataSource.sendEncryptionRequest(path, request, token)
 }

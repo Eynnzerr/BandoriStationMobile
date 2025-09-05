@@ -57,6 +57,7 @@ import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.dialog.BlockUserDialog
 import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
 import com.eynnzerr.bandoristation.ui.dialog.InformDialog
+import com.eynnzerr.bandoristation.ui.dialog.RequestRoomDialog
 import com.eynnzerr.bandoristation.ui.dialog.RoomFilterDialog
 import com.eynnzerr.bandoristation.ui.dialog.UpdateDialog
 import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
@@ -230,10 +231,28 @@ fun HomeScreen(
         }
     }
 
+    RequestRoomDialog(
+        isVisible = state.showRequestRoomDialog,
+        state = state.requestRoomState,
+        roomNumber = state.decryptedRoomNumber,
+        errorMessage = state.requestRoomError,
+        onDismissRequest = { viewModel.sendEvent(OnDismissRequestRoomDialog()) },
+        onSubmitInviteCode = { code ->
+            viewModel.sendEvent(OnSubmitInviteCode(
+                targetUser = state.requestingRoomInfo?.userInfo?.userId?.toString() ?: "",
+                code = code)
+            )
+        },
+        onApplyOnline = { viewModel.sendEvent(OnApplyOnline()) },
+        onCopy = { viewModel.sendEffect(HomeEffect.CopyRoomNumber(it)) }
+    )
+
     SendRoomDialog(
         isVisible = showSendRoomDialog,
         onDismissRequest = { viewModel.sendEffect(HomeEffect.CloseSendRoomDialog()) },
-        onSendClick = { roomInfo, continuous -> viewModel.sendEvent(UploadRoom(roomInfo, continuous)) },
+        onSendClick = { roomNumber, description, continuous, encrypted ->
+            viewModel.sendEvent(UploadRoom(roomNumber, description, continuous, encrypted))
+        },
         onAddPresetWord = { viewModel.sendEvent(AddPresetWord(it)) },
         onDeletePresetWord = { viewModel.sendEvent(RemovePresetWord(it)) },
         presetWords = state.presetWords,
@@ -438,6 +457,10 @@ fun HomeScreen(
                     onReportUser = { viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo)) },
                     onClickUserAvatar = { viewModel.sendEvent(BrowseUser(roomInfo.userInfo?.userId ?: -1)) },
                     isJoined = roomInfo == state.selectedRoom,
+                    isEncrypted = roomInfo.number == "999999",
+                    onRequest = {
+                        viewModel.sendEvent(OnRequestRoom(roomInfo))
+                    },
                     currentTimeMillis = state.serverTimestampMillis,
                     modifier = Modifier.animateItem()
                 )

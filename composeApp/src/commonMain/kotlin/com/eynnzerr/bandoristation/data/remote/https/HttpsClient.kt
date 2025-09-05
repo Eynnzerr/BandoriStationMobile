@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.data.remote.https
 
+import com.eynnzerr.bandoristation.data.remote.NetworkUrl
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ApiResponseContent
@@ -129,6 +130,39 @@ class HttpsClient(
         } catch (e: Exception) {
             AppLogger.e(TAG, "Error fetching latest release: ${e.message}")
             return GithubRelease() // return empty release on error
+        }
+    }
+
+    suspend fun sendEncryptionRequest(
+        path: String,
+        request: ApiRequest,
+        token: String? = null,
+    ): ApiResponse {
+        if (!isNetworkAvailable()) {
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("No Internet")
+            )
+        }
+        AppLogger.d(TAG, "Send https request to encryption server: ${json.encodeToString(request)}; using token: $token.")
+
+        try {
+            val response: HttpResponse = client.post(NetworkUrl.ENCRYPTION_SERVER + path) {
+                token?.let { bearToken ->
+                    header("Authorization", "Bearer $bearToken")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            AppLogger.d(TAG, "response status: ${response.status.value}; raw body: ${response.bodyAsText()}")
+            return response.body()
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Error sending authenticated request: ${e.message}")
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("Network error: ${e.message}")
+            )
         }
     }
 }

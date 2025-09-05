@@ -211,6 +211,40 @@ sealed class ApiRequest(
         group = "UserLogin",
         function = "resetPassword",
     )
+
+    @Serializable
+    data class RegisterEncryptionRequest(
+        val userId: String,
+        val originalToken: String
+    ) : ApiRequest(
+        group = "User",
+        function = "register"
+    )
+
+    @Serializable
+    data class UpdateInviteCodeRequest(
+        val inviteCode: String
+    ) : ApiRequest(
+        group = "User",
+        function = "updateInviteCode"
+    )
+
+    @Serializable
+    data class VerifyInviteCodeRequest(
+        val targetUserId: String,
+        val inviteCode: String
+    ) : ApiRequest(
+        group = "Room",
+        function = "verifyInviteCodeRequest"
+    )
+
+    @Serializable
+    data class UploadEncryptedRoom(
+        val roomNumber: String,
+    ) : ApiRequest(
+        group = "Room",
+        function = "uploadRoom"
+    )
 }
 
 /**

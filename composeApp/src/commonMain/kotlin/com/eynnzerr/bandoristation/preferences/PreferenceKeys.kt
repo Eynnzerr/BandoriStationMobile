@@ -22,4 +22,7 @@ object PreferenceKeys {
     val SHOW_PLAER_BRIEF = booleanPreferencesKey("show_player_brief") // whether to display player brief info in room cards
     val RECORD_ROOM_HISTORY = booleanPreferencesKey("record_room_history") // whether to record room join history
     val AUTO_UPLOAD_INTERVAL = longPreferencesKey("auto_upload_interval") // interval(seconds) for auto uploading room info
+    val ENABLE_ENCRYPTION = booleanPreferencesKey("enable_encryption") // enable room number encryption
+    val ENCRYPTION_INVITE_CODE = stringPreferencesKey("encryption_invite_code") // invite code required for viewing user's room number
+    val ENCRYPTION_TOKEN = stringPreferencesKey("encryption_token") // token used to communicate with encryption server.
 }

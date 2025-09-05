@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsBus
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.outlined.DirectionsBus
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,6 +46,8 @@ fun RoomCard(
     onReportUser: () -> Unit,
     onClickUserAvatar: () -> Unit = {},
     isJoined: Boolean,
+    isEncrypted: Boolean = false,
+    onRequest: () -> Unit = {},
     currentTimeMillis: Long = Clock.System.now().toEpochMilliseconds(),
     modifier: Modifier = Modifier,
 ) {
@@ -84,12 +88,20 @@ fun RoomCard(
                     )
                 }
                 Text(
-                    text = roomInfo.number ?: "000000",
+                    text = if (isEncrypted) "******" else roomInfo.number ?: "000000",
                     style = MaterialTheme.typography.titleSmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontSize = 16.sp,
                 )
+            }
+            
+            if (isEncrypted) {
+                FilledIconButton(
+                    onClick = onRequest
+                ) {
+                    Icon(Icons.Filled.LockOpen, null)
+                }
             }
 
             FilledIconToggleButton(

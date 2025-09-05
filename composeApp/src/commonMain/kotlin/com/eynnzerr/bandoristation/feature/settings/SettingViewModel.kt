@@ -7,13 +7,18 @@ import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.usecase.clientName
+import com.eynnzerr.bandoristation.usecase.encryption.RegisterEncryptionUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.UpdateInviteCodeUseCase
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SettingViewModel(
     private val setUpClientUseCase: SetUpClientUseCase,
+    private val registerEncryptionUseCase: RegisterEncryptionUseCase,
+    private val updateInviteCodeUseCase: UpdateInviteCodeUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<SettingState, SettingEvent, SettingEffect>(
     initialState = SettingState.initial()
@@ -28,6 +33,8 @@ class SettingViewModel(
                     isShowingPlayerInfo = p[PreferenceKeys.SHOW_PLAER_BRIEF] ?: false,
                     isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true,
                     autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 10L,
+                    isEncryptionEnabled = p[PreferenceKeys.ENABLE_ENCRYPTION] ?: false,
+                    inviteCode = p[PreferenceKeys.ENCRYPTION_INVITE_CODE] ?: ""
                 )
             }
         }
@@ -81,6 +88,46 @@ class SettingViewModel(
             is SettingEvent.UpdateAutoUploadInterval -> {
                 viewModelScope.launch {
                     dataStore.edit { p -> p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] = event.interval }
+                }
+                null to null
+            }
+
+            is SettingEvent.UpdateEnableEncryption -> {
+                viewModelScope.launch {
+                    dataStore.edit { p -> p[PreferenceKeys.ENABLE_ENCRYPTION] = event.enabled }
+                }
+                null to null
+            }
+
+            is SettingEvent.RegisterEncryption -> {
+                viewModelScope.launch {
+                    val result = registerEncryptionUseCase.invoke(Unit)
+                    when (result) {
+                        is UseCaseResult.Success -> {
+                            sendEffect(SettingEffect.ShowSnackbar("注册/刷新加密服务成功。"))
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(SettingEffect.ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is SettingEvent.UpdateInviteCode -> {
+                viewModelScope.launch {
+                    dataStore.edit { p -> p[PreferenceKeys.ENCRYPTION_INVITE_CODE] = event.code }
+                    val result = updateInviteCodeUseCase.invoke(event.code)
+                    when (result) {
+                        is UseCaseResult.Success -> {
+                            sendEffect(SettingEffect.ShowSnackbar("邀请码更新成功。"))
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(SettingEffect.ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
                 }
                 null to null
             }

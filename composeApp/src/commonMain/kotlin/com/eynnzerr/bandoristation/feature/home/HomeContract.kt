@@ -15,6 +15,7 @@ import org.jetbrains.compose.resources.StringResource
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.home_screen_title
 import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.ui.dialog.RequestRoomState
 
 data class HomeState(
     val rooms: List<RoomInfo> = emptyList(),
@@ -30,6 +31,12 @@ data class HomeState(
     val selectedUser: AccountInfo = AccountInfo(),
     val followingUsers: List<Long> = emptyList(),
     val isAutoUploading: Boolean = false,
+    // for request room dialog
+    val requestingRoomInfo: RoomInfo? = null,
+    val showRequestRoomDialog: Boolean = false,
+    val requestRoomState: RequestRoomState = RequestRoomState.INITIAL,
+    val decryptedRoomNumber: String? = null,
+    val requestRoomError: String? = null,
 ) : UIState {
     companion object {
         fun initial() = HomeState(
@@ -44,7 +51,12 @@ sealed class HomeIntent: UIEvent {
     data class UpdateTimestamp(val timestampMillis: Long): HomeIntent()
     data class UpdateMessageBadge(val hasUnReadMessages: Boolean): HomeIntent()
     data class JoinRoom(val room: RoomInfo?): HomeIntent()
-    data class UploadRoom(val room: RoomUploadInfo, val continuous: Boolean = false): HomeIntent()
+    data class UploadRoom(
+        val number: String,
+        val description: String = "",
+        val continuous: Boolean = false,
+        val encrypted: Boolean = false,
+    ): HomeIntent()
     data class UpdatePresetWords(val words: Set<String>): HomeIntent()
     data class AddPresetWord(val word: String): HomeIntent()
     data class RemovePresetWord(val word: String): HomeIntent()
@@ -55,6 +67,12 @@ sealed class HomeIntent: UIEvent {
     data class UpdateRoomFilter(val filter: RoomFilter): HomeIntent()
     data class BrowseUser(val id: Long): HomeIntent()
     data class FollowUser(val id: Long): HomeIntent()
+
+    // for request room dialog
+    data class OnRequestRoom(val room: RoomInfo): HomeIntent()
+    class OnDismissRequestRoomDialog: HomeIntent()
+    data class OnSubmitInviteCode(val targetUser: String, val code: String): HomeIntent()
+    class OnApplyOnline: HomeIntent()
 }
 
 sealed class HomeEffect: UIEffect {

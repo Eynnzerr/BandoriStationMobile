@@ -125,6 +125,12 @@ class RemoteDataSourceImpl(
 
     override suspend fun fetchLatestRelease(owner: String, repo: String) =
         httpsClient.fetchLatestRelease(owner, repo)
+
+    override suspend fun sendEncryptionRequest(
+        path: String,
+        request: ApiRequest,
+        token: String?,
+    ) = httpsClient.sendEncryptionRequest(path, request, token)
 }
 
 private const val TAG = "RemoteDataSourceImpl"
