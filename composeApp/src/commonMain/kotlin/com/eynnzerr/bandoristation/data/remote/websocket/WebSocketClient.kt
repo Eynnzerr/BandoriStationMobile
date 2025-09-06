@@ -7,12 +7,14 @@ import com.eynnzerr.bandoristation.utils.AppLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.http.headers
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
@@ -32,8 +34,10 @@ import kotlin.concurrent.Volatile
 
 class WebSocketClient(
     private val serverUrl: String,
+    private val needHeartbeat: Boolean,
     private val client: HttpClient, // Injected
     val json: Json, // Injected
+    private val tokenProvider: (suspend () -> String?)? = null
 ) {
     var session: DefaultClientWebSocketSession? = null
     private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -71,7 +75,15 @@ class WebSocketClient(
         }
 
         try {
+            val token = tokenProvider?.invoke()
+
             client.webSocket(serverUrl) {
+                token?.let {
+                    headers {
+                        append("Authorization", "Bearer $it")
+                    }
+                }
+
                 session = this
                 connectMutex.withLock {
                     _connectionState.value = ConnectionState.Connected
@@ -80,19 +92,23 @@ class WebSocketClient(
                 AppLogger.d(TAG, "Connected to websocket $serverUrl")
 
                 // 心跳
-                val heartbeatJob = scope.launch {
-                    while (isActive) {
-                        delay(30000) // 心跳包间隔要求为30秒
-                        try {
-                            sendRequest(
-                                action = "heartbeat",
-                                data = mapOf("client" to "BandoriStation Mobile")
-                            )
-                        } catch (e: Exception) {
-                            AppLogger.d(TAG, "Failed to send heartbeat packet to $serverUrl!. exception: ${e.message}")
-                            break
+                val heartbeatJob: Job? = if (needHeartbeat) {
+                    scope.launch {
+                        while (isActive) {
+                            delay(30000) // 心跳包间隔要求为30秒
+                            try {
+                                sendRequest(
+                                    action = "heartbeat",
+                                    data = mapOf("client" to "BandoriStation Mobile")
+                                )
+                            } catch (e: Exception) {
+                                AppLogger.d(TAG, "Failed to send heartbeat packet to $serverUrl!. exception: ${e.message}")
+                                break
+                            }
                         }
                     }
+                } else {
+                    null
                 }
 
                 try {
@@ -129,7 +145,7 @@ class WebSocketClient(
                     AppLogger.d(TAG, "WebSocketClient Websocket Error: $e")
                     e.printStackTrace()
                 } finally {
-                    heartbeatJob.cancel()
+                    heartbeatJob?.cancel()
                     connectMutex.withLock {
                         _connectionState.value = ConnectionState.Disconnected
                     }
@@ -228,4 +244,4 @@ class WebSocketClient(
     }
 }
 
-private const val TAG = "WebSocketClient"
+private const val TAG = "WebSocketClient(BandoriStation)"

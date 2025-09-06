@@ -10,20 +10,18 @@ import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import org.koin.core.qualifier.named
 
 @Composable
 fun WebSocketLifecycleHandler(
     coroutineScope: CoroutineScope = rememberCoroutineScope { Dispatchers.IO }
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val webSocketClient: WebSocketClient = koinInject()
+    val webSocketClient: WebSocketClient = koinInject(qualifier = named("BandoriStationWS"))
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->

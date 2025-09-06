@@ -7,10 +7,10 @@ object NetworkUrl {
     const val HTTPS_SERVER = "https://server.bandoristation.com"
     const val API_SERVER = "https://api.bandoristation.com"
 
+    const val ENCRYPTION_WS = "ws://http://127.0.0.1:18080/ws"
     const val ENCRYPTION_SERVER = "http://127.0.0.1:18080/"
     const val REGISTER = "register"
     const val ROOM_UPLOAD = "room/upload"
-    const val ROOM_REMOVE = "room/remove"
     const val VERIFY_INVITE_CODE = "room/verify-invite-code"
     const val INVITE_CODE = "room/invite-code"
 }
