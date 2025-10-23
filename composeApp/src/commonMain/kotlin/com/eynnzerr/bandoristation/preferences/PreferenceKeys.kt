@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 
 object PreferenceKeys {
-    val IS_FIRST_RUN = booleanPreferencesKey("is_first_run") // whether it's the first run of the app
+    val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_run") // whether it's the first run of the app
     val IS_TOKEN_LOGIN = booleanPreferencesKey("is_token_login") // whether is logged in by token
     val SERVER_TIME = longPreferencesKey("server_time") // server timestamp when connected
     val USER_TOKEN = stringPreferencesKey("user_token") // cached user token

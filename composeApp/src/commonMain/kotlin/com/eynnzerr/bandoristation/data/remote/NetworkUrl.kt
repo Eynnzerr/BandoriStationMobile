@@ -8,7 +8,7 @@ object NetworkUrl {
     const val API_SERVER = "https://api.bandoristation.com"
 
     const val ENCRYPTION_WS = "wss://eynnzerr.top/bandori/ws/connect"
-    const val ENCRYPTION_SERVER = "https://eynnzerr.top/bandori/api"
+    const val ENCRYPTION_SERVER = "https://eynnzerr.top/bandori/api/"
     const val REGISTER = "register"
     const val ROOM_UPLOAD = "room/upload"
     const val VERIFY_INVITE_CODE = "room/verify-invite-code"

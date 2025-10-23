@@ -61,7 +61,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.isActive
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class HomeViewModel(
     private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
@@ -94,6 +95,7 @@ class HomeViewModel(
     private var waitingRequestId: String? = null // 当在对话框点击申请后，随即记录当前requestId。即这个字段始终跟踪最后在对话框中申请的id
     private val pendingRequestMap = mutableMapOf<String, RoomInfo>() // 当前正在等待批准的全部申请 requestId to roomInfo
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun onInitialize() {
         sendEvent(HomeIntent.GetRoomFilter())
 
@@ -186,18 +188,12 @@ class HomeViewModel(
                 isSavingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
                 autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 5L
 
-                val isFirstRun = p[PreferenceKeys.IS_FIRST_RUN] ?: true
                 internalState.update {
                     it.copy(
-                        isFirstRun = isFirstRun,
                         presetWords = p[PreferenceKeys.PRESET_WORDS] ?: emptySet(),
                         followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList(),
                         userId = p[PreferenceKeys.USER_ID] ?: 0,
                     )
-                }
-
-                if (isFirstRun) {
-                    sendEffect(OpenHelpDialog())
                 }
             }
         }
@@ -513,7 +509,7 @@ class HomeViewModel(
             is HomeIntent.SetNoReminder -> {
                 viewModelScope.launch {
                     dataStore.edit { p ->
-                        p[PreferenceKeys.IS_FIRST_RUN] = false
+                        p[PreferenceKeys.IS_FIRST_LAUNCH] = false
                     }
                 }
                 null to null

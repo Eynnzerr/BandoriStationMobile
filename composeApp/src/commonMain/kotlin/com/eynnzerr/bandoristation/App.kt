@@ -1,6 +1,5 @@
 package com.eynnzerr.bandoristation
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
@@ -35,11 +34,14 @@ fun App() {
 
         var screenInfo by remember { mutableStateOf(ScreenInfo()) }
         var themeConfig : BandThemeConfig by remember { mutableStateOf(BandThemeConfig.Default) }
+        var isFirstLaunch by remember { mutableStateOf(false) }
 
         appScope.launch(Dispatchers.IO) {
             PreferencesManager.preferencesFlow().collect { p ->
                 val themeName = p[PreferenceKeys.BAND_THEME]
                 themeConfig = getBandConfig(themeName)
+
+                isFirstLaunch = p[PreferenceKeys.IS_FIRST_LAUNCH] ?: true
             }
         }
 
@@ -55,7 +57,7 @@ fun App() {
                     CompositionLocalProvider(LocalAppProperty provides appProperty) {
                         RootNavGraph(
                             navController = appNavController,
-                            startDestination = Screen.Home,
+                            startDestination = if (isFirstLaunch) Screen.Tutorial else Screen.Home,
                         )
                     }
                 },

@@ -213,9 +213,6 @@ fun HomeScreen(
 
                 is HomeEffect.CloseHelpDialog -> {
                     showHelpDialog = false
-                    if (state.isFirstRun) {
-                        viewModel.sendEvent(SetNoReminder())
-                    }
                 }
 
                 is HomeEffect.OpenHelpDialog -> {

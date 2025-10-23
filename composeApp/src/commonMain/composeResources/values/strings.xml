@@ -218,4 +218,7 @@
     <string name="approve_request_dialog_refuse_button">Refuse</string>
     <string name="approve_request_dialog_add_to_whitelist">Whitelist</string>
     <string name="approve_request_dialog_add_to_blacklist">Blacklist</string>
+
+    <!-- Tutorial Screen   -->
+    <string name="tutorial_screen_title">Tutorial</string>
 </resources>

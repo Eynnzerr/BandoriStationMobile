@@ -218,4 +218,7 @@
     <string name="approve_request_dialog_refuse_button">拒绝</string>
     <string name="approve_request_dialog_add_to_whitelist">白名单</string>
     <string name="approve_request_dialog_add_to_blacklist">黑名单</string>
+
+    <!-- Tutorial Screen   -->
+    <string name="tutorial_screen_title">教学</string>
 </resources>

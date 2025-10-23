@@ -9,25 +9,26 @@ import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.model.GithubRelease
 import com.eynnzerr.bandoristation.navigation.Screen
-import kotlinx.datetime.Clock.System
 import org.jetbrains.compose.resources.StringResource
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.home_screen_title
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.ui.dialog.RequestRoomState
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
-data class HomeState(
+@OptIn(ExperimentalTime::class)
+data class HomeState (
     val rooms: List<RoomInfo> = emptyList(),
     val roomFilter: RoomFilter = RoomFilter(),
     val hasUnReadMessages: Boolean = false,
     val selectedRoom: RoomInfo? = null,
-    val serverTimestampMillis: Long = System.now().toEpochMilliseconds(),
-    val joinedTimestampMillis: Long = System.now().toEpochMilliseconds(),
+    val serverTimestampMillis: Long = Clock.System.now().toEpochMilliseconds(),
+    val joinedTimestampMillis: Long = Clock.System.now().toEpochMilliseconds(),
     val presetWords: Set<String> = emptySet(),
     val title: StringResource = Res.string.home_screen_title,
     val isShowingPlayerBrief: Boolean = false,
-    val isFirstRun: Boolean = false,
     val selectedUser: AccountInfo = AccountInfo(),
     val followingUsers: List<Long> = emptyList(),
     val isAutoUploading: Boolean = false,
