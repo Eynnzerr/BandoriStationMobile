@@ -62,6 +62,8 @@
     <string name="settings_encrypt_code_title">邀请码</string>
     <string name="settings_encrypt_code_desc">供他人查看你的实际车牌</string>
     <string name="settings_encrypt_code_helper_text">* 他人凭邀请码可直接查看你的加密车牌，请妥善保管和谨慎分享</string>
+    <string name="settings_encrypt_list_title">黑/白名单</string>
+    <string name="settings_encrypt_list_desc">管理加密车牌查看申请黑/白名单</string>
 
     <!--  报错页  -->
     <string name="crash_title">移动车站崩溃了！</string>
@@ -209,4 +211,11 @@
     <string name="user_profile_stats_duration_title">在车时长统计/分钟</string>
     <string name="user_profile_stats_duration_label">时长/分钟</string>
     <string name="user_profile_stats_keywords_title">车头关键词统计</string>
+
+    <!-- Approve Request Dialog -->
+    <string name="approve_request_dialog_title">车牌查看请求</string>
+    <string name="approve_request_dialog_agree_button">同意 (%1$ds)</string>
+    <string name="approve_request_dialog_refuse_button">拒绝</string>
+    <string name="approve_request_dialog_add_to_whitelist">白名单</string>
+    <string name="approve_request_dialog_add_to_blacklist">黑名单</string>
 </resources>

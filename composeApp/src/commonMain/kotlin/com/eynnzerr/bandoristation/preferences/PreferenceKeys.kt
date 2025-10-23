@@ -11,6 +11,8 @@ object PreferenceKeys {
     val SERVER_TIME = longPreferencesKey("server_time") // server timestamp when connected
     val USER_TOKEN = stringPreferencesKey("user_token") // cached user token
     val USER_ID = longPreferencesKey("user_id") // cached user id
+    val USER_AVATAR = stringPreferencesKey("user_avatar") // cached user avatar
+    val USER_NAME = stringPreferencesKey("user_name") // cached username
     val PRESET_WORDS = stringSetPreferencesKey("preset_words") // preset words for uploading
     val TEMP_TOKEN = stringPreferencesKey("temp_token") // temporary token used for signup
     val BAND_THEME = stringPreferencesKey("default") // app theme choice

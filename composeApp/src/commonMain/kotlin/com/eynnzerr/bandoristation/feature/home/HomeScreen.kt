@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +45,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
+import bandoristationm.composeapp.generated.resources.request_room_dialog_copy_button
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
 import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.UserInfo
@@ -64,6 +66,7 @@ import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import com.eynnzerr.bandoristation.model.GithubRelease
+import com.eynnzerr.bandoristation.ui.dialog.ApproveRequestDialog
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -154,6 +157,20 @@ fun HomeScreen(
                     }
                 }
 
+                is HomeEffect.ShowRequestResultBySnackbar -> {
+                    coroutineScope.launch {
+                        val result = snackbarHostState.showSnackbar(
+                            message = action.text,
+                            duration = SnackbarDuration.Short,
+                            actionLabel = getString(Res.string.request_room_dialog_copy_button),
+                            withDismissAction = true
+                        )
+                        if (result == SnackbarResult.ActionPerformed) {
+                            clipboardManager.setText(AnnotatedString(action.number))
+                        }
+                    }
+                }
+
                 is HomeEffect.OpenSendRoomDialog -> {
                     prefillRoomNumber = action.prefillRoomNumber
                     prefillDescription = action.prefillDescription.replaceFirst("^\\d{6}\\s*".toRegex(), "")
@@ -231,6 +248,33 @@ fun HomeScreen(
         }
     }
 
+    val currentRequest = state.accessRequestQueue.firstOrNull()
+    ApproveRequestDialog(
+        isVisible = currentRequest != null,
+        request = currentRequest,
+        onDismissRequest = { addToWhitelist, addToBlacklist ->
+            viewModel.sendEvent(
+                RespondToAccessRequest(
+                    isApproved = false,
+                    addToBlacklist = addToBlacklist,
+                    addToWhiteList = addToWhitelist
+                )
+            )
+        },
+        onConfirm = { addToWhitelist, addToBlacklist ->
+            viewModel.sendEvent(
+                RespondToAccessRequest(
+                    isApproved = true,
+                    addToBlacklist = addToBlacklist,
+                    addToWhiteList = addToWhitelist
+                )
+            )
+        },
+        onViewUser = {
+            viewModel.sendEvent(BrowseUser(currentRequest?.requesterId?.toLongOrNull() ?: -1))
+        }
+    )
+
     RequestRoomDialog(
         isVisible = state.showRequestRoomDialog,
         state = state.requestRoomState,
@@ -243,7 +287,7 @@ fun HomeScreen(
                 code = code)
             )
         },
-        onApplyOnline = { viewModel.sendEvent(OnApplyOnline()) },
+        onApplyOnline = { viewModel.sendEvent(OnApplyOnline(state.requestingRoomInfo)) },
         onCopy = { viewModel.sendEffect(HomeEffect.CopyRoomNumber(it)) }
     )
 
@@ -454,10 +498,14 @@ fun HomeScreen(
                     onBlockUser = {
                         roomInfo.userInfo?.let { viewModel.sendEffect(HomeEffect.OpenBlockUserDialog(it)) }
                     },
-                    onReportUser = { viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo)) },
-                    onClickUserAvatar = { viewModel.sendEvent(BrowseUser(roomInfo.userInfo?.userId ?: -1)) },
+                    onReportUser = {
+                        viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo))
+                    },
+                    onClickUserAvatar = {
+                        viewModel.sendEvent(BrowseUser(roomInfo.userInfo?.userId ?: -1))
+                    },
                     isJoined = roomInfo == state.selectedRoom,
-                    isEncrypted = roomInfo.number == "999999",
+                    isEncrypted = roomInfo.number == "999999" && roomInfo.userInfo?.userId != state.userId,
                     onRequest = {
                         viewModel.sendEvent(OnRequestRoom(roomInfo))
                     },

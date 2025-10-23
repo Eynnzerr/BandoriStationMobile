@@ -22,25 +22,31 @@ fun WebSocketLifecycleHandler(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val webSocketClient: WebSocketClient = koinInject(qualifier = named("BandoriStationWS"))
+    val encryptionSocketClient: WebSocketClient = koinInject(qualifier = named("BandoriscriptionWS"))
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_START -> {
-                    AppLogger.d(TAG, "App lifecycle changed to ON_START.")
-
                     val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
                         throwable.printStackTrace()
                     }
 
                     coroutineScope.launch(exceptionHandler) {
+                        AppLogger.d(TAG, "App lifecycle changed to ON_START. Connecting to BandoriStation WebSocket...")
                         webSocketClient.connect()
+                    }
+
+                    coroutineScope.launch(exceptionHandler) {
+                        AppLogger.d(TAG, "App lifecycle changed to ON_START. Connecting to Bandoriscription WebSocket...")
+                        encryptionSocketClient.connect()
                     }
                 }
                 Lifecycle.Event.ON_STOP -> {
-                    AppLogger.d(TAG, "App lifecycle changed to ON_STOP.")
+                    AppLogger.d(TAG, "App lifecycle changed to ON_STOP. Disconnect websockets.")
                     coroutineScope.launch {
                         webSocketClient.disconnect()
+                        encryptionSocketClient.disconnect()
                     }
                 }
                 else -> Unit

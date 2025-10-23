@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.NetworkUrl
 import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
+import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
@@ -18,6 +19,7 @@ import kotlinx.serialization.Serializable
 
 class RegisterEncryptionUseCase(
     private val repository: AppRepository,
+    private val encryptionSocketClient:  WebSocketClient,
     private val dataStore: DataStore<Preferences>,
 ): UseCase<Unit, String, String>(Dispatchers.IO) {
 
@@ -34,6 +36,7 @@ class RegisterEncryptionUseCase(
                 val wrapper = NetResponseHelper.parseApiResponse<UserRegisterResponse>(response)
                 return wrapper?.let { w ->
                     dataStore.edit { p -> p[PreferenceKeys.ENCRYPTION_TOKEN] = w.token }
+                    encryptionSocketClient.connect() // try to connect for the first time.
                     UseCaseResult.Success(w.token)
                 } ?:UseCaseResult.Error("Failed to parse getRoomNumberFilterResponse.")
             },

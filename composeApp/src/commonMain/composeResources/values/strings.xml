@@ -61,7 +61,9 @@
     <string name="settings_encrypt_login_desc">Click to register/refresh account at encryption server</string>
     <string name="settings_encrypt_code_title">Invite Code</string>
     <string name="settings_encrypt_code_desc">Required for others to view your room number</string>
-    <string name="settings_encrypt_code_helper_text">* Others can view your encrypted room number with the invitation code. Please keep it safe and share it with caution.</string>
+    <string name="settings_encrypt_code_helper_text">* Others can access your encrypted room number with the invitation code. Please keep it safe and share it with caution.</string>
+    <string name="settings_encrypt_list_title">White/Black List</string>
+    <string name="settings_encrypt_list_desc">Manage white/black list for encrypted number request</string>
 
     <!--  CrashReportPage  -->
     <string name="crash_title">Oops, BandoriStationM crashes!</string>
@@ -209,4 +211,11 @@
     <string name="user_profile_stats_duration_title">Joined Duration Statistics (minutes)</string>
     <string name="user_profile_stats_duration_label">Duration (min)</string>
     <string name="user_profile_stats_keywords_title">Room Message Keywords Statistics</string>
+
+    <!-- Approve Request Dialog -->
+    <string name="approve_request_dialog_title">Room Access Request</string>
+    <string name="approve_request_dialog_agree_button">Agree (%1$ds)</string>
+    <string name="approve_request_dialog_refuse_button">Refuse</string>
+    <string name="approve_request_dialog_add_to_whitelist">Whitelist</string>
+    <string name="approve_request_dialog_add_to_blacklist">Blacklist</string>
 </resources>

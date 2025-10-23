@@ -15,6 +15,7 @@ fun provideRepositoryModule() = module {
     single {
         RemoteDataSourceImpl(
             webSocketClient = get(named("BandoriStationWS")),
+            encryptionSocketClient = get(named("BandoriscriptionWS")),
             httpsClient = get()
         )
     }.bind(RemoteDataSource::class)

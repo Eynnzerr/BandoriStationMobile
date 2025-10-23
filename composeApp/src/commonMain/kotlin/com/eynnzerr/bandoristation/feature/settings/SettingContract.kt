@@ -3,7 +3,10 @@ package com.eynnzerr.bandoristation.feature.settings
 import com.eynnzerr.bandoristation.base.UIEffect
 import com.eynnzerr.bandoristation.base.UIEvent
 import com.eynnzerr.bandoristation.base.UIState
+import com.eynnzerr.bandoristation.feature.home.HomeIntent
 import com.eynnzerr.bandoristation.getPlatform
+import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.model.account.AccountSummary
 
 data class SettingState(
     val themeName: String = "",
@@ -15,6 +18,10 @@ data class SettingState(
     val versionName: String = "",
     val isEncryptionEnabled: Boolean = false,
     val inviteCode: String = "",
+    val blacklist: List<String> = emptyList(),
+    val whitelist: List<String> = emptyList(),
+    val selectedUser: AccountInfo = AccountInfo(),
+    val followingUsers: List<Long> = emptyList(),
 ) : UIState {
     companion object {
         fun initial() = SettingState(
@@ -33,10 +40,16 @@ sealed class SettingEvent : UIEvent {
     data class UpdateEnableEncryption(val enabled: Boolean): SettingEvent()
     class RegisterEncryption: SettingEvent()
     data class UpdateInviteCode(val code: String): SettingEvent()
+    data class RemoveFromWhiteList(val id: String): SettingEvent()
+    data class RemoveFromBlackList(val id: String): SettingEvent()
+    class FetchWhiteBlackList: SettingEvent()
+    data class BrowseUser(val id: Long): SettingEvent()
+    data class FollowUser(val id: Long): SettingEvent()
 }
 
 sealed class SettingEffect : UIEffect {
     data class ControlTutorialDialog(val isShowing: Boolean): SettingEffect()
-    data class ControlRegexDialog(val isShowing: Boolean): SettingEffect()
+    data class ControlListDialog(val isShowing: Boolean): SettingEffect()
+    data class ControlProfileDialog(val isShowing: Boolean): SettingEffect()
     data class ShowSnackbar(val text: String): SettingEffect()
 }

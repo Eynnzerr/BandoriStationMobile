@@ -49,12 +49,14 @@ class LoginUseCase(
                         onSuccess = { userInfoContent ->
                             // successfully fetched user information.
                             val userInfo = NetResponseHelper.parseApiResponse<AccountInfo>(userInfoContent)
-                            return userInfo?.let {
+                            return userInfo?.let { info ->
                                 dataStore.edit { preferences ->
                                     preferences[PreferenceKeys.USER_TOKEN] = loginResult.token
                                     preferences[PreferenceKeys.USER_ID] = loginResult.userId
+                                    preferences[PreferenceKeys.USER_NAME] = info.accountSummary.username
+                                    preferences[PreferenceKeys.USER_AVATAR] = info.accountSummary.avatar
                                 }
-                                UseCaseResult.Success(it)
+                                UseCaseResult.Success(info)
                             } ?: UseCaseResult.Error(
                                 LoginError.Other("Failed to parse GetUserInfo response.")
                             )

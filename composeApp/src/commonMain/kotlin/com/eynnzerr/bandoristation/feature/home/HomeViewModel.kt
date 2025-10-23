@@ -46,14 +46,18 @@ import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
+import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.usecase.clientName
-import com.eynnzerr.bandoristation.usecase.encryption.UploadEncryptedRoomUseCase
-import com.eynnzerr.bandoristation.usecase.encryption.VerifyInviteCodeUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.EncryptionAggregator
 import com.eynnzerr.bandoristation.utils.AppLogger
+import com.eynnzerr.bandoristation.utils.generateUUID
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.isActive
@@ -77,8 +81,7 @@ class HomeViewModel(
     private val getLatestReleaseUseCase: GetLatestReleaseUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val followUserUseCase: FollowUserUseCase,
-    private val verifyInviteCodeUseCase: VerifyInviteCodeUseCase,
-    private val uploadEncryptedRoomUseCase: UploadEncryptedRoomUseCase,
+    private val encryptionAggregator: EncryptionAggregator,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
@@ -88,6 +91,8 @@ class HomeViewModel(
     var isSavingRoomHistory = true
     var autoUploadInterval: Long = 5L
     private var autoUploadJob: Job? = null
+    private var waitingRequestId: String? = null // 当在对话框点击申请后，随即记录当前requestId。即这个字段始终跟踪最后在对话框中申请的id
+    private val pendingRequestMap = mutableMapOf<String, RoomInfo>() // 当前正在等待批准的全部申请 requestId to roomInfo
 
     override suspend fun onInitialize() {
         sendEvent(HomeIntent.GetRoomFilter())
@@ -186,7 +191,8 @@ class HomeViewModel(
                     it.copy(
                         isFirstRun = isFirstRun,
                         presetWords = p[PreferenceKeys.PRESET_WORDS] ?: emptySet(),
-                        followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList()
+                        followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList(),
+                        userId = p[PreferenceKeys.USER_ID] ?: 0,
                     )
                 }
 
@@ -205,6 +211,70 @@ class HomeViewModel(
                     }
                     is UseCaseResult.Success -> {
                         sendEffect(ShowSnackbar(result.data))
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            encryptionAggregator.listenRoomAccessRequest().collect { result ->
+                when (result) {
+                    is UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Error -> {
+                        AppLogger.d(TAG, "Failed to receive encrypted room access request.")
+                    }
+                    is UseCaseResult.Success -> {
+                        val request = result.data
+                        internalState.update {
+                            it.copy(accessRequestQueue = it.accessRequestQueue + request)
+                        }
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            encryptionAggregator.listenRoomAccessResponse().collect { result ->
+                when (result) {
+                    is UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Error -> {
+                        AppLogger.d(TAG, "Failed to receive encrypted room access response.")
+                    }
+                    is UseCaseResult.Success -> {
+                        val response = result.data
+                        if (state.value.showRequestRoomDialog && response.requestId == waitingRequestId) {
+                            // 若当前用户正在对话框界面等待结果，直接在对话框上显示
+                            if (response.approved) {
+                                internalState.update {
+                                    it.copy(
+                                        requestRoomState = RequestRoomState.SUCCESS,
+                                        decryptedRoomNumber = response.roomNumber ?: ""
+                                    )
+                                }
+                            } else {
+                                internalState.update {
+                                    it.copy(
+                                        requestRoomState = RequestRoomState.ERROR,
+                                        requestRoomError = response.message ?: ""
+                                    )
+                                }
+                            }
+
+                            waitingRequestId = null
+                        } else {
+                            // 当前用户已退出对话框 or 进入新申请的对话框。通过带复制按钮的snackbar显示
+                            pendingRequestMap[response.requestId]?.let { roomInfo ->
+                                if (response.approved) {
+                                    val text = "你申请查看的用户${roomInfo.userInfo?.username}的实际车牌为: ${response.roomNumber} (${roomInfo.rawMessage})"
+                                    sendEffect(ShowRequestResultBySnackbar(text, response.roomNumber?: ""))
+                                } else {
+                                    val text = "用户${roomInfo.userInfo?.username}拒绝了你的申请，原因: ${response.message}"
+                                    sendEffect(ShowSnackbar(text))
+                                }
+                            }
+                        }
+
+                        pendingRequestMap.remove(response.requestId)
                     }
                 }
             }
@@ -329,13 +399,21 @@ class HomeViewModel(
 
                 if (event.encrypted) {
                     viewModelScope.launch {
-                        uploadEncryptedRoomUseCase(event.number)
+                        encryptionAggregator.uploadEncryptedRoom(event.number)
                     }
                 }
 
-                state.value.selectedRoom?.let {
-                    state.value.copy(selectedRoom = it.copy(event.number, event.description))
-                } to ShowResourceSnackbar(Res.string.upload_room_snackbar)
+                val newState = state.value.selectedRoom?.let {
+                    state.value.copy(selectedRoom = it.copy(number = event.number, rawMessage = event.description))
+                } ?: state.value
+
+                val finalState = if (event.encrypted) {
+                    newState.copy(encryptedRoomNumber = event.number)
+                } else {
+                    newState
+                }
+
+                finalState to ShowResourceSnackbar(Res.string.upload_room_snackbar)
             }
 
             is HomeIntent.AddPresetWord -> {
@@ -366,8 +444,7 @@ class HomeViewModel(
 
             is HomeIntent.InformUser -> {
                 viewModelScope.launch {
-                    val informResult = informUserUseCase.invoke(event.params)
-                    when (informResult) {
+                    when (val informResult = informUserUseCase.invoke(event.params)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> {
                             sendEffect(ShowSnackbar(informResult.error))
@@ -382,8 +459,7 @@ class HomeViewModel(
 
             is HomeIntent.GetRoomFilter -> {
                 viewModelScope.launch {
-                    val getFilterResult = getRoomFilterUseCase.invoke(Unit)
-                    when (getFilterResult) {
+                    when (val getFilterResult = getRoomFilterUseCase.invoke(Unit)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> {
                             sendEffect(ShowSnackbar(getFilterResult.error))
@@ -402,8 +478,7 @@ class HomeViewModel(
 
             is HomeIntent.UpdateRoomFilter -> {
                 viewModelScope.launch {
-                    val updateFilterResult = updateRoomFilterUseCase.invoke(event.filter)
-                    when (updateFilterResult) {
+                    when (val updateFilterResult = updateRoomFilterUseCase.invoke(event.filter)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> {
                             sendEffect(ShowSnackbar(updateFilterResult.error))
@@ -446,8 +521,7 @@ class HomeViewModel(
 
             is HomeIntent.BrowseUser -> {
                 viewModelScope.launch {
-                    val response = getUserInfoUseCase.invoke(event.id)
-                    when (response) {
+                    when (val response = getUserInfoUseCase.invoke(event.id)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> {
                             sendEffect(ShowSnackbar(response.error))
@@ -465,8 +539,7 @@ class HomeViewModel(
 
             is HomeIntent.FollowUser -> {
                 viewModelScope.launch {
-                    val response = followUserUseCase.invoke(event.id)
-                    when (response) {
+                    when (val response = followUserUseCase.invoke(event.id)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> {
                             sendEffect(ShowSnackbar(response.error))
@@ -490,6 +563,7 @@ class HomeViewModel(
             }
 
             is HomeIntent.OnDismissRequestRoomDialog -> {
+                waitingRequestId = null // clear waiting flag.
                 state.value.copy(showRequestRoomDialog = false) to null
             }
 
@@ -499,8 +573,7 @@ class HomeViewModel(
                         targetUserId = event.targetUser,
                         inviteCode = event.code,
                     )
-                    val result = verifyInviteCodeUseCase.invoke(request)
-                    when (result) {
+                    when (val result = encryptionAggregator.verifyInviteCode(request)) {
                         is UseCaseResult.Success -> {
                             internalState.update {
                                 it.copy(
@@ -526,13 +599,52 @@ class HomeViewModel(
 
             is HomeIntent.OnApplyOnline -> {
                 internalState.update { it.copy(requestRoomState = RequestRoomState.PENDING_APPROVAL) }
-                viewModelScope.launch {
-                    delay(3000) // simulate network delay
-                    internalState.update {
-                        it.copy(
-                            requestRoomState = RequestRoomState.SUCCESS,
-                            decryptedRoomNumber = "191981"
-                        )
+                event.requestingRoomInfo?.let { roomInfo ->
+                    viewModelScope.launch {
+                        val requestId = generateUUID()
+                        val request = dataStore.data.map { p ->
+                            RoomAccessRequest(
+                                requestId = requestId,
+                                targetUserId = roomInfo.userInfo?.userId?.toString() ?: "",
+                                requesterId = (p[PreferenceKeys.USER_ID] ?: 0).toString(),
+                                requesterName = p[PreferenceKeys.USER_NAME] ?: "",
+                                requesterAvatar = p[PreferenceKeys.USER_AVATAR] ?: "",
+                            )
+                        }.first()
+                        encryptionAggregator.requestEncryptedRoomAccess(request)
+
+                        // record pending request states.
+                        waitingRequestId = requestId
+                        pendingRequestMap[requestId] = roomInfo
+                    }
+                }
+
+                null to null
+            }
+
+            is HomeIntent.RespondToAccessRequest -> {
+                val currentRequest = state.value.accessRequestQueue.firstOrNull()
+                if (currentRequest != null) {
+                    viewModelScope.launch {
+                        // 1. Respond to the user
+                        encryptionAggregator.respondToRoomAccess(RoomAccessResponse(
+                            requestId = currentRequest.requestId,
+                            approved = event.isApproved,
+                            roomNumber = if (event.isApproved) state.value.encryptedRoomNumber else null,
+                            message = if (event.isApproved) "欢迎上车" else "房主拒绝了你的请求"
+                        ))
+
+                        // 2. Handle blacklist/whitelist
+                        if (event.addToWhiteList) {
+                            encryptionAggregator.addToWhiteList(currentRequest.requesterId)
+                        } else if (event.addToBlacklist) {
+                            encryptionAggregator.addToBlacklist(currentRequest.requesterId)
+                        }
+
+                        // 3. Remove from queue
+                        internalState.update {
+                            it.copy(accessRequestQueue = it.accessRequestQueue.drop(1))
+                        }
                     }
                 }
                 null to null

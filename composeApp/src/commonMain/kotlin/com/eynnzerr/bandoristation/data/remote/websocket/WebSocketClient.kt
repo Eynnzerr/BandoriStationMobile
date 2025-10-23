@@ -7,7 +7,7 @@ import com.eynnzerr.bandoristation.utils.AppLogger
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.http.headers
+import io.ktor.client.request.header
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
@@ -77,13 +77,14 @@ class WebSocketClient(
         try {
             val token = tokenProvider?.invoke()
 
-            client.webSocket(serverUrl) {
-                token?.let {
-                    headers {
-                        append("Authorization", "Bearer $it")
+            client.webSocket(
+                urlString = serverUrl,
+                request = {
+                    token?.let {
+                        header("Authorization", "Bearer $it")
                     }
                 }
-
+            ) {
                 session = this
                 connectMutex.withLock {
                     _connectionState.value = ConnectionState.Connected
@@ -141,10 +142,12 @@ class WebSocketClient(
                             }
                         }
                     }
+                    AppLogger.d(TAG, "exit for-loop of connect().")
                 } catch (e: Exception) {
                     AppLogger.d(TAG, "WebSocketClient Websocket Error: $e")
                     e.printStackTrace()
                 } finally {
+                    AppLogger.d(TAG, "WebSocketClient enter finally block of connect().")
                     heartbeatJob?.cancel()
                     connectMutex.withLock {
                         _connectionState.value = ConnectionState.Disconnected

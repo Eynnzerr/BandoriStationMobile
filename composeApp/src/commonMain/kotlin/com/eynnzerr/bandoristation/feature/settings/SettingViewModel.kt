@@ -5,13 +5,19 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
+import com.eynnzerr.bandoristation.feature.settings.SettingEffect.*
 import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
+import com.eynnzerr.bandoristation.usecase.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.usecase.clientName
+import com.eynnzerr.bandoristation.usecase.encryption.GetBlackWhiteListUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.RegisterEncryptionUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.RemoveFromBlacklistUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.RemoveFromWhitelistUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.UpdateInviteCodeUseCase
+import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -19,6 +25,11 @@ class SettingViewModel(
     private val setUpClientUseCase: SetUpClientUseCase,
     private val registerEncryptionUseCase: RegisterEncryptionUseCase,
     private val updateInviteCodeUseCase: UpdateInviteCodeUseCase,
+    private val removeFromBlacklistUseCase: RemoveFromBlacklistUseCase,
+    private val removeFromWhitelistUseCase: RemoveFromWhitelistUseCase,
+    private val getBlackWhiteListUseCase: GetBlackWhiteListUseCase,
+    private val getUserInfoUseCase: GetUserInfoUseCase,
+    private val followUserUseCase: FollowUserUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<SettingState, SettingEvent, SettingEffect>(
     initialState = SettingState.initial()
@@ -34,7 +45,8 @@ class SettingViewModel(
                     isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true,
                     autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 10L,
                     isEncryptionEnabled = p[PreferenceKeys.ENABLE_ENCRYPTION] ?: false,
-                    inviteCode = p[PreferenceKeys.ENCRYPTION_INVITE_CODE] ?: ""
+                    inviteCode = p[PreferenceKeys.ENCRYPTION_INVITE_CODE] ?: "",
+                    followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList()
                 )
             }
         }
@@ -101,13 +113,12 @@ class SettingViewModel(
 
             is SettingEvent.RegisterEncryption -> {
                 viewModelScope.launch {
-                    val result = registerEncryptionUseCase.invoke(Unit)
-                    when (result) {
+                    when (val result = registerEncryptionUseCase.invoke(Unit)) {
                         is UseCaseResult.Success -> {
-                            sendEffect(SettingEffect.ShowSnackbar("注册/刷新加密服务成功。"))
+                            sendEffect(ShowSnackbar("注册/刷新加密服务成功。"))
                         }
                         is UseCaseResult.Error -> {
-                            sendEffect(SettingEffect.ShowSnackbar(result.error))
+                            sendEffect(ShowSnackbar(result.error))
                         }
                         is UseCaseResult.Loading -> Unit
                     }
@@ -118,15 +129,113 @@ class SettingViewModel(
             is SettingEvent.UpdateInviteCode -> {
                 viewModelScope.launch {
                     dataStore.edit { p -> p[PreferenceKeys.ENCRYPTION_INVITE_CODE] = event.code }
-                    val result = updateInviteCodeUseCase.invoke(event.code)
-                    when (result) {
+                    when (val result = updateInviteCodeUseCase.invoke(event.code)) {
                         is UseCaseResult.Success -> {
-                            sendEffect(SettingEffect.ShowSnackbar("邀请码更新成功。"))
+                            sendEffect(ShowSnackbar("邀请码更新成功。"))
                         }
                         is UseCaseResult.Error -> {
-                            sendEffect(SettingEffect.ShowSnackbar(result.error))
+                            sendEffect(ShowSnackbar(result.error))
                         }
                         is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is SettingEvent.RemoveFromBlackList -> {
+                viewModelScope.launch {
+                    when (val result = removeFromBlacklistUseCase.invoke(event.id)) {
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar("已将用户ID ${event.id}从黑名单移除。"))
+                            val removedList = state.value.blacklist.toMutableList().apply {
+                                remove(event.id)
+                            }
+                            internalState.update {
+                                it.copy(
+                                    blacklist = removedList
+                                )
+                            }
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is SettingEvent.RemoveFromWhiteList -> {
+                viewModelScope.launch {
+                    when (val result = removeFromWhitelistUseCase.invoke(event.id)) {
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar("已将用户ID ${event.id}从白名单移除。"))
+                            val removedList = state.value.whitelist.toMutableList().apply {
+                                remove(event.id)
+                            }
+                            internalState.update {
+                                it.copy(
+                                    whitelist = removedList
+                                )
+                            }
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is SettingEvent.FetchWhiteBlackList -> {
+                viewModelScope.launch {
+                    when (val result = getBlackWhiteListUseCase.invoke(Unit)) {
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(
+                                    blacklist = result.data.blacklist,
+                                    whitelist = result.data.whitelist,
+                                )
+                            }
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is SettingEvent.BrowseUser -> {
+                viewModelScope.launch {
+                    when (val response = getUserInfoUseCase.invoke(event.id)) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(selectedUser = response.data)
+                            }
+                            sendEffect(ControlProfileDialog(true))
+                        }
+                    }
+                }
+                null to null
+            }
+
+            is SettingEvent.FollowUser -> {
+                viewModelScope.launch {
+                    when (val response = followUserUseCase.invoke(event.id)) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(response.error))
+                        }
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar(response.data))
+                        }
                     }
                 }
                 null to null

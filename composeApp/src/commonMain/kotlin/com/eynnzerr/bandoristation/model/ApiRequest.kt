@@ -245,6 +245,28 @@ sealed class ApiRequest(
         group = "Room",
         function = "uploadRoom"
     )
+
+    @Serializable
+    data class BlacklistRequest(
+        val blockedUserId: String
+    ) : ApiRequest(
+        group = "Room",
+        function = "blacklist"
+    )
+
+    @Serializable
+    data class WhitelistRequest(
+        val allowedUserId: String
+    ) : ApiRequest(
+        group = "Room",
+        function = "whitelist"
+    )
+
+    @Serializable
+    class Empty : ApiRequest(
+        group = "",
+        function = ""
+    )
 }
 
 /**

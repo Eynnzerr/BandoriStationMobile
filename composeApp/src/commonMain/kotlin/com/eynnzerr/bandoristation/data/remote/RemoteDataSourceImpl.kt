@@ -1,16 +1,23 @@
 package com.eynnzerr.bandoristation.data.remote
 
 import com.eynnzerr.bandoristation.data.remote.https.HttpsClient
+import com.eynnzerr.bandoristation.data.remote.websocket.EncryptionSocketActions
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.WebSocketResponse
+import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
+import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.json.JsonElement
 
 class RemoteDataSourceImpl(
     private val webSocketClient: WebSocketClient,
+    private val encryptionSocketClient: WebSocketClient,
     private val httpsClient: HttpsClient,
 ): RemoteDataSource {
     override val webSocketConnectionState = webSocketClient.connectionState
@@ -131,6 +138,55 @@ class RemoteDataSourceImpl(
         request: ApiRequest,
         token: String?,
     ) = httpsClient.sendEncryptionRequest(path, request, token)
+
+    override val encryptionSocketConnectionState = encryptionSocketClient.connectionState
+    override val encryptionSocketResponseFlow = encryptionSocketClient.responseFlow
+    override suspend fun connectEncryptionWebSocket()
+        = encryptionSocketClient.connect()
+
+    override suspend fun <T> sendEncryptionSocketRequest(action: String, data: T?)
+        = encryptionSocketClient.sendRequest(action, data)
+
+    override suspend fun <T> sendEncryptionSocketRequestWithRetry(
+        action: String,
+        data: T?,
+        retryAttempts: Int
+    ) {
+        if (encryptionSocketConnectionState.value is WebSocketClient.ConnectionState.Connected) {
+            encryptionSocketClient.sendRequest(action, data)
+        } else if (retryAttempts >= maxResendAttempts) {
+            return
+        } else {
+            AppLogger.d(TAG, "Try to send $action when encryption websocket is not connected. Resend after $resendDelayMillis ms.")
+            delay(resendDelayMillis)
+            sendEncryptionSocketRequestWithRetry(action, data, retryAttempts + 1)
+        }
+    }
+
+    override fun listenEncryptionSocketForActions(actions: List<String>): Flow<WebSocketResponse<JsonElement>>
+        = encryptionSocketClient.listenForActions(actions)
+
+    override fun listenEncryptionSocketConnectionState(): Flow<WebSocketClient.ConnectionState>
+        = encryptionSocketClient.connectionState
+
+    override suspend fun disconnectEncryptionSocket()
+        = encryptionSocketClient.disconnect()
+
+    override suspend fun requestRoomAccess(request: RoomAccessRequest) {
+        encryptionSocketClient.sendRequestWithRetry(
+            action = EncryptionSocketActions.REQUEST_ACCESS,
+            data = request
+        )
+    }
+
+    override suspend fun respondRoomAccess(response: RoomAccessResponse) {
+        encryptionSocketClient.sendRequestWithRetry(
+            action = EncryptionSocketActions.RESPOND_ACCESS,
+            data = response
+        )
+    }
+
+
 }
 
 private const val TAG = "RemoteDataSourceImpl"

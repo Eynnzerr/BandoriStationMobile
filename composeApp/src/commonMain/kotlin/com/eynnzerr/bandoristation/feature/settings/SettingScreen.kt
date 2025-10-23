@@ -1,25 +1,22 @@
 package com.eynnzerr.bandoristation.feature.settings
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.GroupAdd
-import androidx.compose.material.icons.outlined.Key
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Schedule
@@ -34,6 +31,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,19 +59,22 @@ import bandoristationm.composeapp.generated.resources.settings_auto_upload_inter
 import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_title
-import bandoristationm.composeapp.generated.resources.settings_encrypt_desc
+import bandoristationm.composeapp.generated.resources.settings_encrypt_list_desc
+import bandoristationm.composeapp.generated.resources.settings_encrypt_list_title
 import bandoristationm.composeapp.generated.resources.settings_encrypt_login_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_login_title
-import bandoristationm.composeapp.generated.resources.settings_encrypt_title
 import bandoristationm.composeapp.generated.resources.settings_tutorial_title
 import bandoristationm.composeapp.generated.resources.settings_tutorial_desc
 import bandoristationm.composeapp.generated.resources.settings_version_title
+import com.eynnzerr.bandoristation.feature.settings.SettingEvent.*
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
 import com.eynnzerr.bandoristation.ui.component.settings.SettingDropdownItem
 import com.eynnzerr.bandoristation.ui.component.settings.SettingItem
 import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
 import com.eynnzerr.bandoristation.ui.dialog.InvitationCodeDialog
+import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
+import com.eynnzerr.bandoristation.ui.dialog.WhiteBlackListDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.ui.theme.bandThemeList
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
@@ -92,6 +94,8 @@ fun SettingScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var showTutorialDialog by remember { mutableStateOf(false) }
     var showInvitationCodeDialog by remember { mutableStateOf(false) }
+    var showListDialog by remember { mutableStateOf(false) }
+    var showProfileDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -100,7 +104,17 @@ fun SettingScreen(
                     showTutorialDialog = action.isShowing
                 }
 
-                is SettingEffect.ControlRegexDialog -> Unit
+                is SettingEffect.ControlListDialog -> {
+                    if (action.isShowing) {
+                        viewModel.sendEvent(FetchWhiteBlackList())
+                    }
+                    showListDialog = action.isShowing
+                }
+
+                is SettingEffect.ControlProfileDialog -> {
+                    showProfileDialog = action.isShowing
+                }
+
                 is SettingEffect.ShowSnackbar -> {
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
@@ -124,6 +138,32 @@ fun SettingScreen(
         isVisible = showTutorialDialog,
         markdownPath = "files/introduction.md",
         onDismissRequest = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(false)) },
+    )
+
+    WhiteBlackListDialog(
+        isVisible = showListDialog,
+        onDismissRequest = { viewModel.sendEffect(SettingEffect.ControlListDialog(false)) },
+        blacklist = state.blacklist,
+        whitelist = state.whitelist,
+        onRemoveFromBlackList = { viewModel.sendEvent(SettingEvent.RemoveFromBlackList(it)) },
+        onRemoveFromWhiteList = { viewModel.sendEvent(SettingEvent.RemoveFromWhiteList(it)) },
+        onViewUserInfo = { viewModel.sendEvent(SettingEvent.BrowseUser(it.toLongOrNull() ?: 0)) },
+        placeholder = {
+            Box(
+                modifier = Modifier.size(100.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("暂无")
+            }
+        }
+    )
+
+    UserProfileDialog(
+        isVisible = showProfileDialog,
+        accountInfo = state.selectedUser,
+        onDismissRequest = { viewModel.sendEffect(SettingEffect.ControlProfileDialog(false)) },
+        onFollow = { viewModel.sendEvent(SettingEvent.FollowUser(it)) },
+        hasFollowed = state.selectedUser.accountSummary.userId in state.followingUsers,
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -239,53 +279,32 @@ fun SettingScreen(
                 }
             }
 
-//            SettingItem(
-//                title = stringResource(Res.string.settings_active_filter_rules_title),
-//                desc = stringResource(Res.string.settings_active_filter_rules_desc),
-//                icon = Icons.Outlined.FilterList,
-//                // onClick = { viewModel.sendEffect(SettingEffect.ControlRegexDialog(true)) },
-//                onClick = {},
-//                enable = false
-//            )
-
             SettingItem(
-                title = stringResource(Res.string.settings_encrypt_title),
-                desc = stringResource(Res.string.settings_encrypt_desc),
-                icon = Icons.Outlined.Key,
-                action = {
-                    Switch(
-                        checked = state.isEncryptionEnabled,
-                        onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateEnableEncryption(it) ) }
-                    )
-                },
-                onClick = {}
+                title = stringResource(Res.string.settings_encrypt_login_title),
+                desc = stringResource(Res.string.settings_encrypt_login_desc),
+                icon = Icons.AutoMirrored.Outlined.Login,
+                onClick = {
+                    viewModel.sendEvent(SettingEvent.RegisterEncryption())
+                }
             )
 
-            AnimatedVisibility(
-                visible = state.isEncryptionEnabled,
-                enter = fadeIn() + slideInVertically { it },
-                exit = fadeOut() + slideOutVertically { it },
-            ) {
-                Column {
-                    SettingItem(
-                        title = stringResource(Res.string.settings_encrypt_login_title),
-                        desc = stringResource(Res.string.settings_encrypt_login_desc),
-                        icon = Icons.AutoMirrored.Outlined.Login,
-                        onClick = {
-                            viewModel.sendEvent(SettingEvent.RegisterEncryption())
-                        }
-                    )
-
-                    SettingItem(
-                        title = stringResource(Res.string.settings_encrypt_code_title),
-                        desc = stringResource(Res.string.settings_encrypt_code_desc),
-                        icon = Icons.Outlined.GroupAdd,
-                        onClick = {
-                            showInvitationCodeDialog = true
-                        }
-                    )
+            SettingItem(
+                title = stringResource(Res.string.settings_encrypt_code_title),
+                desc = stringResource(Res.string.settings_encrypt_code_desc),
+                icon = Icons.Outlined.GroupAdd,
+                onClick = {
+                    showInvitationCodeDialog = true
                 }
-            }
+            )
+
+            SettingItem(
+                title = stringResource(Res.string.settings_encrypt_list_title),
+                desc = stringResource(Res.string.settings_encrypt_list_desc),
+                icon = Icons.AutoMirrored.Outlined.List,
+                onClick = {
+                    viewModel.sendEffect(SettingEffect.ControlListDialog(true))
+                }
+            )
 
             SettingItem(
                 title = stringResource(Res.string.settings_tutorial_title),

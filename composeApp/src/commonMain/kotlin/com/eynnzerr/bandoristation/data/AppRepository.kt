@@ -2,12 +2,17 @@ package com.eynnzerr.bandoristation.data
 
 import com.eynnzerr.bandoristation.data.local.LocalDataSource
 import com.eynnzerr.bandoristation.data.remote.RemoteDataSource
+import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
+import com.eynnzerr.bandoristation.model.WebSocketResponse
+import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
+import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.json.JsonElement
 
 class AppRepository(
     private val remoteDataSource: RemoteDataSource,
@@ -58,4 +63,21 @@ class AppRepository(
         request: ApiRequest,
         token: String? = null,
     ) = remoteDataSource.sendEncryptionRequest(path, request, token)
+
+    suspend fun connectEncryptionWebSocket() = remoteDataSource.connectEncryptionWebSocket()
+    suspend fun <T> sendEncryptionSocketRequest(action: String, data: T? = null)
+        = remoteDataSource.sendEncryptionSocketRequest(action, data)
+    suspend fun <T> sendEncryptionSocketRequestWithRetry(
+        action: String,
+        data: T? = null,
+        retryAttempts: Int = 0
+    ) = remoteDataSource.sendEncryptionSocketRequestWithRetry(action, data, retryAttempts)
+    fun listenEncryptionSocketForActions(actions: List<String>) = remoteDataSource.listenEncryptionSocketForActions(actions)
+    fun listenEncryptionSocketConnectionState() = remoteDataSource.listenEncryptionSocketConnectionState()
+    suspend fun disconnectEncryptionSocket() = remoteDataSource.disconnectEncryptionSocket()
+
+    // Encryption Business
+    suspend fun requestRoomAccess(request: RoomAccessRequest) = remoteDataSource.requestRoomAccess(request)
+
+    suspend fun respondRoomAccess(response: RoomAccessResponse) = remoteDataSource.respondRoomAccess(response)
 }

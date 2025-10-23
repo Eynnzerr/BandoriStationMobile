@@ -47,7 +47,17 @@ import com.eynnzerr.bandoristation.usecase.roomhistory.EditRoomHistoryUseCase
 import com.eynnzerr.bandoristation.usecase.roomhistory.FetchAllHistoryUseCase
 import com.eynnzerr.bandoristation.usecase.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.usecase.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.AddToBlacklistUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.AddToWhitelistUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.EncryptionAggregator
+import com.eynnzerr.bandoristation.usecase.encryption.GetBlackWhiteListUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.ListenRoomAccessRequestUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.ListenRoomAccessResponseUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.RegisterEncryptionUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.RemoveFromBlacklistUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.RemoveFromWhitelistUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.RequestEncryptedRoomAccessUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.RespondToRoomAccessUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.UpdateInviteCodeUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.UploadEncryptedRoomUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.VerifyInviteCodeUseCase
@@ -308,8 +318,24 @@ fun provideUseCaseModule() = module {
     singleOf(::RoomHistoryAggregator)
 
     // Encryption UseCases
-    singleOf(::RegisterEncryptionUseCase)
+    single {
+        RegisterEncryptionUseCase(
+            repository = get(),
+            encryptionSocketClient = get(named("BandoriscriptionWS")),
+            dataStore = get(),
+        )
+    }
     singleOf(::UpdateInviteCodeUseCase)
     singleOf(::VerifyInviteCodeUseCase)
     singleOf(::UploadEncryptedRoomUseCase)
+    singleOf(::RequestEncryptedRoomAccessUseCase)
+    singleOf(::RespondToRoomAccessUseCase)
+    singleOf(::ListenRoomAccessRequestUseCase)
+    singleOf(::ListenRoomAccessResponseUseCase)
+    singleOf(::AddToWhitelistUseCase)
+    singleOf(::AddToBlacklistUseCase)
+    singleOf(::RemoveFromWhitelistUseCase)
+    singleOf(::RemoveFromBlacklistUseCase)
+    singleOf(::GetBlackWhiteListUseCase)
+    singleOf(::EncryptionAggregator)
 }
