@@ -55,6 +55,7 @@ class LoginUseCase(
                                     preferences[PreferenceKeys.USER_ID] = loginResult.userId
                                     preferences[PreferenceKeys.USER_NAME] = info.accountSummary.username
                                     preferences[PreferenceKeys.USER_AVATAR] = info.accountSummary.avatar
+                                    preferences[PreferenceKeys.IS_TOKEN_LOGIN] = false
                                 }
                                 UseCaseResult.Success(info)
                             } ?: UseCaseResult.Error(

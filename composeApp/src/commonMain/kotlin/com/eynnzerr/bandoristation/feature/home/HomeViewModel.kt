@@ -61,8 +61,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.isActive
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
+import kotlinx.datetime.Clock
 
 class HomeViewModel(
     private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
@@ -95,7 +94,6 @@ class HomeViewModel(
     private var waitingRequestId: String? = null // 当在对话框点击申请后，随即记录当前requestId。即这个字段始终跟踪最后在对话框中申请的id
     private val pendingRequestMap = mutableMapOf<String, RoomInfo>() // 当前正在等待批准的全部申请 requestId to roomInfo
 
-    @OptIn(ExperimentalTime::class)
     override suspend fun onInitialize() {
         sendEvent(HomeIntent.GetRoomFilter())
 

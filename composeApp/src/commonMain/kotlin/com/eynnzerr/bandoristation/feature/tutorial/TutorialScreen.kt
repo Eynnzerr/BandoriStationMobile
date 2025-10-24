@@ -1,6 +1,7 @@
 package com.eynnzerr.bandoristation.feature.tutorial
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -15,6 +17,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -23,6 +27,8 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -36,35 +42,79 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import bandoristationm.composeapp.generated.resources.Res
-import com.eynnzerr.bandoristation.feature.home.HomeEffect
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
+import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
 import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
+import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
+import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun TutorialScreen(
     navController: NavHostController,
+    viewModel: TutorialViewModel = koinViewModel<TutorialViewModel>()
 ) {
     val pagerState = rememberPagerState { 2 }
     val coroutineScope = rememberCoroutineScope()
 
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val effect = rememberFlowWithLifecycle(viewModel.effect)
     var showLoginDialog by remember { mutableStateOf(false) }
-    var isLoggedIn by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
+    var loginDialogState by remember { mutableStateOf(LoginScreenState.INITIAL) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(effect) {
+        effect.collect { action ->
+            when (action) {
+                is TutorialEffect.ControlLoginDialog -> {
+                    showLoginDialog = action.visible
+                    loginDialogState = LoginScreenState.INITIAL
+                }
+                is TutorialEffect.ControlLoginDialogScreen -> {
+                    loginDialogState = action.destination
+                }
+                is TutorialEffect.NavigateToHome -> {
+                    navController.navigateTo(Screen.Home, true)
+                }
+                is TutorialEffect.PopBackLoginDialog -> {
+                    loginDialogState = when (loginDialogState) {
+                        LoginScreenState.REGISTER, LoginScreenState.FORGOT_PASSWORD -> LoginScreenState.PASSWORD_LOGIN
+                        LoginScreenState.RESET_PASSWORD -> LoginScreenState.FORGOT_PASSWORD
+                        LoginScreenState.VERIFY_EMAIL -> LoginScreenState.REGISTER
+                        else -> LoginScreenState.INITIAL
+                    }
+                }
+                is TutorialEffect.ShowSnackbar -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = action.text,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+                is TutorialEffect.ControlHelpDialog -> {
+                    showHelpDialog = action.visible
+                }
+            }
+        }
+    }
 
     HorizontalPager(
         state = pagerState,
         modifier = Modifier
             .fillMaxSize(),
-        userScrollEnabled = false // controlled by buttons
+        userScrollEnabled = false
     ) { page ->
         when (page) {
             0 -> IntroductionPage(onNext = {
@@ -73,16 +123,33 @@ fun TutorialScreen(
                 }
             })
             1 -> LoginPage(
-                isLoggedIn = isLoggedIn,
-                onLoginClick = { showLoginDialog = true },
-                onRegisterEncryptionClick = { /* TODO */ },
+                isLoggedIn = state.isLoggedIn,
+                userAvatar = state.avatar,
+                userName = state.username,
+                isStationConnected = state.isStationConnected,
+                isEncryptionConnected = state.isEncryptionConnected,
+                onLoginClick = {
+                    if (state.isLoggedIn) {
+                        // 退出登录
+                        viewModel.sendEvent(TutorialIntent.Logout())
+                    } else {
+                        // 打开登录对话框
+                        viewModel.sendEffect(TutorialEffect.ControlLoginDialog(true))
+                    }
+                },
+                onClickHelp = {
+                    viewModel.sendEffect(TutorialEffect.ControlHelpDialog(true))
+                },
+                onRegisterEncryptionClick = {
+                    viewModel.sendEvent(TutorialIntent.RegisterEncryption())
+                },
                 onBack = {
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(0)
                     }
                 },
                 onFinish = {
-                    navController.navigateTo(Screen.Home)
+                    viewModel.sendEffect(TutorialEffect.NavigateToHome())
                 }
             )
         }
@@ -90,44 +157,45 @@ fun TutorialScreen(
 
     LoginDialog(
         isVisible = showLoginDialog,
-        onDismissRequest = { showLoginDialog = false },
-        onEnterLogin = {
-            isLoggedIn = true
-            showLoginDialog = false
-        }
-        // currentScreen = loginDialogState,
-        // onPopBack = { viewModel.sendEffect(AccountEffect.PopBackLoginDialog()) },
-        // onDismissRequest = { viewModel.sendEffect(AccountEffect.ControlLoginDialog(false)) },
-        // onHelp = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.HELP)) },
-        // onEnterLogin = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.PASSWORD_LOGIN)) },
-        //        onEnterToken = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.TOKEN_LOGIN)) },
-        //        onEnterRegister = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.REGISTER)) },
-        //        onEnterForgot = { viewModel.sendEffect(AccountEffect.ControlLoginDialogScreen(LoginScreenState.FORGOT_PASSWORD)) },
-        //        onLoginWithToken = { token ->
-        //            viewModel.sendEvent(GetUserInfo(token))
-        //        },
-        //        onLoginWithPassword = { username, password ->
-        //            viewModel.sendEvent(Login(username, password))
-        //        },
-        //        onRegister = { username, password, email ->
-        //            viewModel.sendEvent(Signup(username, password, email))
-        //        },
-        //        onSendVerificationCode = {
-        //            viewModel.sendEvent(SendVerificationCode())
-        //        },
-        //        onVerifyCode = { code ->
-        //            viewModel.sendEvent(VerifyEmail(code))
-        //        },
-        //        onSendCodeForResetPassword = {
-        //            viewModel.sendEvent(ResetPasswordSendVCode(it))
-        //        },
-        //        onVerifyCodeForResetPassword = { email, code ->
-        //            viewModel.sendEvent(ResetPasswordVerifyCode(email, code))
-        //        },
-        //        onResetPassword = {
-        //            viewModel.sendEvent(ResetPassword(it))
-        //        },
-        //        sendCountDown = state.countDown
+        currentScreen = loginDialogState,
+        onPopBack = { viewModel.sendEffect(TutorialEffect.PopBackLoginDialog()) },
+        onDismissRequest = { viewModel.sendEffect(TutorialEffect.ControlLoginDialog(false)) },
+        onHelp = { viewModel.sendEffect(TutorialEffect.ControlLoginDialogScreen(LoginScreenState.HELP)) },
+        onEnterLogin = { viewModel.sendEffect(TutorialEffect.ControlLoginDialogScreen(LoginScreenState.PASSWORD_LOGIN)) },
+        onEnterToken = { viewModel.sendEffect(TutorialEffect.ControlLoginDialogScreen(LoginScreenState.TOKEN_LOGIN)) },
+        onEnterRegister = { viewModel.sendEffect(TutorialEffect.ControlLoginDialogScreen(LoginScreenState.REGISTER)) },
+        onEnterForgot = { viewModel.sendEffect(TutorialEffect.ControlLoginDialogScreen(LoginScreenState.FORGOT_PASSWORD)) },
+        onLoginWithToken = { token ->
+            viewModel.sendEvent(TutorialIntent.GetUserInfo(token))
+        },
+        onLoginWithPassword = { username, password ->
+            viewModel.sendEvent(TutorialIntent.Login(username, password))
+        },
+        onRegister = { username, password, email ->
+            viewModel.sendEvent(TutorialIntent.Signup(username, password, email))
+        },
+        onSendVerificationCode = {
+            viewModel.sendEvent(TutorialIntent.SendVerificationCode())
+        },
+        onVerifyCode = { code ->
+            viewModel.sendEvent(TutorialIntent.VerifyEmail(code))
+        },
+        onSendCodeForResetPassword = {
+            viewModel.sendEvent(TutorialIntent.ResetPasswordSendVCode(it))
+        },
+        onVerifyCodeForResetPassword = { email, code ->
+            viewModel.sendEvent(TutorialIntent.ResetPasswordVerifyCode(email, code))
+        },
+        onResetPassword = {
+            viewModel.sendEvent(TutorialIntent.ResetPassword(it))
+        },
+        sendCountDown = state.countDown
+    )
+
+    HelpDialog(
+        isVisible = showHelpDialog,
+        markdownPath = "files/guidance.md",
+        onDismissRequest = { viewModel.sendEffect(TutorialEffect.ControlHelpDialog(false)) },
     )
 }
 
@@ -163,12 +231,18 @@ fun IntroductionPage(onNext: () -> Unit) {
             }
         }
     ) { paddingValues ->
-        RichText(
-            state = richTextState,
+        Box(
             modifier = Modifier
-                .verticalScroll(rememberScrollState())
+                .fillMaxSize()
                 .padding(paddingValues = paddingValues)
-        )
+                .padding(horizontal = 12.dp)
+        ) {
+            RichText(
+                state = richTextState,
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+            )
+        }
     }
 }
 
@@ -176,6 +250,11 @@ fun IntroductionPage(onNext: () -> Unit) {
 @Composable
 fun LoginPage(
     isLoggedIn: Boolean,
+    userAvatar: String,
+    userName: String,
+    isStationConnected: Boolean,
+    isEncryptionConnected: Boolean,
+    onClickHelp: () -> Unit,
     onLoginClick: () -> Unit,
     onRegisterEncryptionClick: () -> Unit,
     onBack: () -> Unit,
@@ -190,9 +269,7 @@ fun LoginPage(
                 navigationIcon = { },
                 actions = {
                     IconButton(
-                        onClick = {
-
-                        }
+                        onClick = onClickHelp
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
@@ -228,12 +305,12 @@ fun LoginPage(
             verticalArrangement = Arrangement.Top
         ) {
             UserAvatar(
-                avatarName = "",
-                size = 128.dp
+                avatarName = userAvatar,
+                size = 108.dp
             )
 
             Text(
-                "未登录",
+                userName,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)
             )
@@ -243,7 +320,7 @@ fun LoginPage(
                     onClick = onLoginClick,
                     modifier = Modifier.width(156.dp)
                 ) {
-                    Text("重新登录")
+                    Text("退出登录", color = MaterialTheme.colorScheme.error)
                 }
             } else {
                 Button(
@@ -271,15 +348,42 @@ fun LoginPage(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
             }
+
+            Spacer(Modifier.height(32.dp))
+
+            ConnectionStatus(
+                name = "车站服务器",
+                isConnected = isStationConnected
+            )
+            Spacer(Modifier.height(8.dp))
+            ConnectionStatus(
+                name = "加密服务器",
+                isConnected = isEncryptionConnected
+            )
         }
     }
 }
 
-
-@Preview
 @Composable
-fun TutorialScreenPreview() {
-    TutorialScreen(rememberNavController())
+private fun ConnectionStatus(name: String, isConnected: Boolean) {
+    val icon = if (isConnected) Icons.Filled.CheckCircle else Icons.Filled.Warning
+    val color = if (isConnected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(16.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = if (isConnected) "$name: 已连接" else "$name: 未连接",
+            style = MaterialTheme.typography.bodyMedium,
+            color = color
+        )
+    }
 }
 
 @Preview
@@ -293,7 +397,12 @@ fun IntroductionPagePreview() {
 fun LoginPagePreview() {
     LoginPage(
         isLoggedIn = false,
+        userAvatar = "",
+        userName = "未登录",
+        isStationConnected = false,
+        isEncryptionConnected = false,
         onLoginClick = {},
+        onClickHelp = {},
         onRegisterEncryptionClick = {},
         onBack = {},
         onFinish = {}

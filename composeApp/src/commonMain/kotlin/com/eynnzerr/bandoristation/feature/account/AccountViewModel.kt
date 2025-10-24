@@ -177,9 +177,6 @@ class AccountViewModel(
                            }
                        }
                        is UseCaseResult.Success -> {
-                           dataStore.edit { p ->
-                               p[PreferenceKeys.IS_TOKEN_LOGIN] = false
-                           }
                            sendEvent(UpdateAccountInfo(loginResult.data))
                            setAccessPermissionUseCase.invoke(null)
                        }

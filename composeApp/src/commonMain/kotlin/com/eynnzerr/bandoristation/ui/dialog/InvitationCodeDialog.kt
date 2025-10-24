@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -29,6 +30,7 @@ import bandoristationm.composeapp.generated.resources.settings_encrypt_code_help
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_title
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun InvitationCodeDialog(
@@ -62,7 +64,8 @@ fun InvitationCodeDialog(
             },
             text = {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     OutlinedTextField(
                         value = code,
@@ -104,4 +107,15 @@ fun InvitationCodeDialog(
             }
         )
     }
+}
+
+@Preview
+@Composable
+fun InvitationCodeDialogPreview() {
+    InvitationCodeDialog(
+        isVisible = true,
+        initialCode = "eynnzerr",
+        onDismissRequest = {},
+        onConfirm = {},
+    )
 }

@@ -1,19 +1,19 @@
-package com.eynnzerr.bandoristation.usecase.websocket
+package com.eynnzerr.bandoristation.usecase.encryption
 
-import com.eynnzerr.bandoristation.usecase.base.FlowUseCase
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.model.UseCaseResult
-import kotlinx.coroutines.CoroutineDispatcher
+import com.eynnzerr.bandoristation.usecase.base.FlowUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetWebSocketStateUseCase(
+class GetEncryptionSocketStateUseCase(
     private val repository: AppRepository,
-    private val dispatcher: CoroutineDispatcher,
-): FlowUseCase<Unit, WebSocketClient.ConnectionState, Unit>(dispatcher) {
+): FlowUseCase<Unit, WebSocketClient.ConnectionState, Unit>(Dispatchers.IO) {
     override fun execute(parameters: Unit): Flow<UseCaseResult<WebSocketClient.ConnectionState, Unit>> {
-        return repository.listenWebSocketConnection().map { connectionState ->
+        return repository.listenEncryptionSocketConnectionState().map { connectionState ->
             UseCaseResult.Success(connectionState)
         }
     }

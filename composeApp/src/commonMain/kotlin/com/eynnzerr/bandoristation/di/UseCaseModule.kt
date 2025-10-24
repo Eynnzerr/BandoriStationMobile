@@ -51,6 +51,7 @@ import com.eynnzerr.bandoristation.usecase.encryption.AddToBlacklistUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.AddToWhitelistUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.EncryptionAggregator
 import com.eynnzerr.bandoristation.usecase.encryption.GetBlackWhiteListUseCase
+import com.eynnzerr.bandoristation.usecase.encryption.GetEncryptionSocketStateUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.ListenRoomAccessRequestUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.ListenRoomAccessResponseUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.RegisterEncryptionUseCase
@@ -337,5 +338,6 @@ fun provideUseCaseModule() = module {
     singleOf(::RemoveFromWhitelistUseCase)
     singleOf(::RemoveFromBlacklistUseCase)
     singleOf(::GetBlackWhiteListUseCase)
+    singleOf(::GetEncryptionSocketStateUseCase)
     singleOf(::EncryptionAggregator)
 }
