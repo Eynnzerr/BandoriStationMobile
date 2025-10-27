@@ -180,6 +180,7 @@ class HomeViewModel(
         }
 
         viewModelScope.launch {
+            dataStore.edit { p -> p[PreferenceKeys.IS_FIRST_LAUNCH] = false }
             dataStore.data.collect { p ->
                 isFilteringPJSK = p[PreferenceKeys.FILTER_PJSK] ?: true
                 isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false

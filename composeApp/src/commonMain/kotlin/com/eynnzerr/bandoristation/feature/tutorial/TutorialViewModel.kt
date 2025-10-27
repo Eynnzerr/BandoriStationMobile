@@ -61,9 +61,6 @@ class TutorialViewModel(
             sendEvent(TutorialIntent.GetUserInfo(token))
         }
 
-        // 进入该页面一次后，之后不再显示该页面
-        dataStore.edit { p -> p[PreferenceKeys.IS_FIRST_LAUNCH] = false }
-
         // 监听当前2个服务器ws的连接情况
         viewModelScope.launch {
             launch {
