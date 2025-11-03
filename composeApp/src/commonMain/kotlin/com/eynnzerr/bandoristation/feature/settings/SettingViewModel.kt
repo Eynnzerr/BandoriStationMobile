@@ -44,7 +44,7 @@ class SettingViewModel(
                     isShowingPlayerInfo = p[PreferenceKeys.SHOW_PLAER_BRIEF] ?: false,
                     isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true,
                     autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 10L,
-                    isEncryptionEnabled = p[PreferenceKeys.ENABLE_ENCRYPTION] ?: false,
+                    isEncryptionEnabled = p[PreferenceKeys.ENCRYPTION_TOKEN] != null,
                     inviteCode = p[PreferenceKeys.ENCRYPTION_INVITE_CODE] ?: "",
                     followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList()
                 )

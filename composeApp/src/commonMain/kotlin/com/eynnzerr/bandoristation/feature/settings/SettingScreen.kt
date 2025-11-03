@@ -292,6 +292,7 @@ fun SettingScreen(
                 title = stringResource(Res.string.settings_encrypt_code_title),
                 desc = stringResource(Res.string.settings_encrypt_code_desc),
                 icon = Icons.Outlined.GroupAdd,
+                enable = state.isEncryptionEnabled,
                 onClick = {
                     showInvitationCodeDialog = true
                 }
@@ -301,6 +302,7 @@ fun SettingScreen(
                 title = stringResource(Res.string.settings_encrypt_list_title),
                 desc = stringResource(Res.string.settings_encrypt_list_desc),
                 icon = Icons.AutoMirrored.Outlined.List,
+                enable = state.isEncryptionEnabled,
                 onClick = {
                     viewModel.sendEffect(SettingEffect.ControlListDialog(true))
                 }

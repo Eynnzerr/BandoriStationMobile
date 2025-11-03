@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -25,7 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.approve_request_dialog_add_to_blacklist
+import bandoristationm.composeapp.generated.resources.approve_request_dialog_add_to_whitelist
 import bandoristationm.composeapp.generated.resources.dialog_confirm
 import com.eynnzerr.bandoristation.ui.component.PlainButton
 import com.eynnzerr.bandoristation.ui.component.WhiteBlackListItem
@@ -87,24 +91,27 @@ fun WhiteBlackListDialog(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 PlainButton(
                                     onClick = { state = WhiteBlackListDialogState.BLACKLIST },
                                     imageVector = Icons.Default.People,
-                                    text = "查看黑名单"
+                                    text = stringResource(Res.string.approve_request_dialog_add_to_blacklist)
                                 )
                                 PlainButton(
                                     onClick = { state = WhiteBlackListDialogState.WHITELIST },
                                     imageVector = Icons.Outlined.People,
-                                    text = "查看白名单"
+                                    text = stringResource(Res.string.approve_request_dialog_add_to_whitelist)
                                 )
                             }
 
                             Text(
                                 text = "* 由于车站服务器未提供批量查询接口，出于APP性能考虑，在具体名单界面不获取展示用户信息，请点击头像查看具体用户。",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
+                                modifier = Modifier.padding(horizontal = 12.dp)
                             )
                         }
                     }
