@@ -37,7 +37,9 @@ class WebSocketClient(
     private val needHeartbeat: Boolean,
     private val client: HttpClient, // Injected
     val json: Json, // Injected
-    private val tokenProvider: (suspend () -> String?)? = null
+    private val tokenProvider: (suspend () -> String?)? = null,
+    private val autoReconnect: Boolean = true,
+    private val name: String = "",
 ) {
     var session: DefaultClientWebSocketSession? = null
     private var scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -62,12 +64,12 @@ class WebSocketClient(
     private val reconnectDelayMillis = 5000L
 
     suspend fun connect() {
-        AppLogger.d(TAG, "trying to connect to websocket.")
+        AppLogger.d(name, "trying to connect to websocket.")
 
         connectMutex.withLock {
             if (_connectionState.value is ConnectionState.Connected ||
                 _connectionState.value is ConnectionState.Connecting) {
-                AppLogger.d(TAG, "connect: Websocket has already been connecting or connected. Return.")
+                AppLogger.d(name, "connect: Websocket has already been connecting or connected. Return.")
                 return
             }
             _connectionState.value = ConnectionState.Connecting
@@ -90,7 +92,7 @@ class WebSocketClient(
                     _connectionState.value = ConnectionState.Connected
                 }
                 reconnectAttempts = 0
-                AppLogger.d(TAG, "Connected to websocket $serverUrl")
+                AppLogger.d(name, "Connected to websocket $serverUrl")
 
                 // 心跳
                 val heartbeatJob: Job? = if (needHeartbeat) {
@@ -103,7 +105,7 @@ class WebSocketClient(
                                     data = mapOf("client" to "BandoriStation Mobile")
                                 )
                             } catch (e: Exception) {
-                                AppLogger.d(TAG, "Failed to send heartbeat packet to $serverUrl!. exception: ${e.message}")
+                                AppLogger.d(name, "Failed to send heartbeat packet to $serverUrl!. exception: ${e.message}")
                                 break
                             }
                         }
@@ -119,42 +121,42 @@ class WebSocketClient(
                                 val text = frame.readText()
                                 try {
                                     val response = json.decodeFromString<WebSocketResponse<JsonElement>>(text)
-                                    AppLogger.d(TAG, "received from websocket: $text")
+                                    AppLogger.d(name, "received from websocket: $text")
                                     _responseFlow.emit(response)
                                 } catch (e: Exception) {
-                                    AppLogger.d(TAG, "WebSocketClient Parse Error: $e")
+                                    AppLogger.d(name, "WebSocketClient Parse Error: $e")
                                 }
                             }
                             is Frame.Close -> {
-                                AppLogger.d(TAG, "received close from websocket. Ignore.")
+                                AppLogger.d(name, "received close from websocket. Ignore.")
                             }
                             is Frame.Binary -> {
-                                AppLogger.d(TAG, "received binary from websocket. Ignore.")
+                                AppLogger.d(name, "received binary from websocket. Ignore.")
                             }
                             is Frame.Ping -> {
-                                AppLogger.d(TAG, "received ping from websocket. Ignore.")
+                                AppLogger.d(name, "received ping from websocket. Ignore.")
                             }
                             is Frame.Pong -> {
-                                AppLogger.d(TAG, "received pong from websocket. Ignore.")
+                                AppLogger.d(name, "received pong from websocket. Ignore.")
                             }
                             else -> {
-                                AppLogger.d(TAG, "received other type of frame from websocket. Ignore.")
+                                AppLogger.d(name, "received other type of frame from websocket. Ignore.")
                             }
                         }
                     }
-                    AppLogger.d(TAG, "exit for-loop of connect().")
+                    AppLogger.d(name, "exit for-loop of connect().")
                 } catch (e: Exception) {
-                    AppLogger.d(TAG, "WebSocketClient Websocket Error: $e")
+                    AppLogger.d(name, "WebSocketClient Websocket Error: $e")
                     e.printStackTrace()
                 } finally {
-                    AppLogger.d(TAG, "WebSocketClient enter finally block of connect().")
+                    AppLogger.d(name, "WebSocketClient enter finally block of connect().")
                     heartbeatJob?.cancel()
                     connectMutex.withLock {
                         _connectionState.value = ConnectionState.Disconnected
                     }
 
                     // Try to reconnect
-                    if (!isNormallyDisconnected && reconnectAttempts < maxReconnectAttempts) {
+                    if (!isNormallyDisconnected && reconnectAttempts < maxReconnectAttempts && autoReconnect) {
                         reconnectAttempts++
                         delay(reconnectDelayMillis)
                         connect()
@@ -162,14 +164,14 @@ class WebSocketClient(
                 }
             }
         } catch (e: Exception) {
-            AppLogger.d(TAG, "WebSocketClient Connection Error: $e")
+            AppLogger.d(name, "WebSocketClient Connection Error: $e")
             e.printStackTrace()
             connectMutex.withLock {
                 _connectionState.value = ConnectionState.Error(e)
             }
 
             // Try to reconnect
-            if (!isNormallyDisconnected && reconnectAttempts < maxReconnectAttempts) {
+            if (!isNormallyDisconnected && reconnectAttempts < maxReconnectAttempts && autoReconnect) {
                 reconnectAttempts++
                 delay(reconnectDelayMillis)
                 connect()
@@ -215,7 +217,7 @@ class WebSocketClient(
     suspend fun disconnect() {
         connectMutex.withLock {
             if (_connectionState.value == ConnectionState.Disconnected && session == null) {
-                AppLogger.d(TAG, "Already disconnected.")
+                AppLogger.d(name, "Already disconnected.")
                 return
             }
             _connectionState.value = ConnectionState.Disconnected
@@ -226,9 +228,9 @@ class WebSocketClient(
         if (session != null) {
             try {
                 session?.close()
-                AppLogger.d(TAG, "Sent close frame to websocket $serverUrl")
+                AppLogger.d(name, "Sent close frame to websocket $serverUrl")
             } catch (e: Exception) {
-                AppLogger.d(TAG, "Error while closing websocket session: ${e.message}")
+                AppLogger.d(name, "Error while closing websocket session: ${e.message}")
             } finally {
                 session = null
             }
@@ -236,7 +238,7 @@ class WebSocketClient(
 
         scope.cancel()
         scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-        AppLogger.d(TAG, "Disconnected from websocket $serverUrl")
+        AppLogger.d(name, "Disconnected from websocket $serverUrl")
     }
 
     sealed class ConnectionState {
@@ -246,5 +248,3 @@ class WebSocketClient(
         data class Error(val exception: Exception) : ConnectionState()
     }
 }
-
-private const val TAG = "WebSocketClient(BandoriStation)"

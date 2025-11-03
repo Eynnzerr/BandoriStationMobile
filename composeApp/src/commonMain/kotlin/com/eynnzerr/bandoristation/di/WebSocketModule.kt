@@ -17,7 +17,9 @@ fun provideWebSocketClientModule() = module {
             needHeartbeat = true,
             client = get(),
             json = get(),
-            tokenProvider = null
+            tokenProvider = null,
+            autoReconnect = true,
+            name = "Websocket(BandoriStation)"
         )
     }
 
@@ -28,7 +30,9 @@ fun provideWebSocketClientModule() = module {
             needHeartbeat = false,
             client = get(),
             json = get(),
-            tokenProvider = { dataStore.data.map { p -> p[PreferenceKeys.ENCRYPTION_TOKEN] ?: "" }.first() }
+            tokenProvider = { dataStore.data.map { p -> p[PreferenceKeys.ENCRYPTION_TOKEN] ?: "" }.first() },
+            autoReconnect = false,
+            name = "Websocket(Bandoriscription)"
         )
     }
 }
