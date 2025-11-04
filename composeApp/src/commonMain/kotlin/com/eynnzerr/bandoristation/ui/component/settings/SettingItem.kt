@@ -38,7 +38,7 @@ fun SettingItem(
 ) {
     Surface(
         modifier = modifier
-            .clickable(onClick = onClick)
+            .clickable(enabled = enable, onClick = onClick)
             .alpha(if (enable) 1f else 0.5f),
         color = Color.Unspecified,
     ) {

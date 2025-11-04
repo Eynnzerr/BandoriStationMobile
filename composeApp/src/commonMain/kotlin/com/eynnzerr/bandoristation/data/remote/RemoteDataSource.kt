@@ -7,6 +7,8 @@ import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
 import com.eynnzerr.bandoristation.model.GithubRelease
+import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
+import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,4 +45,26 @@ interface RemoteDataSource {
     suspend fun sendApiRequest(request: ApiRequest): ApiResponse
 
     suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease
+
+    // Encryption related
+    suspend fun sendEncryptionRequest(
+        path: String,
+        request: ApiRequest,
+        token: String? = null,
+    ): ApiResponse
+
+    // Encryption websocket basic operation
+    val encryptionSocketConnectionState: StateFlow<WebSocketClient.ConnectionState>
+    val encryptionSocketResponseFlow: SharedFlow<WebSocketResponse<JsonElement>>
+    suspend fun connectEncryptionWebSocket()
+    suspend fun <T> sendEncryptionSocketRequest(action: String, data: T? = null)
+    suspend fun <T> sendEncryptionSocketRequestWithRetry(action: String, data: T? = null, retryAttempts: Int = 0)
+    fun listenEncryptionSocketForActions(actions: List<String>): Flow<WebSocketResponse<JsonElement>>
+    fun listenEncryptionSocketConnectionState(): Flow<WebSocketClient.ConnectionState>
+    suspend fun disconnectEncryptionSocket()
+
+    // Encryption Business
+    suspend fun requestRoomAccess(request: RoomAccessRequest)
+
+    suspend fun respondRoomAccess(response: RoomAccessResponse)
 }

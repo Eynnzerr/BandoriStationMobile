@@ -6,7 +6,8 @@ import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.utils.AppLogger
 
 fun NavController.navigateTo(
-    screen: Screen
+    screen: Screen,
+    popInclusive: Boolean = false
 ) {
     val currentRoute: String? = this.currentBackStackEntry?.destination?.route
 
@@ -24,6 +25,7 @@ fun NavController.navigateTo(
         // on the back stack as users select items
         popUpTo(graph.findStartDestination().route ?: "/home") {
             saveState = true
+            inclusive = popInclusive
         }
 
         // Avoid multiple copies of the same destination when

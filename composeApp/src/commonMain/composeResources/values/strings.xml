@@ -55,6 +55,15 @@
     <string name="settings_tutorial_title">Terminology Tutorial</string>
     <string name="settings_tutorial_desc">A simple tutorial on common terms for room leaders</string>
     <string name="settings_version_title">Version</string>
+    <string name="settings_encrypt_title">Encryption</string>
+    <string name="settings_encrypt_desc">Others must be approved to view your room number</string>
+    <string name="settings_encrypt_login_title">Registration</string>
+    <string name="settings_encrypt_login_desc">Click to register/refresh account at encryption server</string>
+    <string name="settings_encrypt_code_title">Invite Code</string>
+    <string name="settings_encrypt_code_desc">Required for others to view your room number</string>
+    <string name="settings_encrypt_code_helper_text">* Others can access your encrypted room number with the invitation code. Please keep it safe and share it with caution.</string>
+    <string name="settings_encrypt_list_title">White/Black List</string>
+    <string name="settings_encrypt_list_desc">Manage white/black list for encrypted number request</string>
 
     <!--  CrashReportPage  -->
     <string name="crash_title">Oops, BandoriStationM crashes!</string>
@@ -133,6 +142,7 @@
     <string name="send_room_dialog_new_preset_word_label">New Preset Word</string>
     <string name="send_room_dialog_add_button">Add</string>
     <string name="send_room_dialog_continuous_send_checkbox">Continuously send room number until next departure</string>
+    <string name="send_room_dialog_encrypt_checkbox">Encrypt room number (999999)</string>
     <string name="send_room_dialog_send_button">Send</string>
     <string name="send_room_dialog_cancel_button">Cancel</string>
 
@@ -166,6 +176,22 @@
     <string name="login_dialog_label_email_address">Email Address</string>
     <string name="login_dialog_label_code">Verification Code</string>
 
+    <!-- Request Room Dialog -->
+    <string name="request_room_dialog_title">Request Room Access</string>
+    <string name="request_room_dialog_prompt">Please select a method to view the room number:</string>
+    <string name="request_room_dialog_invite_code_label">Invitation Code</string>
+    <string name="request_room_dialog_confirm_button">Confirm</string>
+    <string name="request_room_dialog_apply_online_button">Apply Online</string>
+    <string name="request_room_dialog_pending_text">Waiting for approval...</string>
+    <string name="request_room_dialog_success_text">The room number is:</string>
+    <string name="request_room_dialog_copy_button">Copy</string>
+    <string name="request_room_dialog_error_unknown">An unknown error occurred</string>
+    <string name="request_room_dialog_retry_button">Retry</string>
+    <string name="request_room_dialog_cancel_button">Close</string>
+    <string name="request_room_dialog_error_timeout">Request timed out.</string>
+    <string name="request_room_dialog_error_rejected">Your request was rejected.</string>
+    <string name="request_room_dialog_error_wrong_code">Incorrect invitation code.</string>
+
     <!-- User Profile Dialog -->
     <string name="user_profile_dialog_unfollow_button">Unfollow</string>
     <string name="user_profile_dialog_follow_button">Follow</string>
@@ -185,4 +211,14 @@
     <string name="user_profile_stats_duration_title">Joined Duration Statistics (minutes)</string>
     <string name="user_profile_stats_duration_label">Duration (min)</string>
     <string name="user_profile_stats_keywords_title">Room Message Keywords Statistics</string>
+
+    <!-- Approve Request Dialog -->
+    <string name="approve_request_dialog_title">Room Access Request</string>
+    <string name="approve_request_dialog_agree_button">Agree (%1$ds)</string>
+    <string name="approve_request_dialog_refuse_button">Refuse</string>
+    <string name="approve_request_dialog_add_to_whitelist">Whitelist</string>
+    <string name="approve_request_dialog_add_to_blacklist">Blacklist</string>
+
+    <!-- Tutorial Screen   -->
+    <string name="tutorial_screen_title">Tutorial</string>
 </resources>

@@ -6,11 +6,13 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 
 object PreferenceKeys {
-    val IS_FIRST_RUN = booleanPreferencesKey("is_first_run") // whether it's the first run of the app
+    val IS_FIRST_LAUNCH = booleanPreferencesKey("is_first_run") // whether it's the first run of the app
     val IS_TOKEN_LOGIN = booleanPreferencesKey("is_token_login") // whether is logged in by token
     val SERVER_TIME = longPreferencesKey("server_time") // server timestamp when connected
     val USER_TOKEN = stringPreferencesKey("user_token") // cached user token
     val USER_ID = longPreferencesKey("user_id") // cached user id
+    val USER_AVATAR = stringPreferencesKey("user_avatar") // cached user avatar
+    val USER_NAME = stringPreferencesKey("user_name") // cached username
     val PRESET_WORDS = stringSetPreferencesKey("preset_words") // preset words for uploading
     val TEMP_TOKEN = stringPreferencesKey("temp_token") // temporary token used for signup
     val BAND_THEME = stringPreferencesKey("default") // app theme choice
@@ -22,4 +24,7 @@ object PreferenceKeys {
     val SHOW_PLAER_BRIEF = booleanPreferencesKey("show_player_brief") // whether to display player brief info in room cards
     val RECORD_ROOM_HISTORY = booleanPreferencesKey("record_room_history") // whether to record room join history
     val AUTO_UPLOAD_INTERVAL = longPreferencesKey("auto_upload_interval") // interval(seconds) for auto uploading room info
+    val ENABLE_ENCRYPTION = booleanPreferencesKey("enable_encryption") // enable room number encryption
+    val ENCRYPTION_INVITE_CODE = stringPreferencesKey("encryption_invite_code") // invite code required for viewing user's room number
+    val ENCRYPTION_TOKEN = stringPreferencesKey("encryption_token") // token used to communicate with encryption server.
 }

@@ -13,6 +13,7 @@ import bandoristationm.composeapp.generated.resources.account_screen_title
 import bandoristationm.composeapp.generated.resources.chat_screen_title
 import bandoristationm.composeapp.generated.resources.home_screen_title
 import bandoristationm.composeapp.generated.resources.settings_screen_title
+import bandoristationm.composeapp.generated.resources.tutorial_screen_title
 import org.jetbrains.compose.resources.StringResource
 
 sealed class Screen(
@@ -54,6 +55,11 @@ sealed class Screen(
     object Settings: Screen(
         route = Destinations.SETTINGS_ROUTE,
         title = Res.string.settings_screen_title,
+    )
+
+    object Tutorial: Screen(
+        route = Destinations.TUTORIAL_ROUTE,
+        title = Res.string.tutorial_screen_title,
     )
 
     companion object {

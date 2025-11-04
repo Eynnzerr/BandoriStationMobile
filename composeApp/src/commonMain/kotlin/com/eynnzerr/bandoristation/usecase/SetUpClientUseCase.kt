@@ -20,4 +20,4 @@ class SetUpClientUseCase(
     }
 }
 
-const val clientName = "BandoriStationM"
+const val clientName = "BandoriStation"

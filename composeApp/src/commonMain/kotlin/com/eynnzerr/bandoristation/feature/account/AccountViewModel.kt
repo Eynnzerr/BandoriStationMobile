@@ -54,7 +54,6 @@ class AccountViewModel(
     private val resetPasswordSendVCodeUseCase: ResetPasswordSendVCodeUseCase,
     private val resetPasswordVerifyEmailUseCase: ResetPasswordVerifyEmailUseCase,
     private val resetPasswordUseCase: ResetPasswordUseCase,
-    private val setPreferenceUseCase: SetPreferenceUseCase,
     private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
     private val getFollowingBriefUseCase: GetFollowingBriefUseCase,
     private val getFollowerBriefUseCase: GetFollowerBriefUseCase,
@@ -140,18 +139,18 @@ class AccountViewModel(
            is GetUserInfo -> {
                viewModelScope.launch {
                    val token = event.token
-                   val userInfoResult = getSelfInfoUseCase(token)
-                   when (userInfoResult) {
+                   when (val userInfoResult = getSelfInfoUseCase(token)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEvent(NotifyUpdateInfoFailed(userInfoResult.error))
                        }
                        is UseCaseResult.Success -> {
                            sendEvent(UpdateAccountInfo(userInfoResult.data))
-                           setPreferenceUseCase(Params(
-                               key = PreferenceKeys.USER_TOKEN,
-                               value = token
-                           ))
+                           dataStore.edit { p ->
+                               p[PreferenceKeys.USER_TOKEN] = token
+                               p[PreferenceKeys.USER_NAME] = userInfoResult.data.accountSummary.username
+                               p[PreferenceKeys.USER_AVATAR] = userInfoResult.data.accountSummary.avatar
+                           }
                            setAccessPermissionUseCase(token) // 每当重新拉取用户信息成功：用最新的token设置ws权限
                        }
                    }
@@ -165,8 +164,7 @@ class AccountViewModel(
                        username = event.username,
                        password = event.password,
                    )
-                   val loginResult = loginUseCase.invoke(params)
-                   when (loginResult) {
+                   when (val loginResult = loginUseCase.invoke(params)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            when (val error = loginResult.error) {
@@ -179,9 +177,6 @@ class AccountViewModel(
                            }
                        }
                        is UseCaseResult.Success -> {
-                           dataStore.edit { p ->
-                               p[PreferenceKeys.IS_TOKEN_LOGIN] = false
-                           }
                            sendEvent(UpdateAccountInfo(loginResult.data))
                            setAccessPermissionUseCase.invoke(null)
                        }
@@ -192,8 +187,7 @@ class AccountViewModel(
 
            is Logout -> {
                viewModelScope.launch {
-                   val logoutResult = logoutUseCase.invoke(Unit)
-                   when (logoutResult) {
+                   when (val logoutResult = logoutUseCase.invoke(Unit)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(logoutResult.error))
@@ -231,8 +225,7 @@ class AccountViewModel(
 
            is SendVerificationCode -> {
                viewModelScope.launch {
-                   val sendCodeResult = sendVerificationCodeUseCase.invoke(Unit)
-                   when (sendCodeResult) {
+                   when (val sendCodeResult = sendVerificationCodeUseCase.invoke(Unit)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(sendCodeResult.error))
@@ -247,15 +240,13 @@ class AccountViewModel(
                            }
                        }
                    }
-
                }
                null to null
            }
 
            is VerifyEmail -> {
                viewModelScope.launch {
-                   val verifyEmailResult = verifyEmailUseCase.invoke(event.code)
-                   when (verifyEmailResult) {
+                   when (val verifyEmailResult = verifyEmailUseCase.invoke(event.code)) {
                        UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(verifyEmailResult.error))
@@ -271,8 +262,7 @@ class AccountViewModel(
 
             is ResetPasswordSendVCode -> {
                 viewModelScope.launch {
-                    val result = resetPasswordSendVCodeUseCase.invoke(event.email)
-                    when (result) {
+                    when (val result = resetPasswordSendVCodeUseCase.invoke(event.email)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> sendEffect(ShowSnackbar(result.error))
                         is UseCaseResult.Success -> {
@@ -310,8 +300,7 @@ class AccountViewModel(
 
             is ResetPassword -> {
                 viewModelScope.launch {
-                    val response = resetPasswordUseCase.invoke(event.password)
-                    when (response) {
+                    when (val response = resetPasswordUseCase.invoke(event.password)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> sendEffect(ShowSnackbar(response.error))
                         is UseCaseResult.Success -> {
@@ -330,8 +319,7 @@ class AccountViewModel(
            is GetFollowers -> {
                viewModelScope.launch {
                    val selfId = state.value.accountInfo.accountSummary.userId
-                   val followerBriefResult = getFollowerBriefUseCase.invoke(selfId)
-                   when (followerBriefResult) {
+                   when (val followerBriefResult = getFollowerBriefUseCase.invoke(selfId)) {
                        UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(followerBriefResult.error))
@@ -348,8 +336,7 @@ class AccountViewModel(
 
            is GetFollowings -> {
                viewModelScope.launch {
-                   val followingBriefResult = getFollowingBriefUseCase.invoke(Unit)
-                   when (followingBriefResult) {
+                   when (val followingBriefResult = getFollowingBriefUseCase.invoke(Unit)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(followingBriefResult.error))
@@ -366,8 +353,7 @@ class AccountViewModel(
 
            is GetEditProfileData -> {
                viewModelScope.launch {
-                   val profileResult = getEditProfileDataUseCase.invoke(Unit)
-                   when (profileResult) {
+                   when (val profileResult = getEditProfileDataUseCase.invoke(Unit)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(profileResult.error))
@@ -384,8 +370,7 @@ class AccountViewModel(
 
            is FollowUser -> {
                viewModelScope.launch {
-                   val response = followUserUseCase.invoke(event.id)
-                   when (response) {
+                   when (val response = followUserUseCase.invoke(event.id)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(response.error))
@@ -400,8 +385,7 @@ class AccountViewModel(
 
            is BindQQ -> {
                viewModelScope.launch {
-                   val response = updateAccountAggregator.bindQQ(event.qq)
-                   when (response) {
+                   when (val response = updateAccountAggregator.bindQQ(event.qq)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(response.error))
@@ -422,8 +406,7 @@ class AccountViewModel(
 
            is UpdateAvatar -> {
                viewModelScope.launch {
-                   val response = updateAccountAggregator.updateAvatar(event.avatarBase64)
-                   when (response) {
+                   when (val response = updateAccountAggregator.updateAvatar(event.avatarBase64)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(response.error))
@@ -444,8 +427,7 @@ class AccountViewModel(
 
            is UpdateBanner -> {
                viewModelScope.launch {
-                   val response = updateAccountAggregator.updateBanner(event.bannerBase64)
-                   when (response) {
+                   when (val response = updateAccountAggregator.updateBanner(event.bannerBase64)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(response.error))
@@ -498,8 +480,7 @@ class AccountViewModel(
 
            is UpdateUsername -> {
                viewModelScope.launch {
-                   val response = updateAccountAggregator.updateUsername(event.username)
-                   when (response) {
+                   when (val response = updateAccountAggregator.updateUsername(event.username)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(response.error))
@@ -542,8 +523,7 @@ class AccountViewModel(
 
            is SendUpdateEmailVCode -> {
                viewModelScope.launch {
-                   val response = updateAccountAggregator.updateEmailSendVCode(event.email)
-                   when (response) {
+                   when (val response = updateAccountAggregator.updateEmailSendVCode(event.email)) {
                        is UseCaseResult.Loading -> Unit
                        is UseCaseResult.Error -> {
                            sendEffect(ShowSnackbar(response.error))

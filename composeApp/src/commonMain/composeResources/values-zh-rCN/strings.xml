@@ -55,6 +55,15 @@
     <string name="settings_tutorial_title">术语教程</string>
     <string name="settings_tutorial_desc">关于车头常用术语的简易教程</string>
     <string name="settings_version_title">版本</string>
+    <string name="settings_encrypt_title">车牌加密</string>
+    <string name="settings_encrypt_desc">他人查看车牌需取得你的同意</string>
+    <string name="settings_encrypt_login_title">加密服务注册</string>
+    <string name="settings_encrypt_login_desc">点击以在加密服务端注册/刷新账号信息</string>
+    <string name="settings_encrypt_code_title">邀请码</string>
+    <string name="settings_encrypt_code_desc">供他人查看你的实际车牌</string>
+    <string name="settings_encrypt_code_helper_text">* 他人凭邀请码可直接查看你的加密车牌，请妥善保管和谨慎分享</string>
+    <string name="settings_encrypt_list_title">黑/白名单</string>
+    <string name="settings_encrypt_list_desc">管理加密车牌查看申请黑/白名单</string>
 
     <!--  报错页  -->
     <string name="crash_title">移动车站崩溃了！</string>
@@ -133,6 +142,7 @@
     <string name="send_room_dialog_new_preset_word_label">新预选词</string>
     <string name="send_room_dialog_add_button">添加</string>
     <string name="send_room_dialog_continuous_send_checkbox">持续发送车牌直到下次发车</string>
+    <string name="send_room_dialog_encrypt_checkbox">是否加密车牌(999999)</string>
     <string name="send_room_dialog_send_button">发送</string>
     <string name="send_room_dialog_cancel_button">取消</string>
 
@@ -166,6 +176,22 @@
     <string name="login_dialog_label_email_address">邮箱地址</string>
     <string name="login_dialog_label_code">验证码</string>
 
+    <!-- Request Room Dialog -->
+    <string name="request_room_dialog_title">查看加密车牌</string>
+    <string name="request_room_dialog_prompt">请选择一种方式查看车牌：</string>
+    <string name="request_room_dialog_invite_code_label">邀请码</string>
+    <string name="request_room_dialog_confirm_button">确定</string>
+    <string name="request_room_dialog_apply_online_button">在线发出申请</string>
+    <string name="request_room_dialog_pending_text">正在等待批准...</string>
+    <string name="request_room_dialog_success_text">车牌号为:</string>
+    <string name="request_room_dialog_copy_button">复制</string>
+    <string name="request_room_dialog_error_unknown">发生未知错误</string>
+    <string name="request_room_dialog_retry_button">重试</string>
+    <string name="request_room_dialog_cancel_button">关闭</string>
+    <string name="request_room_dialog_error_timeout">请求超时</string>
+    <string name="request_room_dialog_error_rejected">车主拒绝了你的请求</string>
+    <string name="request_room_dialog_error_wrong_code">邀请码错误</string>
+
     <!-- 用户资料对话框 -->
     <string name="user_profile_dialog_unfollow_button">取关</string>
     <string name="user_profile_dialog_follow_button">关注</string>
@@ -185,4 +211,14 @@
     <string name="user_profile_stats_duration_title">在车时长统计/分钟</string>
     <string name="user_profile_stats_duration_label">时长/分钟</string>
     <string name="user_profile_stats_keywords_title">车头关键词统计</string>
+
+    <!-- Approve Request Dialog -->
+    <string name="approve_request_dialog_title">车牌查看请求</string>
+    <string name="approve_request_dialog_agree_button">同意 (%1$ds)</string>
+    <string name="approve_request_dialog_refuse_button">拒绝</string>
+    <string name="approve_request_dialog_add_to_whitelist">白名单</string>
+    <string name="approve_request_dialog_add_to_blacklist">黑名单</string>
+
+    <!-- Tutorial Screen   -->
+    <string name="tutorial_screen_title">教学</string>
 </resources>

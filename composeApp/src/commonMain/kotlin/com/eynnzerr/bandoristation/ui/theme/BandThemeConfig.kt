@@ -4,11 +4,13 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.ag_logo
 import bandoristationm.composeapp.generated.resources.hhw_logo
 import bandoristationm.composeapp.generated.resources.monica_logo
+import bandoristationm.composeapp.generated.resources.mujica_logo
 import bandoristationm.composeapp.generated.resources.mygo_logo
 import bandoristationm.composeapp.generated.resources.pp_logo
 import bandoristationm.composeapp.generated.resources.ppp_logo
 import bandoristationm.composeapp.generated.resources.r_logo
 import bandoristationm.composeapp.generated.resources.ras_logo
+import bandoristationm.composeapp.generated.resources.ymmt_logo
 import org.jetbrains.compose.resources.DrawableResource
 
 sealed class BandThemeConfig(
@@ -26,6 +28,8 @@ sealed class BandThemeConfig(
         const val RAS_NAME = "RAS A SUILEN"
         const val MONICA_NAME = "Morfonica"
         const val MYGO_NAME = "MyGO!!!!!"
+        const val MUJICA_NAME = "Ave Mujica"
+        const val YMMT_NAME = "梦限大MewType"
     }
 
     object Default : BandThemeConfig(
@@ -88,6 +92,20 @@ sealed class BandThemeConfig(
         bandIcon = Res.drawable.mygo_logo,
         bandLogo = Res.drawable.mygo_logo,
     )
+
+    object Mujica : BandThemeConfig(
+        name = MUJICA_NAME,
+        seedColorLong = 0xFF881144,
+        bandIcon = Res.drawable.mujica_logo,
+        bandLogo = Res.drawable.mujica_logo,
+    )
+
+    object Ymmt : BandThemeConfig(
+        name = YMMT_NAME,
+        seedColorLong = 0xFFFF7788,
+        bandIcon = Res.drawable.ymmt_logo,
+        bandLogo = Res.drawable.ymmt_logo,
+    )
 }
 
 fun getBandConfig(name: String?) = when (name) {
@@ -99,6 +117,8 @@ fun getBandConfig(name: String?) = when (name) {
     BandThemeConfig.RAS_NAME -> BandThemeConfig.RaiseASuilen
     BandThemeConfig.MONICA_NAME -> BandThemeConfig.Morfonica
     BandThemeConfig.MYGO_NAME -> BandThemeConfig.Mygo
+    BandThemeConfig.MUJICA_NAME -> BandThemeConfig.Mujica
+    BandThemeConfig.YMMT_NAME -> BandThemeConfig.Ymmt
     else -> BandThemeConfig.Default
 }
 
@@ -112,4 +132,6 @@ val bandThemeList = listOf(
     BandThemeConfig.RaiseASuilen,
     BandThemeConfig.Morfonica,
     BandThemeConfig.Mygo,
+    BandThemeConfig.Mujica,
+    BandThemeConfig.Ymmt
 )

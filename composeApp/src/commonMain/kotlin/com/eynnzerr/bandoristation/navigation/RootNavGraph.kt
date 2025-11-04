@@ -7,6 +7,7 @@ import com.eynnzerr.bandoristation.feature.account.AccountScreen
 import com.eynnzerr.bandoristation.feature.chat.ChatScreen
 import com.eynnzerr.bandoristation.feature.home.HomeScreen
 import com.eynnzerr.bandoristation.feature.settings.SettingScreen
+import com.eynnzerr.bandoristation.feature.tutorial.TutorialScreen
 import com.eynnzerr.bandoristation.navigation.ext.animatedComposable
 
 @Composable
@@ -30,6 +31,9 @@ fun RootNavGraph (
         }
         animatedComposable(Destinations.SETTINGS_ROUTE) {
             SettingScreen(navController)
+        }
+        animatedComposable(Destinations.TUTORIAL_ROUTE) {
+            TutorialScreen(navController)
         }
     }
 }
