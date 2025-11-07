@@ -53,6 +53,7 @@ fun App() {
                             RootNavGraph(
                                 navController = appNavController,
                                 startDestination = if (isFirstLaunch) Screen.Tutorial else Screen.Home,
+                                // startDestination = Screen.Tutorial
                             )
                         }
                         // While loading, this will be empty, preventing a flicker.
