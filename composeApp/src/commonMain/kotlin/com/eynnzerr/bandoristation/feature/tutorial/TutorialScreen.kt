@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -72,7 +73,7 @@ fun TutorialScreen(
     var showLoginDialog by remember { mutableStateOf(false) }
     var showHelpDialog by remember { mutableStateOf(false) }
     var loginDialogState by remember { mutableStateOf(LoginScreenState.INITIAL) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    var snackbarText by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -96,12 +97,7 @@ fun TutorialScreen(
                     }
                 }
                 is TutorialEffect.ShowSnackbar -> {
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = action.text,
-                            duration = SnackbarDuration.Short
-                        )
-                    }
+                    snackbarText = action.text
                 }
                 is TutorialEffect.ControlHelpDialog -> {
                     showHelpDialog = action.visible
@@ -128,6 +124,8 @@ fun TutorialScreen(
                 userName = state.username,
                 isStationConnected = state.isStationConnected,
                 isEncryptionConnected = state.isEncryptionConnected,
+                snackbarMessage = snackbarText,
+                onSnackbarShown = { snackbarText = null },
                 onLoginClick = {
                     if (state.isLoggedIn) {
                         // 退出登录
@@ -235,7 +233,6 @@ fun IntroductionPage(onNext: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues = paddingValues)
-                .padding(horizontal = 12.dp)
         ) {
             RichText(
                 state = richTextState,
@@ -254,6 +251,8 @@ fun LoginPage(
     userName: String,
     isStationConnected: Boolean,
     isEncryptionConnected: Boolean,
+    snackbarMessage: String?,
+    onSnackbarShown: () -> Unit,
     onClickHelp: () -> Unit,
     onLoginClick: () -> Unit,
     onRegisterEncryptionClick: () -> Unit,
@@ -261,6 +260,18 @@ fun LoginPage(
     onFinish: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(snackbarMessage) {
+        if (snackbarMessage != null) {
+            snackbarHostState.showSnackbar(
+                message = snackbarMessage,
+                duration = SnackbarDuration.Short
+            )
+            onSnackbarShown()
+        }
+    }
+
     Scaffold(
         modifier = Modifier.appBarScroll(true, scrollBehavior),
         topBar = {
@@ -294,7 +305,8 @@ fun LoginPage(
                     Text("完成")
                 }
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -405,6 +417,8 @@ fun LoginPagePreview() {
         onClickHelp = {},
         onRegisterEncryptionClick = {},
         onBack = {},
-        onFinish = {}
+        onFinish = {},
+        onSnackbarShown = {},
+        snackbarMessage = null,
     )
 }
