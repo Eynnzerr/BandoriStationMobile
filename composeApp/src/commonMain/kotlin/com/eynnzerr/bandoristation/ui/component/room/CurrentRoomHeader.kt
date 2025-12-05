@@ -1,8 +1,6 @@
 package com.eynnzerr.bandoristation.ui.component.room
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,8 +37,8 @@ import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.utils.formatTimeDifference
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlinx.datetime.Clock
+import androidx.compose.ui.tooling.preview.Preview
+import kotlin.time.Clock
 
 @Composable
 fun CurrentRoomHeader(

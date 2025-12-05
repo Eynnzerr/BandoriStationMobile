@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.sp
 import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
 import com.eynnzerr.bandoristation.utils.mockChatList
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ChatPiece(

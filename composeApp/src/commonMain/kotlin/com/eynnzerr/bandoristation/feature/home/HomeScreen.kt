@@ -21,13 +21,16 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -35,7 +38,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
@@ -102,6 +107,7 @@ fun HomeScreen(
     var userToBlock: UserInfo? by remember { mutableStateOf(null) }
     var prefillRoomNumber by remember { mutableStateOf("") }
     var prefillDescription by remember { mutableStateOf("") }
+    var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
     // Determine if the first item is visible
     val isFirstItemVisible by remember {
@@ -415,22 +421,21 @@ fun HomeScreen(
         bottomBar = {},
         floatingActionButton = {
             Column {
-                AnimatedVisibility(
-                    visible = !isFirstItemVisible && state.rooms.isNotEmpty(),
-                    enter = fadeIn() + slideInVertically { it },
-                    exit = fadeOut() + slideOutVertically { it },
-                    modifier = Modifier.padding(bottom = 16.dp)
-                ) {
-                    FloatingActionButton(
-                        onClick = {
-                            viewModel.sendEffect(HomeEffect.ScrollToFirst())
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Return to top"
-                        )
+                FloatingActionButton(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .animateFloatingActionButton(
+                            visible = !isFirstItemVisible && state.rooms.isNotEmpty(),
+                            alignment = Alignment.BottomEnd,
+                        ),
+                    onClick = {
+                        viewModel.sendEffect(HomeEffect.ScrollToFirst())
                     }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowUp,
+                        contentDescription = "Return to top"
+                    )
                 }
 
                 FloatingActionButton(

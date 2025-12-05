@@ -1,8 +1,8 @@
 package com.eynnzerr.bandoristation.model.social
 
-import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
 
 @Serializable
 data class FollowUserResult(

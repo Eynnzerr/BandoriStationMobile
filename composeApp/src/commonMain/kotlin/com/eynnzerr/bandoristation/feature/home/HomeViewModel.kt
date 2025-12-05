@@ -61,7 +61,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.isActive
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class HomeViewModel(
     private val getWebSocketStateUseCase: GetWebSocketStateUseCase,

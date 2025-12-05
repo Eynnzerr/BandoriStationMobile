@@ -30,7 +30,7 @@ import bandoristationm.composeapp.generated.resources.settings_encrypt_code_help
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_title
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun InvitationCodeDialog(
