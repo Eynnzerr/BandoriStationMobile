@@ -21,6 +21,11 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
+
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+        freeCompilerArgs.add("-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+    }
     
     listOf(
         iosX64(),
@@ -41,7 +46,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
 
-            implementation(compose.preview)
+            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0-rc01")
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
@@ -49,14 +54,14 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.material3AdaptiveNavigationSuite)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(compose.materialIconsExtended)
+            implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc01")
+            implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc01")
+            implementation("org.jetbrains.compose.material3:material3:1.10.0-alpha05")
+            implementation("org.jetbrains.compose.material3:material3-adaptive-navigation-suite:1.10.0-alpha05")
+            implementation("org.jetbrains.compose.ui:ui:1.10.0-rc01")
+            implementation("org.jetbrains.compose.components:components-resources:1.10.0-rc01")
+            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0-rc01")
+            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
