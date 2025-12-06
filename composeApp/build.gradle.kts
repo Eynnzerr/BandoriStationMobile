@@ -45,8 +45,6 @@ kotlin {
         
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
-
-            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0-rc01")
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
@@ -54,14 +52,14 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
-            implementation("org.jetbrains.compose.runtime:runtime:1.10.0-rc01")
-            implementation("org.jetbrains.compose.foundation:foundation:1.10.0-rc01")
-            implementation("org.jetbrains.compose.material3:material3:1.10.0-alpha05")
-            implementation("org.jetbrains.compose.material3:material3-adaptive-navigation-suite:1.10.0-alpha05")
-            implementation("org.jetbrains.compose.ui:ui:1.10.0-rc01")
-            implementation("org.jetbrains.compose.components:components-resources:1.10.0-rc01")
-            implementation("org.jetbrains.compose.ui:ui-tooling-preview:1.10.0-rc01")
-            implementation("org.jetbrains.compose.material:material-icons-extended:1.7.3")
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3.material3)
+            implementation(libs.compose.material3.adaptive.navigation.suite)
+            implementation(libs.compose.ui.ui)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.ui.preview)
+            implementation(libs.compose.material.icons.extended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
