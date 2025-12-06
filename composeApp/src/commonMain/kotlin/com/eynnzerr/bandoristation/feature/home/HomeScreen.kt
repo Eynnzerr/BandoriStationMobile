@@ -6,29 +6,47 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.ArrowUpward
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.FloatingActionButtonMenu
+import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
+import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
@@ -42,6 +60,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -71,6 +90,7 @@ import com.eynnzerr.bandoristation.ui.dialog.SendRoomDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import com.eynnzerr.bandoristation.model.GithubRelease
+import com.eynnzerr.bandoristation.ui.animation.ExpressiveVisibility
 import com.eynnzerr.bandoristation.ui.dialog.ApproveRequestDialog
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import kotlinx.coroutines.launch
@@ -109,10 +129,10 @@ fun HomeScreen(
     var prefillDescription by remember { mutableStateOf("") }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
-    // Determine if the first item is visible
     val isFirstItemVisible by remember {
         derivedStateOf {
-            lazyListState.firstVisibleItemIndex == 0
+            // TODO 待确认有效性
+            !lazyListState.canScrollBackward
         }
     }
 
@@ -420,31 +440,38 @@ fun HomeScreen(
         },
         bottomBar = {},
         floatingActionButton = {
-            Column {
-                FloatingActionButton(
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .animateFloatingActionButton(
-                            visible = !isFirstItemVisible && state.rooms.isNotEmpty(),
-                            alignment = Alignment.BottomEnd,
-                        ),
-                    onClick = {
-                        viewModel.sendEffect(HomeEffect.ScrollToFirst())
+            FloatingActionButtonMenu(
+                expanded = fabMenuExpanded,
+                button = {
+                    ToggleFloatingActionButton(
+                        checked = fabMenuExpanded,
+                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }
+                    ) {
+                        val imageVector by remember {
+                            derivedStateOf {
+                                if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
+                            }
+                        }
+                        Icon(
+                            painter = rememberVectorPainter(imageVector),
+                            contentDescription = null,
+                            modifier = Modifier.animateIcon({ checkedProgress }),
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowUp,
-                        contentDescription = "Return to top"
-                    )
-                }
+                },
+                horizontalAlignment = Alignment.End,
+            ) {
+                FloatingActionButtonMenuItem(
+                    onClick = {  },
+                    icon = { Icon(Icons.AutoMirrored.Filled.Chat, null) },
+                    text = { Text("创建群聊") }
+                )
 
-                FloatingActionButton(
-                    onClick = {
-                        viewModel.sendEffect(HomeEffect.OpenSendRoomDialog())
-                    }
-                ) {
-                    Icon(Icons.Filled.Add, "")
-                }
+                FloatingActionButtonMenuItem(
+                    onClick = { viewModel.sendEffect(HomeEffect.OpenSendRoomDialog()) },
+                    icon = { Icon(Icons.Filled.Upload, null) },
+                    text = { Text("上传房间") }
+                )
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -455,13 +482,13 @@ fun HomeScreen(
                 .padding(16.dp),
             state = lazyListState,
         ) {
-            state.selectedRoom?.let {
-                stickyHeader(key = -1) {
+            stickyHeader(key = -1) {
+                Box(modifier = Modifier.size(1.dp)) // 防止无RoomHeader时错误的滑动逻辑
+                ExpressiveVisibility(visible = state.selectedRoom != null) {
                     CurrentRoomHeader(
-                        roomInfo = state.selectedRoom!!,
+                        roomInfo = state.selectedRoom ?: RoomInfo(),
                         currentTimeMillis = state.serverTimestampMillis,
                         startTimeMillis = state.joinedTimestampMillis,
-                        // isAutoUploading = state.,
                         onCopy = { roomNumber ->
                             viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
                         },
@@ -479,6 +506,27 @@ fun HomeScreen(
                             viewModel.sendEvent(JoinRoom(null))
                         },
                         modifier = Modifier.padding(bottom = 16.dp)
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    ExtendedFloatingActionButton(
+                        text = { Text("回到顶部", style = MaterialTheme.typography.labelLarge) },
+                        icon = { Icon(Icons.Rounded.ArrowUpward, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                        onClick = { viewModel.sendEffect(HomeEffect.ScrollToFirst()) },
+                        shape = MaterialTheme.shapes.extraLarge,
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
+                        modifier = Modifier
+                            .heightIn(max = 40.dp)
+                            .animateFloatingActionButton(
+                                visible = !isFirstItemVisible && state.rooms.isNotEmpty(),
+                                alignment = Alignment.BottomEnd,
+                            ),
                     )
                 }
             }
