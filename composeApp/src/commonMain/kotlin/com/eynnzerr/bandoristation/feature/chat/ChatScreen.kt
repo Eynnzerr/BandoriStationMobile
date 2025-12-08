@@ -16,10 +16,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-// import androidx.compose.material.icons.filled.Send // Duplicate import
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +30,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -232,6 +234,26 @@ fun ChatScreen(
                 }
             }
         },
+        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    viewModel.sendEffect(ChatEffect.ScrollToLatest())
+                },
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .zIndex(1f)
+                    .animateFloatingActionButton(
+                        visible = !isAtBottom,
+                        alignment = Alignment.BottomCenter,
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = ""
+                )
+            }
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     ) { innerPadding ->
         Box(modifier = Modifier
@@ -241,6 +263,9 @@ fun ChatScreen(
             PullToRefreshBox(
                 isRefreshing = state.isLoading,
                 onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) },
+                indicator = {
+                    ContainedLoadingIndicator()
+                }
             ) {
                 LazyColumn(
                     state = lazyListState,
@@ -290,27 +315,6 @@ fun ChatScreen(
                     isArrowOnTop = false,
                     arrowPosition = ArrowHorizontalPosition.END,
                 )
-            }
-
-            AnimatedVisibility(
-                visible = !isAtBottom,
-                enter = fadeIn() + slideInVertically { it },
-                exit = fadeOut() + slideOutVertically { it },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-                    .zIndex(1f)
-            ) {
-                FloatingActionButton(
-                    onClick = {
-                        viewModel.sendEffect(ChatEffect.ScrollToLatest())
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = ""
-                    )
-                }
             }
         }
     }
