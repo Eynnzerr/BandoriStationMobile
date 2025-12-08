@@ -62,10 +62,11 @@ fun ChatBubble(
                         color = bubbleColor
                     )
 
+                    val backgroundLeftX = if (isMyMessage) 0f else triangleWidth
                     drawRoundRect(
                         color = bubbleColor,
-                        topLeft = Offset(triangleWidth, 0f),
-                        size = Size(size.width - triangleWidth * 2, size.height),
+                        topLeft = Offset(backgroundLeftX, 0f),
+                        size = Size(size.width - triangleWidth, size.height),
                         cornerRadius = CornerRadius(cornerRadius, cornerRadius),
                     )
                 }

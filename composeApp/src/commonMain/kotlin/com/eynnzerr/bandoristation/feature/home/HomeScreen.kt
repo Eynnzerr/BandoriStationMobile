@@ -454,7 +454,7 @@ fun HomeScreen(
                 FloatingActionButtonMenuItem(
                     onClick = {  },
                     icon = { Icon(Icons.AutoMirrored.Filled.Chat, null) },
-                    text = { Text("创建群聊") }
+                    text = { Text("群聊") }
                 )
 
                 FloatingActionButtonMenuItem(
@@ -469,7 +469,7 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp),
             state = lazyListState,
         ) {
             stickyHeader(key = -1) {

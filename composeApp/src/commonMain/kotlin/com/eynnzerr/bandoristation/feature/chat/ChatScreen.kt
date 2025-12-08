@@ -1,6 +1,7 @@
 package com.eynnzerr.bandoristation.feature.chat
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -16,9 +17,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
@@ -32,6 +32,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -42,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,6 +89,12 @@ fun ChatScreen(
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    val scaleFraction = {
+        if (state.isLoading) 1f
+        else LinearOutSlowInEasing.transform(pullToRefreshState.distanceFraction).coerceIn(0f, 1f)
+    }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -170,7 +180,13 @@ fun ChatScreen(
     )
 
     SuiteScaffold(
-        scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
+        scaffoldModifier = Modifier
+            .appBarScroll(true, scrollBehavior)
+            .pullToRefresh(
+                state = pullToRefreshState,
+                isRefreshing = state.isLoading,
+                onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) }
+            ),
         isExpanded = isExpanded,
         screens = Screen.bottomScreenList,
         currentDestination = navBackStackEntry?.destination,
@@ -192,11 +208,11 @@ fun ChatScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            viewModel.sendEvent(ChatIntent.ClearAll())
+                            viewModel.sendEvent(ChatIntent.Reset())
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Delete,
+                            imageVector = Icons.Outlined.Refresh,
                             contentDescription = ""
                         )
                     }
@@ -260,40 +276,32 @@ fun ChatScreen(
             .fillMaxSize()
             .padding(innerPadding)
         ) {
-            PullToRefreshBox(
-                isRefreshing = state.isLoading,
-                onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) },
-                indicator = {
-                    ContainedLoadingIndicator()
-                }
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier
+                    .padding(16.dp),
             ) {
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier
-                        .padding(16.dp),
-                ) {
-                    itemsIndexed(
-                        items = state.chats,
-                        key = { _, item -> item.localId }
-                    ) { index, chatMessage ->
-                        Row(
-                            modifier = Modifier.animateItem()
-                        ) {
-                            if (chatMessage.userInfo.userId == null) {
-                                // System Message like date separator
-                                TimePiece(
-                                    chatMessage = chatMessage,
-                                )
-                            } else {
-                                // User Message
-                                ChatPiece(
-                                    chatMessage = chatMessage,
-                                    isMyMessage = chatMessage.userInfo.userId == state.selfId,
-                                    onClickAvatar = {
-                                        viewModel.sendEvent(ChatIntent.BrowseUser(chatMessage.userInfo.userId))
-                                    }
-                                )
-                            }
+                itemsIndexed(
+                    items = state.chats,
+                    key = { _, item -> item.localId }
+                ) { index, chatMessage ->
+                    Row(
+                        modifier = Modifier.animateItem()
+                    ) {
+                        if (chatMessage.userInfo.userId == null) {
+                            // System Message like date separator
+                            TimePiece(
+                                chatMessage = chatMessage,
+                            )
+                        } else {
+                            // User Message
+                            ChatPiece(
+                                chatMessage = chatMessage,
+                                isMyMessage = chatMessage.userInfo.userId == state.selfId,
+                                onClickAvatar = {
+                                    viewModel.sendEvent(ChatIntent.BrowseUser(chatMessage.userInfo.userId))
+                                }
+                            )
                         }
                     }
                 }
@@ -315,6 +323,15 @@ fun ChatScreen(
                     isArrowOnTop = false,
                     arrowPosition = ArrowHorizontalPosition.END,
                 )
+            }
+
+            Box(
+                Modifier.align(Alignment.TopCenter).graphicsLayer {
+                    scaleX = scaleFraction()
+                    scaleY = scaleFraction()
+                }
+            ) {
+                PullToRefreshDefaults.LoadingIndicator(state = pullToRefreshState, isRefreshing = state.isLoading)
             }
         }
     }

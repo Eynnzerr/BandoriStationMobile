@@ -164,7 +164,7 @@ class ChatViewModel(
     }
 
     private suspend fun initializeChatRoom() {
-        sendEvent(ChatIntent.Reset())
+        internalState.update { ChatState.initial() }
 
         when (val response = initializeChatRoomUseCase(Unit)) {
             is UseCaseResult.Error -> {
@@ -193,6 +193,7 @@ class ChatViewModel(
                     isLoading = false,
                 ) to null
             }
+
             is ChatIntent.ClearAll -> {
                 state.value.copy(
                     chats = emptyList(),
@@ -230,7 +231,10 @@ class ChatViewModel(
             }
 
             is ChatIntent.Reset -> {
-                ChatState.initial() to null
+                viewModelScope.launch {
+                    initializeChatRoom()
+                }
+                null to null
             }
 
             is ChatIntent.BrowseUser -> {

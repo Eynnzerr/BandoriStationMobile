@@ -27,6 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 fun UserAvatar(
     avatarName: String,
     size: Dp = 32.dp,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
     if (avatarName == "") {
@@ -34,7 +35,7 @@ fun UserAvatar(
             painter = painterResource(Res.drawable.default_avatar),
             contentDescription = "uploader avatar",
             contentScale = ContentScale.Crop,
-            modifier = Modifier
+            modifier = modifier
                 .size(size)
                 .clip(CircleShape)
                 .clickable(onClick = onClick),
@@ -52,7 +53,7 @@ fun UserAvatar(
             fallback = painterResource(Res.drawable.default_avatar),
             contentDescription = "uploader avatar",
             contentScale = ContentScale.Crop,
-            modifier = Modifier
+            modifier = modifier
                 .size(size)
                 .clip(CircleShape)
                 .clickable(onClick = onClick),
