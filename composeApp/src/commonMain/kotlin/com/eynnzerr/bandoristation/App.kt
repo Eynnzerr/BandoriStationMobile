@@ -26,7 +26,9 @@ fun App() {
     KoinApplication(
         application = { modules(appModule) }
     ) {
+        // Global websocket setup
         WebSocketLifecycleHandler()
+        StartConnectionHandler()
 
         val preferences by PreferencesManager.preferencesFlow().collectAsState(initial = null)
         var screenInfo by remember { mutableStateOf(ScreenInfo()) }

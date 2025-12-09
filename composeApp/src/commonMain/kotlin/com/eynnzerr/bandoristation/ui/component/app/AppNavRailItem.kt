@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.WideNavigationRailItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
@@ -26,32 +27,10 @@ fun ColumnScope.AppNavRailItem(
     selected: Boolean,
     onClick: (Screen) -> Unit,
 ) {
-    @Composable
-    fun ItemIcon() {
-        Icon(
-            imageVector = if (selected) screen.selectedIcon ?: Icons.Default.Warning else screen.unselectedIcon ?: Icons.Default.Warning,
-            contentDescription = null,
-        )
-    }
-
     NavigationRailItem(
         selected = selected,
         onClick = { onClick(screen) },
         icon = {
-            if (showBadge) {
-                BadgedBox(
-                    badge = {
-                        Badge(
-                            modifier =
-                                Modifier.semantics { contentDescription = "New chats" }
-                        )
-                    }
-                ) {
-                    ItemIcon()
-                }
-            } else {
-                ItemIcon()
-            }
         },
         label = { Text(text = stringResource(screen.title ?: Res.string.placeholder)) },
         enabled = true,
@@ -64,4 +43,54 @@ fun ColumnScope.AppNavRailItem(
             indicatorColor =  MaterialTheme.colorScheme.primaryContainer
         )
     )
+}
+
+@Composable
+fun WideAppNavRailItem(
+    screen: Screen,
+    showBadge: Boolean = false,
+    expanded: Boolean = false,
+    selected: Boolean,
+    onClick: (Screen) -> Unit,
+) {
+    WideNavigationRailItem(
+        railExpanded = expanded,
+        icon = { ItemIconWithBadge(screen, selected, showBadge) },
+        label = { Text(text = stringResource(screen.title ?: Res.string.placeholder)) },
+        selected = selected,
+        onClick = { onClick(screen) },
+    )
+}
+
+@Composable
+fun ItemIcon(
+    screen: Screen,
+    selected: Boolean,
+) {
+    Icon(
+        imageVector = if (selected) screen.selectedIcon ?: Icons.Default.Warning else screen.unselectedIcon ?: Icons.Default.Warning,
+        contentDescription = null,
+    )
+}
+
+@Composable
+fun ItemIconWithBadge(
+    screen: Screen,
+    selected: Boolean,
+    showBadge: Boolean = false,
+) {
+    if (showBadge) {
+        BadgedBox(
+            badge = {
+                Badge(
+                    modifier =
+                        Modifier.semantics { contentDescription = "New chats" }
+                )
+            }
+        ) {
+            ItemIcon(screen, selected)
+        }
+    } else {
+        ItemIcon(screen, selected)
+    }
 }

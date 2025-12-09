@@ -500,7 +500,9 @@ fun HomeScreen(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     ExtendedFloatingActionButton(

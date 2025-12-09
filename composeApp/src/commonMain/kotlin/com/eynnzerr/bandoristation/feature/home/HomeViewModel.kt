@@ -21,8 +21,6 @@ import com.eynnzerr.bandoristation.ui.dialog.RequestRoomState
 import com.eynnzerr.bandoristation.usecase.chat.CheckUnreadChatUseCase
 import com.eynnzerr.bandoristation.usecase.websocket.GetWebSocketStateUseCase
 import com.eynnzerr.bandoristation.usecase.room.GetRoomListUseCase
-import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
-import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.usecase.time.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.usecase.room.UploadRoomUseCase
 import com.eynnzerr.bandoristation.usecase.room.GetRoomFilterUseCase
@@ -37,7 +35,6 @@ import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.usecase.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
-import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.room.RoomFilter
 import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.room.RoomInfo
@@ -50,7 +47,6 @@ import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
-import com.eynnzerr.bandoristation.usecase.clientName
 import com.eynnzerr.bandoristation.usecase.encryption.EncryptionAggregator
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.generateUUID
@@ -67,8 +63,6 @@ class HomeViewModel(
     private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
     private val getServerTimeUseCase: GetServerTimeUseCase,
-    private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
-    private val setUpClientUseCase: SetUpClientUseCase,
     private val requestRecentRoomsUseCase: RequestRecentRoomsUseCase,
     private val getRoomListUseCase: GetRoomListUseCase,
     private val updateTimestampUseCase: UpdateTimestampUseCase,
@@ -109,12 +103,6 @@ class HomeViewModel(
                                 it.copy(title = Res.string.room_list_title)
                             }
                             requestRecentRoomsUseCase(Unit)
-                            setAccessPermissionUseCase(null)
-                            setUpClientUseCase(ClientSetInfo(
-                                client = clientName,
-                                sendRoomNumber = true,
-                                sendChat = false,
-                            ))
                         }
                         is WebSocketClient.ConnectionState.Connecting -> {
                             internalState.update {
@@ -174,6 +162,19 @@ class HomeViewModel(
                                 getServerTimeUseCase(Unit)
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            delay(1000L)
+            checkUnreadChatUseCase.invoke(Unit).collect { checkResult ->
+                when (checkResult) {
+                    is UseCaseResult.Error -> Unit
+                    is UseCaseResult.Loading -> Unit
+                    is UseCaseResult.Success -> {
+                        sendEvent(HomeIntent.UpdateMessageBadge(checkResult.data))
                     }
                 }
             }
@@ -302,24 +303,6 @@ class HomeViewModel(
                     }
                 }
                 else -> Unit
-            }
-        }
-    }
-
-    override suspend fun onStartStateFlow() {
-        // 每次重新进入房间页，设置客户端接收条件
-        setUpClientUseCase(ClientSetInfo(
-            client = clientName,
-            sendRoomNumber = true,
-            sendChat = false,
-        ))
-
-        delay(2000L)
-        when (val checkResult = checkUnreadChatUseCase(Unit)) {
-            is UseCaseResult.Error -> Unit
-            is UseCaseResult.Loading -> Unit
-            is UseCaseResult.Success -> {
-                sendEvent(HomeIntent.UpdateMessageBadge(checkResult.data))
             }
         }
     }
