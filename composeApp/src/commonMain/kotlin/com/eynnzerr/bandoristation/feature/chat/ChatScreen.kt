@@ -25,6 +25,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -179,18 +180,14 @@ fun ChatScreen(
         hasFollowed = state.selectedUser.accountSummary.userId in state.followingUsers,
     )
 
-    SuiteScaffold(
-        scaffoldModifier = Modifier
+    Scaffold(
+        modifier = Modifier
             .appBarScroll(true, scrollBehavior)
             .pullToRefresh(
                 state = pullToRefreshState,
                 isRefreshing = state.isLoading,
                 onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) }
             ),
-        isExpanded = isExpanded,
-        screens = Screen.bottomScreenList,
-        currentDestination = navBackStackEntry?.destination,
-        onNavigateTo = { viewModel.sendEffect(ChatEffect.NavigateToScreen(it)) },
         topBar = {
             AppTopBar(
                 title = stringResource(state.title),

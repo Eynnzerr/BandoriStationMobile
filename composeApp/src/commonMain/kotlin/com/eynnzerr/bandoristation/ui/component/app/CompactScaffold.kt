@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.ui.component.app
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +17,7 @@ fun CompactScaffold(
     modifier: Modifier = Modifier,
     screens: List<Screen> = emptyList(),
     showBadges: List<Boolean> = emptyList(),
+    showNavigation: Boolean = false,
     onNavigateTo: (Screen) -> Unit = {},
     currentDestination: NavDestination?,
     topBar: @Composable () -> Unit = {},
@@ -29,10 +31,7 @@ fun CompactScaffold(
         modifier = modifier.fillMaxSize(),
         topBar = topBar,
         bottomBar = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                bottomBar()
+            AnimatedVisibility(visible = showNavigation) {
                 AppNavBar(
                     screens = screens,
                     showBadges = showBadges,

@@ -29,59 +29,40 @@ fun AppNavRail(
     currentDestination: NavDestination?,
     logo: @Composable () -> Unit = {},
 ) {
-//    val state = rememberWideNavigationRailState()
-//    val scope = rememberCoroutineScope()
-//
-//    WideNavigationRail(
-//        state = state,
-//        header = {
-//            IconButton(
-//                onClick = {
-//                    scope.launch {
-//                        if (state.targetValue == WideNavigationRailValue.Expanded)
-//                            state.collapse()
-//                        else state.expand()
-//                    }
-//                },
-//            ) {
-//                if (state.targetValue == WideNavigationRailValue.Expanded) {
-//                    Icon(Icons.AutoMirrored.Filled.MenuOpen, "")
-//                } else {
-//                    Icon(Icons.Filled.Menu, "")
-//                }
-//            }
-//        },
-//    ) {
-//        screens.forEachIndexed { index, screen ->
-//            val selected: Boolean =
-//                currentDestination?.hierarchy?.any { it.route == screen.route } == true
-//
-//            WideAppNavRailItem(
-//                expanded = state.targetValue == WideNavigationRailValue.Expanded,
-//                screen = screen,
-//                showBadge = showBadges.getOrElse(index) { false },
-//                selected = selected,
-//                onClick = onNavigateTo,
-//            )
-//        }
-//    }
+    val state = rememberWideNavigationRailState()
+    val scope = rememberCoroutineScope()
 
-    NavigationRail(
-        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        containerColor = Color.Transparent,
-        modifier = Modifier.padding(vertical = 14.dp)
+    WideNavigationRail(
+        state = state,
+        header = {
+            IconButton(
+                modifier = Modifier.padding(start = 24.dp),
+                onClick = {
+                    scope.launch {
+                        if (state.targetValue == WideNavigationRailValue.Expanded)
+                            state.collapse()
+                        else state.expand()
+                    }
+                },
+            ) {
+                if (state.targetValue == WideNavigationRailValue.Expanded) {
+                    Icon(Icons.AutoMirrored.Filled.MenuOpen, "")
+                } else {
+                    Icon(Icons.Filled.Menu, "")
+                }
+            }
+        },
     ) {
-        logo()
-
         screens.forEachIndexed { index, screen ->
             val selected: Boolean =
                 currentDestination?.hierarchy?.any { it.route == screen.route } == true
 
-            AppNavRailItem(
+            WideAppNavRailItem(
+                expanded = state.targetValue == WideNavigationRailValue.Expanded,
                 screen = screen,
                 showBadge = showBadges.getOrElse(index) { false },
                 selected = selected,
-                onClick = onNavigateTo
+                onClick = onNavigateTo,
             )
         }
     }

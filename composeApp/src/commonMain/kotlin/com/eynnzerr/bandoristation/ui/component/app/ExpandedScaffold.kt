@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.ui.component.app
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,7 @@ fun ExpandedScaffold(
     modifier: Modifier = Modifier,
     screens: List<Screen> = emptyList(),
     showBadges: List<Boolean> = emptyList(),
+    showNavigation: Boolean = false,
     onNavigateTo: (Screen) -> Unit = {},
     currentDestination: NavDestination?,
     topBar: @Composable () -> Unit = {},
@@ -40,21 +42,25 @@ fun ExpandedScaffold(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-       AppNavRail(
-           screens = screens,
-           showBadges = showBadges,
-           onNavigateTo = onNavigateTo,
-           currentDestination = currentDestination,
-           logo = {
-               appProperty.bandTheme.bandIcon?.let {
-                   Image(
-                       painter = painterResource(it),
-                       contentDescription = null,
-                       modifier = Modifier.size(48.dp).padding(bottom = 16.dp)
-                   )
-               }
-           }
-       )
+        AnimatedVisibility(
+            visible = showNavigation,
+        ) {
+            AppNavRail(
+                screens = screens,
+                showBadges = showBadges,
+                onNavigateTo = onNavigateTo,
+                currentDestination = currentDestination,
+                logo = {
+                    appProperty.bandTheme.bandIcon?.let {
+                        Image(
+                            painter = painterResource(it),
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp).padding(bottom = 16.dp)
+                        )
+                    }
+                }
+            )
+        }
 
         Scaffold(
             modifier = modifier.fillMaxSize(),

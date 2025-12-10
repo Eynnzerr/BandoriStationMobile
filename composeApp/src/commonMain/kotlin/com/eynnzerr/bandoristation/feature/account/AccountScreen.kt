@@ -352,11 +352,7 @@ fun AccountScreen(
             }
         },
         content = {
-            SuiteScaffold(
-                isExpanded = isExpanded,
-                screens = Screen.bottomScreenList,
-                currentDestination = navBackStackEntry?.destination,
-                onNavigateTo = navController::navigateTo,
+            Scaffold(
                 snackbarHost = {
                     SnackbarHost(
                         hostState = snackbarHostState,

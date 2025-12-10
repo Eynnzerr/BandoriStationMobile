@@ -31,6 +31,7 @@ import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -369,13 +370,8 @@ fun HomeScreen(
     )
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    SuiteScaffold(
-        scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
-        isExpanded = isExpanded,
-        screens = Screen.bottomScreenList,
-        showBadges = listOf(false, state.hasUnReadMessages, false),
-        currentDestination = navBackStackEntry?.destination,
-        onNavigateTo = { viewModel.sendEffect(HomeEffect.NavigateToScreen(it)) },
+    Scaffold(
+        modifier = Modifier.appBarScroll(true, scrollBehavior),
         topBar = {
             AppTopBar(
                 title = stringResource(state.title),
@@ -428,7 +424,6 @@ fun HomeScreen(
                 }
             )
         },
-        bottomBar = {},
         floatingActionButton = {
             FloatingActionButtonMenu(
                 expanded = fabMenuExpanded,
