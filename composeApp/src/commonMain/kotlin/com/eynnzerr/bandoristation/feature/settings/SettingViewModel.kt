@@ -20,6 +20,8 @@ import com.eynnzerr.bandoristation.usecase.encryption.UpdateInviteCodeUseCase
 import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
 class SettingViewModel(
     private val setUpClientUseCase: SetUpClientUseCase,
@@ -36,6 +38,10 @@ class SettingViewModel(
 ) {
     override suspend fun onInitialize() {
         dataStore.data.collect { p ->
+            val currentTimestamp = Clock.System.now().toEpochMilliseconds()
+            val registerExpireTimestamp = p[PreferenceKeys.REGISTER_EXPIRE_TIME] ?: currentTimestamp
+            val encryptionValidDays = (registerExpireTimestamp - currentTimestamp).milliseconds.inWholeDays
+
             internalState.update {
                 it.copy(
                     themeName = p[PreferenceKeys.BAND_THEME] ?: "",
@@ -44,7 +50,8 @@ class SettingViewModel(
                     isShowingPlayerInfo = p[PreferenceKeys.SHOW_PLAER_BRIEF] ?: false,
                     isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true,
                     autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 10L,
-                    isEncryptionEnabled = p[PreferenceKeys.ENCRYPTION_TOKEN] != null,
+                    isEncryptionEnabled = p[PreferenceKeys.ENCRYPTION_TOKEN] != null && encryptionValidDays > 0,
+                    encryptionValidDays = encryptionValidDays,
                     inviteCode = p[PreferenceKeys.ENCRYPTION_INVITE_CODE] ?: "",
                     followingUsers = p[PreferenceKeys.FOLLOWING_LIST]?.map { s -> s.toLong() } ?: emptyList()
                 )

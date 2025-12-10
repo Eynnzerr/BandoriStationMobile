@@ -27,4 +27,5 @@ object PreferenceKeys {
     val ENABLE_ENCRYPTION = booleanPreferencesKey("enable_encryption") // enable room number encryption
     val ENCRYPTION_INVITE_CODE = stringPreferencesKey("encryption_invite_code") // invite code required for viewing user's room number
     val ENCRYPTION_TOKEN = stringPreferencesKey("encryption_token") // token used to communicate with encryption server.
+    val REGISTER_EXPIRE_TIME = longPreferencesKey("register_expire_time") // last timestamp of register encryption
 }

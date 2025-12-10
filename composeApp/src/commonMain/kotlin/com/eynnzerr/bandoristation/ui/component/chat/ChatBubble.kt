@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
 
 @Composable
 fun ChatBubble(
@@ -104,7 +105,7 @@ fun DrawScope.drawTriangle(
 @Preview()
 @Composable
 fun ChatBubblePreview() {
-    MaterialTheme {
+    BandoriTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()

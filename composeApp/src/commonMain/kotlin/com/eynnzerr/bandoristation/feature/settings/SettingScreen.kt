@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
 import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.outlined.Block
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.SaveAlt
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -69,8 +71,10 @@ import bandoristationm.composeapp.generated.resources.settings_version_title
 import com.eynnzerr.bandoristation.feature.settings.SettingEvent.*
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.BandThemeButton
+import com.eynnzerr.bandoristation.ui.component.settings.MainCard
 import com.eynnzerr.bandoristation.ui.component.settings.SettingDropdownItem
 import com.eynnzerr.bandoristation.ui.component.settings.SettingItem
+import com.eynnzerr.bandoristation.ui.component.settings.SettingsGroup
 import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
 import com.eynnzerr.bandoristation.ui.dialog.InvitationCodeDialog
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
@@ -192,137 +196,193 @@ fun SettingScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingItem(
-                title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
-                desc = stringResource(Res.string.settings_auto_clear_expired_rooms_desc),
-                icon = Icons.Outlined.Schedule,
+            MainCard(
                 action = {
-                    Switch(
-                        checked = state.isClearingOutdatedRoom,
-                        onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateClearOutdatedRoom(it)) }
-                    )
-                },
-                onClick = {}
-            )
-
-            SettingItem(
-                title = stringResource(Res.string.settings_auto_filter_pjsk_title),
-                desc = stringResource(Res.string.settings_auto_filter_pjsk_desc),
-                icon = Icons.Outlined.Block,
-                action = {
-                    Switch(
-                        checked = state.isFilteringPJSK,
-                        onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateFilterPJSK(it)) }
-                    )
-                },
-                onClick = {}
-            )
-
-            SettingItem(
-                title = stringResource(Res.string.settings_show_player_data_title),
-                desc = stringResource(Res.string.settings_show_player_data_desc),
-                icon = Icons.Outlined.SaveAlt,
-                action = {
-                    Switch(
-                        checked = state.isRecordingRoomHistory,
-                        onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateRecordRoomHistory(it)) }
-                    )
-                },
-                onClick = {}
-            )
-
-            var intervalText by remember(state.autoUploadInterval) { mutableStateOf(state.autoUploadInterval.toString()) }
-            SettingItem(
-                title = stringResource(Res.string.settings_auto_upload_interval_title),
-                desc = stringResource(Res.string.settings_auto_upload_interval_desc),
-                icon = Icons.Outlined.Schedule,
-                action = {
-                    OutlinedTextField(
-                        value = intervalText,
-                        onValueChange = {
-                            intervalText = it.filter { ch -> ch.isDigit() }
-                            intervalText.toLongOrNull()?.let { v ->
-                                if (v >= 8) {
-                                    viewModel.sendEvent(SettingEvent.UpdateAutoUploadInterval(v))
-                                }
-                            }
-                        },
-                        modifier = Modifier.width(80.dp),
-                        singleLine = true,
-                        isError = intervalText.toLongOrNull()?.let { interval -> interval < 8 } ?: false
-                    )
-                },
-                onClick = {}
-            )
-
-            SettingDropdownItem(
-                title = stringResource(Res.string.theme),
-                desc = stringResource(Res.string.theme_desc),
-                icon = Icons.Outlined.Palette,
-            ) {
-                Row(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .fillMaxWidth()
-                        .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    bandThemeList.forEach {
-                        BandThemeButton(
-                            bandTheme = it,
-                            selected = it.name == state.themeName,
-                            onSelect = { viewModel.sendEvent(SettingEvent.UpdateBandTheme(it.name)) }
+                    if (state.isEncryptionEnabled) {
+                        Text(
+                            text = "${state.encryptionValidDays}天",
+                            // color = MaterialTheme.colorScheme.error
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Outlined.Error,
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.error
                         )
                     }
-                }
+                },
+                onClick = { viewModel.sendEvent(RegisterEncryption()) }
+            )
+
+            Text(
+                text = "扩展功能",
+                style = MaterialTheme.typography.labelLargeEmphasized,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 32.dp, bottom = 8.dp)
+            )
+
+            SettingsGroup {
+                SettingItem(
+                    enable = state.isEncryptionEnabled,
+                    title = stringResource(Res.string.settings_encrypt_code_title),
+                    desc = stringResource(Res.string.settings_encrypt_code_desc),
+                    icon = Icons.Outlined.GroupAdd,
+                    onClick = {
+                        showInvitationCodeDialog = true
+                    }
+                )
+
+                SettingItem(
+                    enable = state.isEncryptionEnabled,
+                    title = stringResource(Res.string.settings_encrypt_list_title),
+                    desc = stringResource(Res.string.settings_encrypt_list_desc),
+                    icon = Icons.AutoMirrored.Outlined.List,
+                    onClick = {
+                        viewModel.sendEffect(SettingEffect.ControlListDialog(true))
+                    }
+                )
             }
 
-            SettingItem(
-                title = stringResource(Res.string.settings_encrypt_login_title),
-                desc = stringResource(Res.string.settings_encrypt_login_desc),
-                icon = Icons.AutoMirrored.Outlined.Login,
-                onClick = {
-                    viewModel.sendEvent(SettingEvent.RegisterEncryption())
-                }
+            Text(
+                text = "基本设置",
+                style = MaterialTheme.typography.labelLargeEmphasized,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
 
-            SettingItem(
-                title = stringResource(Res.string.settings_encrypt_code_title),
-                desc = stringResource(Res.string.settings_encrypt_code_desc),
-                icon = Icons.Outlined.GroupAdd,
-                enable = state.isEncryptionEnabled,
-                onClick = {
-                    showInvitationCodeDialog = true
-                }
+            SettingsGroup {
+                SettingItem(
+                    title = stringResource(Res.string.theme),
+                    desc = stringResource(Res.string.theme_desc),
+                    icon = Icons.Outlined.Palette,
+                    action = {
+
+                    },
+                    onClick = {}
+                )
+
+//            SettingDropdownItem(
+//                title = stringResource(Res.string.theme),
+//                desc = stringResource(Res.string.theme_desc),
+//                icon = Icons.Outlined.Palette,
+//            ) {
+//                Row(
+//                    modifier = Modifier
+//                        .padding(horizontal = 12.dp)
+//                        .fillMaxWidth()
+//                        .horizontalScroll(rememberScrollState()),
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+//                ) {
+//                    bandThemeList.forEach {
+//                        BandThemeButton(
+//                            bandTheme = it,
+//                            selected = it.name == state.themeName,
+//                            onSelect = { viewModel.sendEvent(SettingEvent.UpdateBandTheme(it.name)) }
+//                        )
+//                    }
+//                }
+//            }
+
+                SettingItem(
+                    title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
+                    desc = stringResource(Res.string.settings_auto_clear_expired_rooms_desc),
+                    icon = Icons.Outlined.Schedule,
+                    action = {
+                        Switch(
+                            checked = state.isClearingOutdatedRoom,
+                            onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateClearOutdatedRoom(it)) }
+                        )
+                    },
+                    onClick = {}
+                )
+
+                SettingItem(
+                    title = stringResource(Res.string.settings_auto_filter_pjsk_title),
+                    desc = stringResource(Res.string.settings_auto_filter_pjsk_desc),
+                    icon = Icons.Outlined.Block,
+                    action = {
+                        Switch(
+                            checked = state.isFilteringPJSK,
+                            onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateFilterPJSK(it)) }
+                        )
+                    },
+                    onClick = {}
+                )
+
+                SettingItem(
+                    title = stringResource(Res.string.settings_show_player_data_title),
+                    desc = stringResource(Res.string.settings_show_player_data_desc),
+                    icon = Icons.Outlined.SaveAlt,
+                    action = {
+                        Switch(
+                            checked = state.isRecordingRoomHistory,
+                            onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateRecordRoomHistory(it)) }
+                        )
+                    },
+                    onClick = {}
+                )
+
+                var intervalText by remember(state.autoUploadInterval) { mutableStateOf(state.autoUploadInterval.toString()) }
+                SettingItem(
+                    title = stringResource(Res.string.settings_auto_upload_interval_title),
+                    desc = stringResource(Res.string.settings_auto_upload_interval_desc),
+                    icon = Icons.Outlined.Schedule,
+                    action = {
+                        OutlinedTextField(
+                            value = intervalText,
+                            onValueChange = {
+                                intervalText = it.filter { ch -> ch.isDigit() }
+                                intervalText.toLongOrNull()?.let { v ->
+                                    if (v >= 8) {
+                                        viewModel.sendEvent(SettingEvent.UpdateAutoUploadInterval(v))
+                                    }
+                                }
+                            },
+                            modifier = Modifier.width(80.dp),
+                            singleLine = true,
+                            isError = intervalText.toLongOrNull()?.let { interval -> interval < 8 } ?: false
+                        )
+                    },
+                    onClick = {}
+                )
+
+//            SettingItem(
+//                title = stringResource(Res.string.settings_encrypt_login_title),
+//                desc = stringResource(Res.string.settings_encrypt_login_desc),
+//                icon = Icons.AutoMirrored.Outlined.Login,
+//                onClick = {
+//                    viewModel.sendEvent(SettingEvent.RegisterEncryption())
+//                }
+//            )
+            }
+
+            Text(
+                text = "其它",
+                style = MaterialTheme.typography.labelLargeEmphasized,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
 
-            SettingItem(
-                title = stringResource(Res.string.settings_encrypt_list_title),
-                desc = stringResource(Res.string.settings_encrypt_list_desc),
-                icon = Icons.AutoMirrored.Outlined.List,
-                enable = state.isEncryptionEnabled,
-                onClick = {
-                    viewModel.sendEffect(SettingEffect.ControlListDialog(true))
-                }
-            )
+            SettingsGroup {
+                SettingItem(
+                    title = stringResource(Res.string.settings_tutorial_title),
+                    desc = stringResource(Res.string.settings_tutorial_desc),
+                    icon = Icons.Outlined.School,
+                    onClick = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(true)) }
+                )
 
-            SettingItem(
-                title = stringResource(Res.string.settings_tutorial_title),
-                desc = stringResource(Res.string.settings_tutorial_desc),
-                icon = Icons.Outlined.School,
-                onClick = { viewModel.sendEffect(SettingEffect.ControlTutorialDialog(true)) }
-            )
-
-            SettingItem(
-                title = stringResource(Res.string.settings_version_title),
-                desc = state.versionName,
-                icon = Icons.Outlined.Update,
-                onClick = {
-                    // 检查更新
-                }
-            )
+                SettingItem(
+                    title = stringResource(Res.string.settings_version_title),
+                    desc = state.versionName,
+                    icon = Icons.Outlined.Update,
+                    onClick = {
+                        // 检查更新
+                    }
+                )
+            }
         }
     }
 }

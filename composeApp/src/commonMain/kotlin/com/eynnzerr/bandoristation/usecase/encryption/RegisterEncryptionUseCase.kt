@@ -16,6 +16,8 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
 
 class RegisterEncryptionUseCase(
     private val repository: AppRepository,
@@ -35,8 +37,11 @@ class RegisterEncryptionUseCase(
             onSuccess = { response ->
                 val wrapper = NetResponseHelper.parseApiResponse<UserRegisterResponse>(response)
                 return wrapper?.let { w ->
-                    dataStore.edit { p -> p[PreferenceKeys.ENCRYPTION_TOKEN] = w.token }
-                    encryptionSocketClient.connect() // try to connect for the first time.
+                    dataStore.edit { p ->
+                        p[PreferenceKeys.ENCRYPTION_TOKEN] = w.token
+                        p[PreferenceKeys.REGISTER_EXPIRE_TIME] = (Clock.System.now() + 30.days).toEpochMilliseconds()
+                    }
+                    encryptionSocketClient.connect() // try to connect. If already connected, return.
                     UseCaseResult.Success(w.token)
                 } ?:UseCaseResult.Error("Failed to parse getRoomNumberFilterResponse.")
             },
