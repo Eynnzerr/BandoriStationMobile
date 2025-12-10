@@ -43,6 +43,7 @@ import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
@@ -508,11 +509,10 @@ class HomeViewModel(
                             internalState.update {
                                 it.copy(selectedUser = response.data)
                             }
-                            sendEffect(ControlProfileDialog(true))
                         }
                     }
                 }
-                null to null
+                state.value.copy(selectedUser = AccountInfo()) to ControlProfileDialog(true)
             }
 
             is HomeIntent.FollowUser -> {

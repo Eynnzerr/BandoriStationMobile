@@ -9,6 +9,7 @@ import com.eynnzerr.bandoristation.feature.settings.SettingEffect.*
 import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.usecase.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.usecase.clientName
@@ -226,11 +227,10 @@ class SettingViewModel(
                             internalState.update {
                                 it.copy(selectedUser = response.data)
                             }
-                            sendEffect(ControlProfileDialog(true))
                         }
                     }
                 }
-                null to null
+                state.value.copy(selectedUser = AccountInfo()) to ControlProfileDialog(true)
             }
 
             is SettingEvent.FollowUser -> {

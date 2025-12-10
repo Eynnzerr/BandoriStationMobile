@@ -25,6 +25,7 @@ import com.eynnzerr.bandoristation.feature.chat.ChatEffect.*
 import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.formatTimestampAsDate
@@ -234,8 +235,7 @@ class ChatViewModel(
 
             is ChatIntent.BrowseUser -> {
                 viewModelScope.launch {
-                    val response = getUserInfoUseCase.invoke(event.id)
-                    when (response) {
+                    when (val response = getUserInfoUseCase.invoke(event.id)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> {
                             sendEffect(ShowSnackbar(response.error))
@@ -244,11 +244,10 @@ class ChatViewModel(
                             internalState.update {
                                 it.copy(selectedUser = response.data)
                             }
-                            sendEffect(ControlProfileDialog(true))
                         }
                     }
                 }
-                null to null
+                state.value.copy(selectedUser = AccountInfo()) to ControlProfileDialog(true)
             }
 
             is ChatIntent.FollowUser -> {
