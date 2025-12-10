@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,8 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -40,10 +44,11 @@ import bandoristationm.composeapp.generated.resources.send_room_dialog_icon_desc
 import bandoristationm.composeapp.generated.resources.send_room_dialog_new_preset_word_label
 import bandoristationm.composeapp.generated.resources.send_room_dialog_no_preset_words
 import bandoristationm.composeapp.generated.resources.send_room_dialog_preset_words_button
+import bandoristationm.composeapp.generated.resources.send_room_dialog_room_number_error
 import bandoristationm.composeapp.generated.resources.send_room_dialog_room_number_label
 import bandoristationm.composeapp.generated.resources.send_room_dialog_send_button
 import bandoristationm.composeapp.generated.resources.send_room_dialog_title
-import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
+import com.eynnzerr.bandoristation.utils.AppLogger
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -73,8 +78,9 @@ fun SendRoomDialog(
         var continuous by remember { mutableStateOf(false) }
         var isEncrypted by remember { mutableStateOf(false) }
         var isAddWordsExpanded by remember { mutableStateOf(false) }
+        var isRoomNumberError by remember { mutableStateOf(false) }
         val focusRequester = remember { FocusRequester() }
-
+        val focusManager = LocalFocusManager.current
 
         AlertDialog(
             onDismissRequest = onDismissRequest,
@@ -95,13 +101,34 @@ fun SendRoomDialog(
                     // 房间号输入框
                     OutlinedTextField(
                         value = roomNumber,
-                        onValueChange = { roomNumber = it },
+                        onValueChange = {
+                            val newText = it.filter { char -> char.isDigit() }
+                            if (newText.length <= 6) {
+                                roomNumber = newText
+                            }
+                            isRoomNumberError = newText.length != 6
+                        },
                         label = { Text(stringResource(Res.string.send_room_dialog_room_number_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = { roomNumber = "" }) {
                                 Icon(Icons.Filled.Clear, contentDescription = stringResource(Res.string.send_room_dialog_clear_icon_desc))
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Next
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = {
+                                focusRequester.requestFocus()
+                            }
+                        ),
+                        isError = isRoomNumberError,
+                        supportingText = {
+                            if (isRoomNumberError) {
+                                Text(stringResource(Res.string.send_room_dialog_room_number_error))
                             }
                         }
                     )
@@ -123,7 +150,14 @@ fun SendRoomDialog(
                         },
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Done
-                        )
+                        ),
+//                        keyboardActions = KeyboardActions(
+//                            onDone = {
+//                                // keyboardController?.hide()
+//                                focusManager.clearFocus()
+//                                defaultKeyboardAction(ImeAction.Done)
+//                            }
+//                        )
                     )
 
                     // 预选词部分
@@ -255,7 +289,7 @@ fun SendRoomDialog(
             },
             confirmButton = {
                 TextButton(
-                    enabled = roomNumber.isNotBlank() && description.text.isNotBlank(),
+                    enabled = roomNumber.isNotBlank() && description.text.isNotBlank() && !isRoomNumberError,
                     onClick = {
                         onSendClick(roomNumber, description.text.trim(), continuous, isEncrypted)
                         onDismissRequest()
@@ -283,10 +317,10 @@ fun SendRoomDialogPreview() {
         onDismissRequest = {  },
         onSendClick = { _, _, _ , _->  },
         onAddPresetWord = { word ->
-            presetWords.value = presetWords.value + word
+            presetWords.value += word
         },
         onDeletePresetWord = { word ->
-            presetWords.value = presetWords.value - word
+            presetWords.value -= word
         }
     )
 }

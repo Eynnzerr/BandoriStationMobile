@@ -145,6 +145,7 @@
     <string name="send_room_dialog_encrypt_checkbox">是否加密车牌(999999)</string>
     <string name="send_room_dialog_send_button">发送</string>
     <string name="send_room_dialog_cancel_button">取消</string>
+    <string name="send_room_dialog_room_number_error">房间号必须为6位数字</string>
 
     <!-- 更新通知对话框 -->
     <string name="update_dialog_title">发现新版本 %1$s</string>

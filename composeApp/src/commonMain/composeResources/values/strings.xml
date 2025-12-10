@@ -145,6 +145,7 @@
     <string name="send_room_dialog_encrypt_checkbox">Encrypt room number (999999)</string>
     <string name="send_room_dialog_send_button">Send</string>
     <string name="send_room_dialog_cancel_button">Cancel</string>
+    <string name="send_room_dialog_room_number_error">Room number must be 6 digits.</string>
 
     <!-- Update Dialog -->
     <string name="update_dialog_title">New version available: %1$s</string>
