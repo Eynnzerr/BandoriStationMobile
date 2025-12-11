@@ -2,7 +2,7 @@ package com.eynnzerr.bandoristation
 
 import androidx.compose.ui.window.ComposeUIViewController
 import platform.UIKit.UIViewController
-import com.eynnzerr.bandoristation.installCrashHandler
+import com.eynnzerr.bandoristation.handler.installCrashHandler
 
 fun MainViewController(): UIViewController {
     installCrashHandler()

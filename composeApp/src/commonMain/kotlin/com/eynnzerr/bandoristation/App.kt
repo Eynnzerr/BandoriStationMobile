@@ -7,6 +7,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import coil3.annotation.ExperimentalCoilApi
 import com.eynnzerr.bandoristation.di.appModule
+import com.eynnzerr.bandoristation.handler.StartConnectionHandler
+import com.eynnzerr.bandoristation.handler.WebSocketLifecycleHandler
 import com.eynnzerr.bandoristation.navigation.RootNavGraph
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
@@ -55,7 +57,6 @@ fun App() {
                             RootNavGraph(
                                 navController = appNavController,
                                 startDestination = if (isFirstLaunch) Screen.Tutorial else Screen.Home,
-                                // startDestination = Screen.Tutorial
                             )
                         }
                         // While loading, this will be empty, preventing a flicker.

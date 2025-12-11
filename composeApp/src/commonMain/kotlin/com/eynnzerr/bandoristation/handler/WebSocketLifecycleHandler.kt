@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation
+package com.eynnzerr.bandoristation.handler
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect

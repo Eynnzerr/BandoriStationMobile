@@ -1,4 +1,4 @@
-package com.eynnzerr.bandoristation
+package com.eynnzerr.bandoristation.handler
 
 /**
  * Install platform specific uncaught exception handler that presents

@@ -1,9 +1,8 @@
-package com.eynnzerr.bandoristation
+package com.eynnzerr.bandoristation.handler
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
-import com.eynnzerr.bandoristation.di.DispatcherQualifiers
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
