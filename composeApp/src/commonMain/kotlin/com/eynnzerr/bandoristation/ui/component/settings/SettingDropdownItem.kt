@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 fun SettingDropdownItem(
     modifier: Modifier = Modifier,
     enable: Boolean = true,
-    selected: Boolean = false,
     title: String,
     desc: String? = null,
     icon: ImageVector? = null,
@@ -33,7 +32,6 @@ fun SettingDropdownItem(
             title = title,
             modifier = modifier,
             enable = enable,
-            selected = selected,
             desc = desc,
             icon = icon,
             action = {

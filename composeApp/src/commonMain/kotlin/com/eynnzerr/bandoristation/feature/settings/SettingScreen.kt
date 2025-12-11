@@ -1,5 +1,6 @@
 package com.eynnzerr.bandoristation.feature.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -254,37 +256,28 @@ fun SettingScreen(
             )
 
             SettingsGroup {
-                SettingItem(
+                SettingDropdownItem(
                     title = stringResource(Res.string.theme),
                     desc = stringResource(Res.string.theme_desc),
                     icon = Icons.Outlined.Palette,
-                    action = {
-
-                    },
-                    onClick = {}
-                )
-
-//            SettingDropdownItem(
-//                title = stringResource(Res.string.theme),
-//                desc = stringResource(Res.string.theme_desc),
-//                icon = Icons.Outlined.Palette,
-//            ) {
-//                Row(
-//                    modifier = Modifier
-//                        .padding(horizontal = 12.dp)
-//                        .fillMaxWidth()
-//                        .horizontalScroll(rememberScrollState()),
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-//                ) {
-//                    bandThemeList.forEach {
-//                        BandThemeButton(
-//                            bandTheme = it,
-//                            selected = it.name == state.themeName,
-//                            onSelect = { viewModel.sendEvent(SettingEvent.UpdateBandTheme(it.name)) }
-//                        )
-//                    }
-//                }
-//            }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 12.dp)
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState())
+                            .background(Color.Transparent),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        bandThemeList.forEach {
+                            BandThemeButton(
+                                bandTheme = it,
+                                selected = it.name == state.themeName,
+                                onSelect = { viewModel.sendEvent(SettingEvent.UpdateBandTheme(it.name)) }
+                            )
+                        }
+                    }
+                }
 
                 SettingItem(
                     title = stringResource(Res.string.settings_auto_clear_expired_rooms_title),
