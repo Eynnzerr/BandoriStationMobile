@@ -13,6 +13,8 @@ import org.jetbrains.compose.resources.StringResource
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.home_screen_title
 import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupDetails
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupMessage
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.ui.dialog.RequestRoomState
 import kotlin.time.Clock
@@ -42,6 +44,10 @@ data class HomeState (
     // for approve request dialog
     val accessRequestQueue: List<RoomAccessRequest> = emptyList(),
     val encryptedRoomNumber: String? = null,
+    // for chat group logic
+    val isInChat: Boolean = false,
+    val chatGroups: List<ChatGroupDetails> = emptyList(),
+    val groupMessages: List<ChatGroupMessage> = emptyList(),
 ) : UIState {
     companion object {
         fun initial() = HomeState(
@@ -85,6 +91,8 @@ sealed class HomeIntent: UIEvent {
         val addToBlacklist: Boolean = false,
         val addToWhiteList: Boolean = false,
     ): HomeIntent()
+
+
 }
 
 sealed class HomeEffect: UIEffect {
@@ -117,4 +125,6 @@ sealed class HomeEffect: UIEffect {
     data class OpenUpdateDialog(val release: GithubRelease): HomeEffect()
     class CloseUpdateDialog(): HomeEffect()
     data class ControlProfileDialog(val visible: Boolean): HomeEffect()
+    data class ControlCreateChatGroupDialog(val visible: Boolean): HomeEffect()
+    data class ControlDrawer(val visible: Boolean): HomeEffect()
 }

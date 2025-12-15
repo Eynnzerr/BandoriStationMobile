@@ -35,7 +35,7 @@ fun ChatBubble(
     val bubbleColor = if (isMyMessage) {
         MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.secondary
+        MaterialTheme.colorScheme.inversePrimary
     }
 
     Column(

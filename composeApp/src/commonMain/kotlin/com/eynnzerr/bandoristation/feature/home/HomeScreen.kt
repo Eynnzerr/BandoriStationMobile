@@ -4,6 +4,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.outlined.FilterAlt
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material3.DrawerValue
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -31,6 +33,8 @@ import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -41,6 +45,7 @@ import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.animateFloatingActionButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -62,6 +67,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import bandoristationm.composeapp.generated.resources.request_room_dialog_copy_button
+import com.eynnzerr.bandoristation.feature.chat_group.GroupChatScreen
+import com.eynnzerr.bandoristation.feature.chat_group.GroupListScreen
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
 import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.UserInfo
@@ -84,6 +91,7 @@ import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import com.eynnzerr.bandoristation.model.GithubRelease
 import com.eynnzerr.bandoristation.ui.animation.ExpressiveVisibility
 import com.eynnzerr.bandoristation.ui.dialog.ApproveRequestDialog
+import com.eynnzerr.bandoristation.ui.dialog.CreateChatGroupDialog
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -99,9 +107,7 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
     val uriHandler = LocalUriHandler.current
-    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val clipboardManager = LocalClipboardManager.current
@@ -114,12 +120,14 @@ fun HomeScreen(
     var showHelpDialog by remember { mutableStateOf(false) }
     var showUpdateDialog by remember { mutableStateOf(false) }
     var showProfileDialog by remember { mutableStateOf(false) }
+    var showCreateGroupDialog by remember { mutableStateOf(false) }
     var latestRelease by remember { mutableStateOf<GithubRelease?>(null) }
     var roomToInform : RoomInfo? by remember { mutableStateOf(null) }
     var userToBlock: UserInfo? by remember { mutableStateOf(null) }
     var prefillRoomNumber by remember { mutableStateOf("") }
     var prefillDescription by remember { mutableStateOf("") }
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     val isFirstItemVisible by remember {
         derivedStateOf {
@@ -258,6 +266,20 @@ fun HomeScreen(
                 is HomeEffect.ControlProfileDialog -> {
                     showProfileDialog = action.visible
                 }
+
+                is HomeEffect.ControlCreateChatGroupDialog -> {
+                    showCreateGroupDialog = action.visible
+                }
+
+                is HomeEffect.ControlDrawer -> {
+                    coroutineScope.launch {
+                        if (action.visible) {
+                            drawerState.open()
+                        } else {
+                            drawerState.close()
+                        }
+                    }
+                }
             }
         }
     }
@@ -369,186 +391,224 @@ fun HomeScreen(
         hasFollowed = state.selectedUser.accountSummary.userId in state.followingUsers,
     )
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    Scaffold(
-        modifier = Modifier.appBarScroll(true, scrollBehavior),
-        topBar = {
-            AppTopBar(
-                title = stringResource(state.title),
-                scrollBehavior = scrollBehavior,
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            viewModel.sendEffect(HomeEffect.NavigateToScreen(Screen.Settings))
+    CreateChatGroupDialog(
+        isVisible = showCreateGroupDialog,
+        onDismissRequest = { viewModel.sendEffect(HomeEffect.ControlCreateChatGroupDialog(false)) },
+        onConfirm = {
+            // TODO 创建新房间
+        }
+    )
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = false,
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                if (state.isInChat) {
+                    GroupChatScreen(
+                        onClose = { viewModel.sendEffect(HomeEffect.ControlDrawer(false)) },
+                        onQuit = {
+                            // TODO 退出群组
+                        },
+                        onSend = {
+                            // TODO 发送消息
+                        },
+                    )
+                } else {
+                    GroupListScreen(
+                        onClose = { viewModel.sendEffect(HomeEffect.ControlDrawer(false)) },
+                        onCreateClick = {
+                            // TODO 打开新建房间对话框
+                        },
+                        chatGroups = state.chatGroups,
+                    )
+                }
+            }
+        },
+    ) {
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+        Scaffold(
+            modifier = Modifier.appBarScroll(true, scrollBehavior),
+            topBar = {
+                AppTopBar(
+                    title = stringResource(state.title),
+                    scrollBehavior = scrollBehavior,
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                viewModel.sendEffect(HomeEffect.NavigateToScreen(Screen.Settings))
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Settings,
+                                contentDescription = ""
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Settings,
-                            contentDescription = ""
-                        )
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                viewModel.sendEffect(HomeEffect.OpenHelpDialog())
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
+                                contentDescription = "",
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                viewModel.sendEvent(RefreshRooms())
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Refresh,
+                                contentDescription = ""
+                            )
+                        }
+
+                        IconButton(
+                            onClick = {
+                                viewModel.sendEffect(HomeEffect.OpenFilterDialog())
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.FilterAlt,
+                                contentDescription = ""
+                            )
+                        }
                     }
-                },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            viewModel.sendEffect(HomeEffect.OpenHelpDialog())
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButtonMenu(
+                    expanded = fabMenuExpanded,
+                    button = {
+                        ToggleFloatingActionButton(
+                            checked = fabMenuExpanded,
+                            onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }
+                        ) {
+                            val imageVector by remember {
+                                derivedStateOf {
+                                    if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
+                                }
+                            }
+                            Icon(
+                                painter = rememberVectorPainter(imageVector),
+                                contentDescription = null,
+                                modifier = Modifier.animateIcon({ checkedProgress }),
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
-                            contentDescription = "",
+                    },
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    FloatingActionButtonMenuItem(
+                        onClick = { viewModel.sendEffect(HomeEffect.OpenSendRoomDialog()) },
+                        icon = { Icon(Icons.Filled.Upload, null) },
+                        text = { Text("上传房间") }
+                    )
+
+                    FloatingActionButtonMenuItem(
+                        onClick = { viewModel.sendEffect(HomeEffect.ControlDrawer(true)) },
+                        icon = { Icon(Icons.AutoMirrored.Filled.Chat, null) },
+                        text = { Text("群聊") }
+                    )
+                }
+            },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        ) { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp),
+                state = lazyListState,
+            ) {
+                stickyHeader(key = -1) {
+                    Box(modifier = Modifier.size(1.dp)) // 防止无RoomHeader时错误的滑动逻辑
+                    ExpressiveVisibility(visible = state.selectedRoom != null) {
+                        CurrentRoomHeader(
+                            roomInfo = state.selectedRoom ?: RoomInfo(),
+                            currentTimeMillis = state.serverTimestampMillis,
+                            startTimeMillis = state.joinedTimestampMillis,
+                            onCopy = { roomNumber ->
+                                viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
+                            },
+                            onPublish = {
+                                state.selectedRoom?.let { selectedRoom ->
+                                    viewModel.sendEffect(
+                                        HomeEffect.OpenSendRoomDialog(
+                                            prefillRoomNumber = selectedRoom.number ?: "",
+                                            prefillDescription = selectedRoom.rawMessage ?: ""
+                                        )
+                                    )
+                                }
+                            },
+                            onLeave = {
+                                viewModel.sendEvent(JoinRoom(null))
+                            },
+                            modifier = Modifier.padding(bottom = 16.dp)
                         )
                     }
 
-                    IconButton(
-                        onClick = {
-                            viewModel.sendEvent(RefreshRooms())
-                        }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Refresh,
-                            contentDescription = ""
-                        )
-                    }
-
-                    IconButton(
-                        onClick = {
-                            viewModel.sendEffect(HomeEffect.OpenFilterDialog())
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.FilterAlt,
-                            contentDescription = ""
+                        ExtendedFloatingActionButton(
+                            text = { Text("回到顶部", style = MaterialTheme.typography.labelLarge) },
+                            icon = { Icon(Icons.Rounded.ArrowUpward, contentDescription = null, modifier = Modifier.size(18.dp)) },
+                            onClick = { viewModel.sendEffect(HomeEffect.ScrollToFirst()) },
+                            shape = MaterialTheme.shapes.extraLarge,
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
+                            modifier = Modifier
+                                .heightIn(max = 40.dp)
+                                .animateFloatingActionButton(
+                                    visible = !isFirstItemVisible && state.rooms.isNotEmpty(),
+                                    alignment = Alignment.BottomEnd,
+                                ),
                         )
                     }
                 }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButtonMenu(
-                expanded = fabMenuExpanded,
-                button = {
-                    ToggleFloatingActionButton(
-                        checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }
-                    ) {
-                        val imageVector by remember {
-                            derivedStateOf {
-                                if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
-                            }
-                        }
-                        Icon(
-                            painter = rememberVectorPainter(imageVector),
-                            contentDescription = null,
-                            modifier = Modifier.animateIcon({ checkedProgress }),
-                        )
-                    }
-                },
-                horizontalAlignment = Alignment.End,
-            ) {
-                FloatingActionButtonMenuItem(
-                    onClick = {  },
-                    icon = { Icon(Icons.AutoMirrored.Filled.Chat, null) },
-                    text = { Text("群聊") }
-                )
 
-                FloatingActionButtonMenuItem(
-                    onClick = { viewModel.sendEffect(HomeEffect.OpenSendRoomDialog()) },
-                    icon = { Icon(Icons.Filled.Upload, null) },
-                    text = { Text("上传房间") }
-                )
-            }
-        },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp),
-            state = lazyListState,
-        ) {
-            stickyHeader(key = -1) {
-                Box(modifier = Modifier.size(1.dp)) // 防止无RoomHeader时错误的滑动逻辑
-                ExpressiveVisibility(visible = state.selectedRoom != null) {
-                    CurrentRoomHeader(
-                        roomInfo = state.selectedRoom ?: RoomInfo(),
-                        currentTimeMillis = state.serverTimestampMillis,
-                        startTimeMillis = state.joinedTimestampMillis,
+                itemsIndexed(
+                    items = state.rooms.asReversed(),
+                    key = { index, item ->
+                        state.rooms.size - 1 - index // reverse index
+                    }
+                ) { index, roomInfo ->
+                    RoomCard(
+                        roomInfo = roomInfo,
                         onCopy = { roomNumber ->
                             viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
                         },
-                        onPublish = {
-                            state.selectedRoom?.let { selectedRoom ->
-                                viewModel.sendEffect(
-                                    HomeEffect.OpenSendRoomDialog(
-                                        prefillRoomNumber = selectedRoom.number ?: "",
-                                        prefillDescription = selectedRoom.rawMessage ?: ""
-                                    )
-                                )
-                            }
+                        onJoin = { joined ->
+                            viewModel.sendEvent(JoinRoom(if (joined) roomInfo else null))
                         },
-                        onLeave = {
-                            viewModel.sendEvent(JoinRoom(null))
+                        onBlockUser = {
+                            roomInfo.userInfo?.let { viewModel.sendEffect(HomeEffect.OpenBlockUserDialog(it)) }
                         },
-                        modifier = Modifier.padding(bottom = 16.dp)
+                        onReportUser = {
+                            viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo))
+                        },
+                        onClickUserAvatar = {
+                            viewModel.sendEvent(BrowseUser(roomInfo.userInfo?.userId ?: -1))
+                        },
+                        isJoined = roomInfo == state.selectedRoom,
+                        isEncrypted = roomInfo.number == "999999" && roomInfo.userInfo?.userId != state.userId,
+                        onRequest = {
+                            viewModel.sendEvent(OnRequestRoom(roomInfo))
+                        },
+                        currentTimeMillis = state.serverTimestampMillis,
+                        modifier = Modifier.animateItem()
                     )
                 }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    ExtendedFloatingActionButton(
-                        text = { Text("回到顶部", style = MaterialTheme.typography.labelLarge) },
-                        icon = { Icon(Icons.Rounded.ArrowUpward, contentDescription = null, modifier = Modifier.size(18.dp)) },
-                        onClick = { viewModel.sendEffect(HomeEffect.ScrollToFirst()) },
-                        shape = MaterialTheme.shapes.extraLarge,
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
-                        modifier = Modifier
-                            .heightIn(max = 40.dp)
-                            .animateFloatingActionButton(
-                                visible = !isFirstItemVisible && state.rooms.isNotEmpty(),
-                                alignment = Alignment.BottomEnd,
-                            ),
-                    )
-                }
-            }
-
-            itemsIndexed(
-                items = state.rooms.asReversed(),
-                key = { index, item ->
-                    state.rooms.size - 1 - index // reverse index
-                }
-            ) { index, roomInfo ->
-                RoomCard(
-                    roomInfo = roomInfo,
-                    onCopy = { roomNumber ->
-                        viewModel.sendEffect(HomeEffect.CopyRoomNumber(roomNumber))
-                    },
-                    onJoin = { joined ->
-                        viewModel.sendEvent(JoinRoom(if (joined) roomInfo else null))
-                    },
-                    onBlockUser = {
-                        roomInfo.userInfo?.let { viewModel.sendEffect(HomeEffect.OpenBlockUserDialog(it)) }
-                    },
-                    onReportUser = {
-                        viewModel.sendEffect(HomeEffect.OpenInformUserDialog(roomInfo))
-                    },
-                    onClickUserAvatar = {
-                        viewModel.sendEvent(BrowseUser(roomInfo.userInfo?.userId ?: -1))
-                    },
-                    isJoined = roomInfo == state.selectedRoom,
-                    isEncrypted = roomInfo.number == "999999" && roomInfo.userInfo?.userId != state.userId,
-                    onRequest = {
-                        viewModel.sendEvent(OnRequestRoom(roomInfo))
-                    },
-                    currentTimeMillis = state.serverTimestampMillis,
-                    modifier = Modifier.animateItem()
-                )
             }
         }
     }

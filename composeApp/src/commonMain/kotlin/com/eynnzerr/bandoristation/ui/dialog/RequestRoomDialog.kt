@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -105,10 +106,13 @@ fun RequestRoomDialog(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            CircularProgressIndicator(
+                            LoadingIndicator(
                                 modifier = Modifier.padding(vertical = 16.dp)
                             )
-                            Text(stringResource(Res.string.request_room_dialog_pending_text))
+                            Text(
+                                text = stringResource(Res.string.request_room_dialog_pending_text),
+                                style = MaterialTheme.typography.bodyLargeEmphasized,
+                            )
                         }
                     }
                     RequestRoomState.SUCCESS -> {
@@ -119,7 +123,7 @@ fun RequestRoomDialog(
                             Text(stringResource(Res.string.request_room_dialog_success_text), style = MaterialTheme.typography.bodyLarge)
                             Spacer(Modifier.height(8.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(roomNumber ?: "", style = MaterialTheme.typography.headlineMedium)
+                                Text(roomNumber ?: "", style = MaterialTheme.typography.headlineMediumEmphasized)
                                 IconButton(onClick = { onCopy(roomNumber ?: "") }) {
                                     Icon(imageVector = Icons.Default.ContentCopy, contentDescription = stringResource(Res.string.request_room_dialog_copy_button))
                                 }
@@ -139,7 +143,8 @@ fun RequestRoomDialog(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = errorMessage ?: stringResource(Res.string.request_room_dialog_error_unknown)
+                                text = errorMessage ?: stringResource(Res.string.request_room_dialog_error_unknown),
+                                style = MaterialTheme.typography.bodyLargeEmphasized,
                             )
                         }
                     }

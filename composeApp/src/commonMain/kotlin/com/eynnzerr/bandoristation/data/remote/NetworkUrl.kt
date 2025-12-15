@@ -20,4 +20,7 @@ object NetworkUrl {
     const val ADD_BLACKLIST = "blacklist/add"
     const val REMOVE_BLACKLIST = "blacklist/remove"
     const val GET_LISTS = "lists"
+    const val CREATE_CHAT = "chat/create"
+    const val JOIN_CHAT = "chat/join"
+    const val GET_ALL_GROUPS = "chat/all_groups"
 }

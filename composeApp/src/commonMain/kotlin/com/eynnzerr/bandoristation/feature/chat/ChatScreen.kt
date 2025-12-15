@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.eynnzerr.bandoristation.ui.component.chat.BottomTextBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,10 +83,7 @@ fun ChatScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    var messageText by remember { mutableStateOf("") }
     var showProfileDialog by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -217,35 +215,11 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = messageText,
-                    onValueChange = { messageText = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text(stringResource(Res.string.chat_message_input_placeholder)) },
-                    maxLines = 3
-                )
-                IconButton(
-                    onClick = {
-                        // Handle send message
-                        if (messageText.isNotBlank()) {
-                            viewModel.sendEvent(ChatIntent.SendChat(messageText))
-                            messageText = ""
-                        }
-                    },
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = ""
-                    )
+            BottomTextBar(
+                onSend = {
+                    viewModel.sendEvent(ChatIntent.SendChat(it))
                 }
-            }
+            )
         },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
