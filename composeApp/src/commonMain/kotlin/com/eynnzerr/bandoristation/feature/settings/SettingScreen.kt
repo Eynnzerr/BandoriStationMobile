@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.List
-import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GroupAdd
@@ -50,6 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.settings_back_button_desc
+import bandoristationm.composeapp.generated.resources.settings_basic_settings
+import bandoristationm.composeapp.generated.resources.settings_encryption_valid_days
+import bandoristationm.composeapp.generated.resources.settings_error_icon_desc
+import bandoristationm.composeapp.generated.resources.settings_extended_features
+import bandoristationm.composeapp.generated.resources.settings_no_data
+import bandoristationm.composeapp.generated.resources.settings_other
 import bandoristationm.composeapp.generated.resources.settings_screen_title
 import bandoristationm.composeapp.generated.resources.theme
 import bandoristationm.composeapp.generated.resources.theme_desc
@@ -65,8 +71,6 @@ import bandoristationm.composeapp.generated.resources.settings_encrypt_code_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_title
 import bandoristationm.composeapp.generated.resources.settings_encrypt_list_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_list_title
-import bandoristationm.composeapp.generated.resources.settings_encrypt_login_desc
-import bandoristationm.composeapp.generated.resources.settings_encrypt_login_title
 import bandoristationm.composeapp.generated.resources.settings_tutorial_title
 import bandoristationm.composeapp.generated.resources.settings_tutorial_desc
 import bandoristationm.composeapp.generated.resources.settings_version_title
@@ -159,7 +163,7 @@ fun SettingScreen(
                 modifier = Modifier.size(100.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text("暂无")
+                Text(stringResource(Res.string.settings_no_data))
             }
         }
     )
@@ -187,7 +191,7 @@ fun SettingScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
-                            contentDescription = ""
+                            contentDescription = stringResource(Res.string.settings_back_button_desc)
                         )
                     }
                 },
@@ -205,13 +209,13 @@ fun SettingScreen(
                 action = {
                     if (state.isEncryptionEnabled) {
                         Text(
-                            text = "${state.encryptionValidDays}天",
+                            text = stringResource(Res.string.settings_encryption_valid_days, state.encryptionValidDays),
                             // color = MaterialTheme.colorScheme.error
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Outlined.Error,
-                            contentDescription = "",
+                            contentDescription = stringResource(Res.string.settings_error_icon_desc),
                             tint = MaterialTheme.colorScheme.error
                         )
                     }
@@ -220,7 +224,7 @@ fun SettingScreen(
             )
 
             Text(
-                text = "扩展功能",
+                text = stringResource(Res.string.settings_extended_features),
                 style = MaterialTheme.typography.labelLargeEmphasized,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 32.dp, bottom = 8.dp)
@@ -249,7 +253,7 @@ fun SettingScreen(
             }
 
             Text(
-                text = "基本设置",
+                text = stringResource(Res.string.settings_basic_settings),
                 style = MaterialTheme.typography.labelLargeEmphasized,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -341,19 +345,10 @@ fun SettingScreen(
                     },
                     onClick = {}
                 )
-
-//            SettingItem(
-//                title = stringResource(Res.string.settings_encrypt_login_title),
-//                desc = stringResource(Res.string.settings_encrypt_login_desc),
-//                icon = Icons.AutoMirrored.Outlined.Login,
-//                onClick = {
-//                    viewModel.sendEvent(SettingEvent.RegisterEncryption())
-//                }
-//            )
             }
 
             Text(
-                text = "其它",
+                text = stringResource(Res.string.settings_other),
                 style = MaterialTheme.typography.labelLargeEmphasized,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)

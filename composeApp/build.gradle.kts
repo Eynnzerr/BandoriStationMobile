@@ -124,8 +124,8 @@ android {
         applicationId = "com.eynnzerr.bandoristation"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
     }
 
     packaging {
@@ -185,7 +185,7 @@ compose.desktop {
             includeAllModules = true
             // modules("java.instrument", "java.management", "jdk.security.auth", "jdk.unsupported")
             packageName = "BandoristationM"
-            packageVersion = "1.0.2"
+            packageVersion = "1.0.3"
 
             macOS {
                 iconFile.set(project.file("desktop_icons/desktop_icon_macos.icns"))

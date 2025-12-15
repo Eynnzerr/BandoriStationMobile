@@ -60,7 +60,8 @@ fun RootNavGraph (
             navController = navController,
             route = "host",
             startDestination = startDestination.route,
-            modifier = Modifier.padding(innerPadding), // 包括bottomBar的padding
+            modifier = Modifier
+                .padding(bottom = innerPadding.calculateBottomPadding()),
         ) {
             animatedComposable(Destinations.HOME_ROUTE) {
                 HomeScreen(navController)

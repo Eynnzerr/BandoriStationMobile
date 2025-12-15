@@ -27,10 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.chat_group_list_title
+import bandoristationm.composeapp.generated.resources.close_button_desc
+import bandoristationm.composeapp.generated.resources.create_chat_room
+import bandoristationm.composeapp.generated.resources.enter_chat_room
 import com.eynnzerr.bandoristation.model.chat_group.ChatGroupDetails
 import com.eynnzerr.bandoristation.model.chat_group.OwnerInfo
 import com.eynnzerr.bandoristation.ui.component.chat_group.ChatGroupItem
 import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
+import org.jetbrains.compose.resources.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,14 +48,14 @@ fun GroupListScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(text = "聊天群组一览") },
+                title = { Text(text = stringResource(Res.string.chat_group_list_title)) },
                 navigationIcon = {
                     IconButton(
                         onClick = onClose
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.close_button_desc),
                         )
                     }
                 },
@@ -59,7 +65,7 @@ fun GroupListScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
+                            contentDescription = stringResource(Res.string.enter_chat_room),
                         )
                     }
                 },
@@ -89,7 +95,7 @@ fun GroupListScreen(
                         modifier = Modifier.size(ButtonDefaults.IconSize)
                     )
                     Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                    Text("创建聊天室")
+                    Text(stringResource(Res.string.create_chat_room))
                 }
             }
 

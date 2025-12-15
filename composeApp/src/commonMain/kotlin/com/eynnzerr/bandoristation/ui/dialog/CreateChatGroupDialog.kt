@@ -14,6 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.create_chat_group_dialog_label
+import bandoristationm.composeapp.generated.resources.create_chat_group_dialog_title
+import bandoristationm.composeapp.generated.resources.create_chat_group_icon_desc
 import bandoristationm.composeapp.generated.resources.dialog_cancel
 import bandoristationm.composeapp.generated.resources.dialog_confirm
 import org.jetbrains.compose.resources.stringResource
@@ -32,17 +35,17 @@ fun CreateChatGroupDialog(
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.AddCircleOutline,
-                    contentDescription = null
+                    contentDescription = stringResource(Res.string.create_chat_group_icon_desc)
                 )
             },
             title = {
-                Text("新建聊天房间")
+                Text(stringResource(Res.string.create_chat_group_dialog_title))
             },
             text = {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("邀请码") },
+                    label = { Text(stringResource(Res.string.create_chat_group_dialog_label)) },
                     singleLine = true,
                 )
             },

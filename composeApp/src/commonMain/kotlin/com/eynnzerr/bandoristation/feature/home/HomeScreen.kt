@@ -26,7 +26,6 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
@@ -63,10 +62,17 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import bandoristationm.composeapp.generated.resources.request_room_dialog_copy_button
+import bandoristationm.composeapp.generated.resources.home_add_fab_desc
+import bandoristationm.composeapp.generated.resources.home_filter_icon_desc
+import bandoristationm.composeapp.generated.resources.home_group_chat
+import bandoristationm.composeapp.generated.resources.home_help_icon_desc
+import bandoristationm.composeapp.generated.resources.home_refresh_icon_desc
+import bandoristationm.composeapp.generated.resources.home_scroll_to_top
+import bandoristationm.composeapp.generated.resources.home_settings_icon_desc
+import bandoristationm.composeapp.generated.resources.home_upload_room
 import com.eynnzerr.bandoristation.feature.chat_group.GroupChatScreen
 import com.eynnzerr.bandoristation.feature.chat_group.GroupListScreen
 import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
@@ -74,11 +80,9 @@ import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
-import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.room.CurrentRoomHeader
 import com.eynnzerr.bandoristation.ui.component.room.RoomCard
-import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.dialog.BlockUserDialog
 import com.eynnzerr.bandoristation.ui.dialog.HelpDialog
 import com.eynnzerr.bandoristation.ui.dialog.InformDialog
@@ -443,7 +447,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Settings,
-                                contentDescription = ""
+                                contentDescription = stringResource(Res.string.home_settings_icon_desc)
                             )
                         }
                     },
@@ -455,7 +459,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
-                                contentDescription = "",
+                                contentDescription = stringResource(Res.string.home_help_icon_desc),
                             )
                         }
 
@@ -466,7 +470,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.Refresh,
-                                contentDescription = ""
+                                contentDescription = stringResource(Res.string.home_refresh_icon_desc)
                             )
                         }
 
@@ -477,7 +481,7 @@ fun HomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Outlined.FilterAlt,
-                                contentDescription = ""
+                                contentDescription = stringResource(Res.string.home_filter_icon_desc)
                             )
                         }
                     }
@@ -498,7 +502,7 @@ fun HomeScreen(
                             }
                             Icon(
                                 painter = rememberVectorPainter(imageVector),
-                                contentDescription = null,
+                                contentDescription = stringResource(Res.string.home_add_fab_desc),
                                 modifier = Modifier.animateIcon({ checkedProgress }),
                             )
                         }
@@ -508,13 +512,16 @@ fun HomeScreen(
                     FloatingActionButtonMenuItem(
                         onClick = { viewModel.sendEffect(HomeEffect.OpenSendRoomDialog()) },
                         icon = { Icon(Icons.Filled.Upload, null) },
-                        text = { Text("上传房间") }
+                        text = { Text(stringResource(Res.string.home_upload_room)) }
                     )
 
                     FloatingActionButtonMenuItem(
-                        onClick = { viewModel.sendEffect(HomeEffect.ControlDrawer(true)) },
+                        onClick = {
+                            // viewModel.sendEffect(HomeEffect.ControlDrawer(true))
+                            viewModel.sendEffect(HomeEffect.ShowSnackbar("该功能即将推出，敬请期待..."))
+                        },
                         icon = { Icon(Icons.AutoMirrored.Filled.Chat, null) },
-                        text = { Text("群聊") }
+                        text = { Text(stringResource(Res.string.home_group_chat)) }
                     )
                 }
             },
@@ -560,7 +567,7 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         ExtendedFloatingActionButton(
-                            text = { Text("回到顶部", style = MaterialTheme.typography.labelLarge) },
+                            text = { Text(stringResource(Res.string.home_scroll_to_top), style = MaterialTheme.typography.labelLarge) },
                             icon = { Icon(Icons.Rounded.ArrowUpward, contentDescription = null, modifier = Modifier.size(18.dp)) },
                             onClick = { viewModel.sendEffect(HomeEffect.ScrollToFirst()) },
                             shape = MaterialTheme.shapes.extraLarge,
@@ -613,5 +620,4 @@ fun HomeScreen(
         }
     }
 }
-
 private const val TAG = "HomeScreen"

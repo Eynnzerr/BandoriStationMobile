@@ -12,7 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
@@ -24,12 +23,10 @@ import androidx.navigation.compose.rememberNavController
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
-import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.EditAccountButton
 import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
-import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.UserProfile
 import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
 import com.eynnzerr.bandoristation.ui.dialog.FollowListDialog
