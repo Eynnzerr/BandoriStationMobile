@@ -15,12 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.ToggleButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -180,10 +184,11 @@ fun UserProfile(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // 标签页
-                TabRow(
+                SecondaryTabRow(
                     selectedTabIndex = selectedTabIndex,
                     containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
@@ -284,15 +289,26 @@ private fun StatisticsContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Row(
-            modifier = Modifier.padding(top = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.padding(top = 16.dp, start = 8.dp, end = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween)
         ) {
             TimeGranularity.entries.forEach { granularity ->
-                FilterChip(
-                    selected = selectedGranularity == granularity,
-                    onClick = { selectedGranularity = granularity },
-                    label = { Text(granularity.displayName) }
-                )
+                ToggleButton(
+                    checked = selectedGranularity == granularity,
+                    onCheckedChange = { selectedGranularity = granularity },
+                    modifier = when (granularity) {
+                        TimeGranularity.MONTHLY -> Modifier.weight(1.5f)
+                        else -> Modifier.weight(1f)
+                    },
+                    colors = ToggleButtonDefaults.tonalToggleButtonColors(),
+                    shapes = when (granularity) {
+                        TimeGranularity.DAILY -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        TimeGranularity.MONTHLY -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                        TimeGranularity.YEARLY -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                    },
+                ) {
+                    Text(granularity.displayName)
+                }
             }
         }
 

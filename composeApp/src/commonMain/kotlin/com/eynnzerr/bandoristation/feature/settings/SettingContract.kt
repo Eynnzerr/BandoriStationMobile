@@ -17,6 +17,7 @@ data class SettingState(
     val autoUploadInterval: Long = 10,
     val versionName: String = "",
     val isEncryptionEnabled: Boolean = false,
+    val encryptionValidDays: Long = 0,
     val inviteCode: String = "",
     val blacklist: List<String> = emptyList(),
     val whitelist: List<String> = emptyList(),

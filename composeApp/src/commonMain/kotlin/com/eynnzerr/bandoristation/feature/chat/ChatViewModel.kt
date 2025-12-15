@@ -17,32 +17,28 @@ import com.eynnzerr.bandoristation.usecase.chat.InitializeChatRoomUseCase
 import com.eynnzerr.bandoristation.usecase.chat.ReceiveHistoryChatUseCase
 import com.eynnzerr.bandoristation.usecase.chat.RequestHistoryChatUseCase
 import com.eynnzerr.bandoristation.usecase.chat.SendChatUseCase
-import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
-import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.usecase.account.GetUserInfoUseCase
 import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.usecase.websocket.ReceiveNoticeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.chat.ChatEffect.*
 import com.eynnzerr.bandoristation.model.ChatMessage
-import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.UserInfo
+import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
-import com.eynnzerr.bandoristation.usecase.clientName
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.formatTimestampAsDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 class ChatViewModel(
     private val getWebSocketStateUseCase: GetWebSocketStateUseCase,
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
-    private val setAccessPermissionUseCase: SetAccessPermissionUseCase,
-    private val setUpClientUseCase: SetUpClientUseCase,
     private val initializeChatRoomUseCase: InitializeChatRoomUseCase,
     private val getChatUseCase: GetChatUseCase,
     private val sendChatUseCase: SendChatUseCase,
@@ -64,14 +60,14 @@ class ChatViewModel(
                             AppLogger.d(TAG, "WebSocket is connected.")
 
                             internalState.update {
-                                it.copy(title = Res.string.chat_screen_title)
+                                it.copy(
+                                    title = Res.string.chat_screen_title,
+                                    isLoading = true,
+                                )
                             }
-                            setAccessPermissionUseCase(null)
-                            setUpClientUseCase(ClientSetInfo(
-                                client = clientName,
-                                sendRoomNumber = false,
-                                sendChat = true,
-                            ))
+
+                            // TODO 不可靠
+                            delay(1000L)
                             initializeChatRoom()
                         }
                         is WebSocketClient.ConnectionState.Connecting -> {
@@ -154,17 +150,17 @@ class ChatViewModel(
 
     override suspend fun onStartStateFlow() {
         // 每次重新进入页面，收集消息流前，都要重置消息列表，获取在其他页面停留期间服务端新增的消息
-        initializeChatRoom()
-
-        setUpClientUseCase(ClientSetInfo(
-            client = clientName,
-            sendRoomNumber = false,
-            sendChat = true,
-        ))
+//        initializeChatRoom()
+//
+//        setUpClientUseCase(ClientSetInfo(
+//            client = clientName,
+//            sendRoomNumber = false,
+//            sendChat = true,
+//        ))
     }
 
     private suspend fun initializeChatRoom() {
-        sendEvent(ChatIntent.Reset())
+        internalState.update { ChatState.initial() }
 
         when (val response = initializeChatRoomUseCase(Unit)) {
             is UseCaseResult.Error -> {
@@ -193,6 +189,7 @@ class ChatViewModel(
                     isLoading = false,
                 ) to null
             }
+
             is ChatIntent.ClearAll -> {
                 state.value.copy(
                     chats = emptyList(),
@@ -230,13 +227,15 @@ class ChatViewModel(
             }
 
             is ChatIntent.Reset -> {
-                ChatState.initial() to null
+                viewModelScope.launch {
+                    initializeChatRoom()
+                }
+                null to null
             }
 
             is ChatIntent.BrowseUser -> {
                 viewModelScope.launch {
-                    val response = getUserInfoUseCase.invoke(event.id)
-                    when (response) {
+                    when (val response = getUserInfoUseCase.invoke(event.id)) {
                         is UseCaseResult.Loading -> Unit
                         is UseCaseResult.Error -> {
                             sendEffect(ShowSnackbar(response.error))
@@ -245,11 +244,10 @@ class ChatViewModel(
                             internalState.update {
                                 it.copy(selectedUser = response.data)
                             }
-                            sendEffect(ControlProfileDialog(true))
                         }
                     }
                 }
-                null to null
+                state.value.copy(selectedUser = AccountInfo()) to ControlProfileDialog(true)
             }
 
             is ChatIntent.FollowUser -> {

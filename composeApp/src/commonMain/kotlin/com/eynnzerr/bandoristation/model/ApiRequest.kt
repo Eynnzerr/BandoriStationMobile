@@ -263,6 +263,26 @@ sealed class ApiRequest(
     )
 
     @Serializable
+    data class CreateChatRequest(
+        val roomName: String,
+        val ownerName: String,
+        val ownerAvatar: String,
+    ) : ApiRequest(
+        group = "Chat",
+        function = "create"
+    )
+
+    @Serializable
+    data class JoinChatRequest(
+        val ownerId: String,
+        val username: String,
+        val avatar: String,
+    ) : ApiRequest(
+        group = "Chat",
+        function = "join"
+    )
+
+    @Serializable
     class Empty : ApiRequest(
         group = "",
         function = ""

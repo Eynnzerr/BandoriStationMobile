@@ -21,6 +21,11 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
+
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+        freeCompilerArgs.add("-opt-in=androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+    }
     
     listOf(
         iosX64(),
@@ -40,8 +45,6 @@ kotlin {
         
         androidMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
-
-            implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
 
             implementation(libs.koin.android)
@@ -49,14 +52,14 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.material3AdaptiveNavigationSuite)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(compose.materialIconsExtended)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3.material3)
+            implementation(libs.compose.material3.adaptive.navigation.suite)
+            implementation(libs.compose.ui.ui)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.ui.preview)
+            implementation(libs.compose.material.icons.extended)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
 
@@ -121,8 +124,8 @@ android {
         applicationId = "com.eynnzerr.bandoristation"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
     }
 
     packaging {
@@ -182,7 +185,7 @@ compose.desktop {
             includeAllModules = true
             // modules("java.instrument", "java.management", "jdk.security.auth", "jdk.unsupported")
             packageName = "BandoristationM"
-            packageVersion = "1.0.2"
+            packageVersion = "1.0.3"
 
             macOS {
                 iconFile.set(project.file("desktop_icons/desktop_icon_macos.icns"))

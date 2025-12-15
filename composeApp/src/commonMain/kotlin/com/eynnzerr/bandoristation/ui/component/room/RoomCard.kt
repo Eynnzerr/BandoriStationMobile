@@ -33,8 +33,8 @@ import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.formatTimeDifference
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlinx.datetime.Clock
+import androidx.compose.ui.tooling.preview.Preview
+import kotlin.time.Clock
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

@@ -3,9 +3,12 @@ package com.eynnzerr.bandoristation
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import coil3.annotation.ExperimentalCoilApi
 import com.eynnzerr.bandoristation.di.appModule
+import com.eynnzerr.bandoristation.handler.StartConnectionHandler
+import com.eynnzerr.bandoristation.handler.WebSocketLifecycleHandler
 import com.eynnzerr.bandoristation.navigation.RootNavGraph
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
@@ -16,7 +19,6 @@ import com.eynnzerr.bandoristation.ui.theme.BandThemeConfig
 import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
 import com.eynnzerr.bandoristation.ui.theme.getBandConfig
 import com.eynnzerr.bandoristation.utils.ScreenInfo
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 
 @OptIn(ExperimentalCoilApi::class)
@@ -26,7 +28,9 @@ fun App() {
     KoinApplication(
         application = { modules(appModule) }
     ) {
+        // Global websocket setup
         WebSocketLifecycleHandler()
+        StartConnectionHandler()
 
         val preferences by PreferencesManager.preferencesFlow().collectAsState(initial = null)
         var screenInfo by remember { mutableStateOf(ScreenInfo()) }
@@ -53,7 +57,6 @@ fun App() {
                             RootNavGraph(
                                 navController = appNavController,
                                 startDestination = if (isFirstLaunch) Screen.Tutorial else Screen.Home,
-                                // startDestination = Screen.Tutorial
                             )
                         }
                         // While loading, this will be empty, preventing a flicker.

@@ -23,12 +23,10 @@ import androidx.navigation.compose.rememberNavController
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.copy_room_snackbar
 import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
-import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.EditAccountButton
 import com.eynnzerr.bandoristation.ui.dialog.LoginDialog
-import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.UserProfile
 import com.eynnzerr.bandoristation.ui.dialog.EditProfileDialog
 import com.eynnzerr.bandoristation.ui.dialog.FollowListDialog
@@ -40,7 +38,7 @@ import network.chaintech.cmpimagepickncrop.CMPImagePickNCropDialog
 import network.chaintech.cmpimagepickncrop.imagecropper.ImageAspectRatio
 import network.chaintech.cmpimagepickncrop.imagecropper.rememberImageCropper
 import org.jetbrains.compose.resources.getString
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 import bandoristationm.composeapp.generated.resources.account_following_list_title
 import bandoristationm.composeapp.generated.resources.account_no_followers_placeholder
@@ -351,11 +349,7 @@ fun AccountScreen(
             }
         },
         content = {
-            SuiteScaffold(
-                isExpanded = isExpanded,
-                screens = Screen.bottomScreenList,
-                currentDestination = navBackStackEntry?.destination,
-                onNavigateTo = navController::navigateTo,
+            Scaffold(
                 snackbarHost = {
                     SnackbarHost(
                         hostState = snackbarHostState,
@@ -371,7 +365,7 @@ fun AccountScreen(
                             .fillMaxSize()
                             .padding(paddingValues)
                     ) {
-                        CircularProgressIndicator(
+                        LoadingIndicator(
                             modifier = Modifier.align(Alignment.Center)
                         )
                     }

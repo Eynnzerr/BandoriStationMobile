@@ -1,6 +1,7 @@
 package com.eynnzerr.bandoristation.feature.chat
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -8,28 +9,28 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-// import androidx.compose.material.icons.filled.Send // Duplicate import
-import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.animateFloatingActionButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -40,21 +41,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import bandoristationm.composeapp.generated.resources.Res
-import bandoristationm.composeapp.generated.resources.chat_message_input_placeholder
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
-import com.eynnzerr.bandoristation.ui.common.LocalAppProperty
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.chat.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.chat.ChatPiece
-import com.eynnzerr.bandoristation.ui.component.app.SuiteScaffold
 import com.eynnzerr.bandoristation.ui.component.chat.TimePiece
 import com.eynnzerr.bandoristation.ui.component.chat.UnreadBubble
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
@@ -63,7 +60,8 @@ import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
+import com.eynnzerr.bandoristation.ui.component.chat.BottomTextBar
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,14 +73,17 @@ fun ChatScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val effect = rememberFlowWithLifecycle(viewModel.effect)
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val isExpanded = LocalAppProperty.current.screenInfo.isLandscape()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    var messageText by remember { mutableStateOf("") }
     var showProfileDialog by remember { mutableStateOf(false) }
     val lazyListState = rememberLazyListState()
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    val scaleFraction = {
+        if (state.isLoading) 1f
+        else LinearOutSlowInEasing.transform(pullToRefreshState.distanceFraction).coerceIn(0f, 1f)
+    }
 
     LaunchedEffect(effect) {
         effect.collect { action ->
@@ -167,12 +168,14 @@ fun ChatScreen(
         hasFollowed = state.selectedUser.accountSummary.userId in state.followingUsers,
     )
 
-    SuiteScaffold(
-        scaffoldModifier = Modifier.appBarScroll(true, scrollBehavior),
-        isExpanded = isExpanded,
-        screens = Screen.bottomScreenList,
-        currentDestination = navBackStackEntry?.destination,
-        onNavigateTo = { viewModel.sendEffect(ChatEffect.NavigateToScreen(it)) },
+    Scaffold(
+        modifier = Modifier
+            .appBarScroll(true, scrollBehavior)
+            .pullToRefresh(
+                state = pullToRefreshState,
+                isRefreshing = state.isLoading,
+                onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) }
+            ),
         topBar = {
             AppTopBar(
                 title = stringResource(state.title),
@@ -190,11 +193,11 @@ fun ChatScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            viewModel.sendEvent(ChatIntent.ClearAll())
+                            viewModel.sendEvent(ChatIntent.Reset())
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Delete,
+                            imageVector = Icons.Outlined.Refresh,
                             contentDescription = ""
                         )
                     }
@@ -202,34 +205,30 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = messageText,
-                    onValueChange = { messageText = it },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text(stringResource(Res.string.chat_message_input_placeholder)) },
-                    maxLines = 3
-                )
-                IconButton(
-                    onClick = {
-                        // Handle send message
-                        if (messageText.isNotBlank()) {
-                            viewModel.sendEvent(ChatIntent.SendChat(messageText))
-                            messageText = ""
-                        }
-                    },
-                    modifier = Modifier.padding(start = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Send,
-                        contentDescription = ""
-                    )
+            BottomTextBar(
+                onSend = {
+                    viewModel.sendEvent(ChatIntent.SendChat(it))
                 }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    viewModel.sendEffect(ChatEffect.ScrollToLatest())
+                },
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .zIndex(1f)
+                    .animateFloatingActionButton(
+                        visible = !isAtBottom,
+                        alignment = Alignment.BottomCenter,
+                    )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowDown,
+                    contentDescription = ""
+                )
             }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -238,37 +237,32 @@ fun ChatScreen(
             .fillMaxSize()
             .padding(innerPadding)
         ) {
-            PullToRefreshBox(
-                isRefreshing = state.isLoading,
-                onRefresh = { viewModel.sendEvent(ChatIntent.LoadMore()) },
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier
+                    .padding(16.dp),
             ) {
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier
-                        .padding(16.dp),
-                ) {
-                    itemsIndexed(
-                        items = state.chats,
-                        key = { _, item -> item.localId }
-                    ) { index, chatMessage ->
-                        Row(
-                            modifier = Modifier.animateItem()
-                        ) {
-                            if (chatMessage.userInfo.userId == null) {
-                                // System Message like date separator
-                                TimePiece(
-                                    chatMessage = chatMessage,
-                                )
-                            } else {
-                                // User Message
-                                ChatPiece(
-                                    chatMessage = chatMessage,
-                                    isMyMessage = chatMessage.userInfo.userId == state.selfId,
-                                    onClickAvatar = {
-                                        viewModel.sendEvent(ChatIntent.BrowseUser(chatMessage.userInfo.userId))
-                                    }
-                                )
-                            }
+                itemsIndexed(
+                    items = state.chats,
+                    key = { _, item -> item.localId }
+                ) { index, chatMessage ->
+                    Row(
+                        modifier = Modifier.animateItem()
+                    ) {
+                        if (chatMessage.userInfo.userId == null) {
+                            // System Message like date separator
+                            TimePiece(
+                                chatMessage = chatMessage,
+                            )
+                        } else {
+                            // User Message
+                            ChatPiece(
+                                chatMessage = chatMessage,
+                                isMyMessage = chatMessage.userInfo.userId == state.selfId,
+                                onClickAvatar = {
+                                    viewModel.sendEvent(ChatIntent.BrowseUser(chatMessage.userInfo.userId))
+                                }
+                            )
                         }
                     }
                 }
@@ -292,25 +286,13 @@ fun ChatScreen(
                 )
             }
 
-            AnimatedVisibility(
-                visible = !isAtBottom,
-                enter = fadeIn() + slideInVertically { it },
-                exit = fadeOut() + slideOutVertically { it },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
-                    .zIndex(1f)
-            ) {
-                FloatingActionButton(
-                    onClick = {
-                        viewModel.sendEffect(ChatEffect.ScrollToLatest())
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = ""
-                    )
+            Box(
+                Modifier.align(Alignment.TopCenter).graphicsLayer {
+                    scaleX = scaleFraction()
+                    scaleY = scaleFraction()
                 }
+            ) {
+                PullToRefreshDefaults.LoadingIndicator(state = pullToRefreshState, isRefreshing = state.isLoading)
             }
         }
     }

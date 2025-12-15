@@ -1,7 +1,7 @@
 package com.eynnzerr.bandoristation.utils
 
 import com.eynnzerr.bandoristation.model.room.RoomHistory
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
@@ -29,7 +29,7 @@ fun getCountDataByGranularity(
     historyList: List<RoomHistory>,
     granularity: TimeGranularity
 ): List<Pair<String, Float>> {
-    val now = Clock.System.now()
+    val now = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds())
     val timeZone = TimeZone.currentSystemDefault()
 
     val ret = when (granularity) {
@@ -112,7 +112,7 @@ fun getDurationDataByGranularity(
     historyList: List<RoomHistory>,
     granularity: TimeGranularity
 ): List<Pair<String, Float>> {
-    val now = Clock.System.now()
+    val now = Instant.fromEpochMilliseconds(Clock.System.now().toEpochMilliseconds())
     val timeZone = TimeZone.currentSystemDefault()
 
     // 过滤掉duration为-1的记录

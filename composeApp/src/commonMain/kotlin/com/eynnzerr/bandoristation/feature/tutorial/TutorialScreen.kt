@@ -42,10 +42,27 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.loading
+import bandoristationm.composeapp.generated.resources.tutorial_account_settings_title
+import bandoristationm.composeapp.generated.resources.tutorial_encryption_server
+import bandoristationm.composeapp.generated.resources.tutorial_finish
+import bandoristationm.composeapp.generated.resources.tutorial_help_icon_desc
+import bandoristationm.composeapp.generated.resources.tutorial_introduction_title
+import bandoristationm.composeapp.generated.resources.tutorial_login_register
+import bandoristationm.composeapp.generated.resources.tutorial_login_required
+import bandoristationm.composeapp.generated.resources.tutorial_logout
+import bandoristationm.composeapp.generated.resources.tutorial_next_step
+import bandoristationm.composeapp.generated.resources.tutorial_not_logged_in
+import bandoristationm.composeapp.generated.resources.tutorial_previous_step
+import bandoristationm.composeapp.generated.resources.tutorial_register_encryption
+import bandoristationm.composeapp.generated.resources.tutorial_server_connected
+import bandoristationm.composeapp.generated.resources.tutorial_server_disconnected
+import bandoristationm.composeapp.generated.resources.tutorial_station_server
 import com.eynnzerr.bandoristation.navigation.Screen
 import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
@@ -57,7 +74,8 @@ import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import com.mohamedrejeb.richeditor.ui.material3.RichText
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -201,7 +219,7 @@ fun TutorialScreen(
 @Composable
 fun IntroductionPage(onNext: () -> Unit) {
     val richTextState = rememberRichTextState()
-    var markdownContent by rememberSaveable { mutableStateOf("Loading...") }
+    var markdownContent by rememberSaveable { mutableStateOf("Loading ...") }
     LaunchedEffect(Unit) {
         markdownContent = Res.readBytes("files/help.md").decodeToString()
         richTextState.setMarkdown(markdownContent)
@@ -212,7 +230,7 @@ fun IntroductionPage(onNext: () -> Unit) {
         modifier = Modifier.appBarScroll(true, scrollBehavior),
         topBar = {
             LargeTopAppBar(
-                title = { Text("1. APP 介绍") },
+                title = { Text(stringResource(Res.string.tutorial_introduction_title)) },
                 navigationIcon = { },
                 actions = { },
                 scrollBehavior = scrollBehavior
@@ -225,7 +243,7 @@ fun IntroductionPage(onNext: () -> Unit) {
                     .fillMaxWidth()
                     .padding(12.dp)
             ) {
-                Text("下一步")
+                Text(stringResource(Res.string.tutorial_next_step))
             }
         }
     ) { paddingValues ->
@@ -276,7 +294,7 @@ fun LoginPage(
         modifier = Modifier.appBarScroll(true, scrollBehavior),
         topBar = {
             LargeTopAppBar(
-                title = { Text("2. 账号设置") },
+                title = { Text(stringResource(Res.string.tutorial_account_settings_title)) },
                 navigationIcon = { },
                 actions = {
                     IconButton(
@@ -284,7 +302,7 @@ fun LoginPage(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
-                            contentDescription = "",
+                            contentDescription = stringResource(Res.string.tutorial_help_icon_desc),
                         )
                     }
                 },
@@ -299,10 +317,10 @@ fun LoginPage(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 OutlinedButton(onClick = onBack) {
-                    Text("上一步")
+                    Text(stringResource(Res.string.tutorial_previous_step))
                 }
                 Button(onClick = onFinish) {
-                    Text("完成")
+                    Text(stringResource(Res.string.tutorial_finish))
                 }
             }
         },
@@ -332,14 +350,14 @@ fun LoginPage(
                     onClick = onLoginClick,
                     modifier = Modifier.width(156.dp)
                 ) {
-                    Text("退出登录", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(Res.string.tutorial_logout), color = MaterialTheme.colorScheme.error)
                 }
             } else {
                 Button(
                     onClick = onLoginClick,
                     modifier = Modifier.width(156.dp)
                 ) {
-                    Text("登录 / 注册")
+                    Text(stringResource(Res.string.tutorial_login_register))
                 }
             }
 
@@ -350,12 +368,12 @@ fun LoginPage(
                 modifier = Modifier.width(156.dp),
                 enabled = isLoggedIn,
             ) {
-                Text("注册加密服务")
+                Text(stringResource(Res.string.tutorial_register_encryption))
             }
 
             if (!isLoggedIn) {
                 Text(
-                    "*（需要登录）",
+                    stringResource(Res.string.tutorial_login_required),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 )
@@ -364,12 +382,12 @@ fun LoginPage(
             Spacer(Modifier.height(32.dp))
 
             ConnectionStatus(
-                name = "车站服务器",
+                name = stringResource(Res.string.tutorial_station_server),
                 isConnected = isStationConnected
             )
             Spacer(Modifier.height(8.dp))
             ConnectionStatus(
-                name = "加密服务器",
+                name = stringResource(Res.string.tutorial_encryption_server),
                 isConnected = isEncryptionConnected
             )
         }
@@ -391,7 +409,7 @@ private fun ConnectionStatus(name: String, isConnected: Boolean) {
         )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = if (isConnected) "$name: 已连接" else "$name: 未连接",
+            text = if (isConnected) stringResource(Res.string.tutorial_server_connected, name) else stringResource(Res.string.tutorial_server_disconnected, name),
             style = MaterialTheme.typography.bodyMedium,
             color = color
         )
@@ -410,7 +428,7 @@ fun LoginPagePreview() {
     LoginPage(
         isLoggedIn = false,
         userAvatar = "",
-        userName = "未登录",
+        userName = stringResource(Res.string.tutorial_not_logged_in),
         isStationConnected = false,
         isEncryptionConnected = false,
         onLoginClick = {},

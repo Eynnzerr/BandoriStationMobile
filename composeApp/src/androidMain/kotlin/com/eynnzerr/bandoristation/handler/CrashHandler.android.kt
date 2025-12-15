@@ -1,6 +1,9 @@
-package com.eynnzerr.bandoristation
+package com.eynnzerr.bandoristation.handler
 
 import android.content.Intent
+import com.eynnzerr.bandoristation.AppApplication
+import com.eynnzerr.bandoristation.CrashActivity
+import com.eynnzerr.bandoristation.getPlatform
 
 actual fun installCrashHandler() {
     Thread.setDefaultUncaughtExceptionHandler { _, e ->

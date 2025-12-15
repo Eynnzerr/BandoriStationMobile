@@ -30,12 +30,18 @@ import androidx.compose.ui.unit.dp
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.approve_request_dialog_add_to_blacklist
 import bandoristationm.composeapp.generated.resources.approve_request_dialog_add_to_whitelist
+import bandoristationm.composeapp.generated.resources.dialog_back_button_desc
 import bandoristationm.composeapp.generated.resources.dialog_confirm
+import bandoristationm.composeapp.generated.resources.wb_list_admin_icon_desc
+import bandoristationm.composeapp.generated.resources.wb_list_dialog_blacklist
+import bandoristationm.composeapp.generated.resources.wb_list_dialog_helper_text
+import bandoristationm.composeapp.generated.resources.wb_list_dialog_no_data
+import bandoristationm.composeapp.generated.resources.wb_list_dialog_title
+import bandoristationm.composeapp.generated.resources.wb_list_dialog_whitelist
 import com.eynnzerr.bandoristation.ui.component.PlainButton
 import com.eynnzerr.bandoristation.ui.component.WhiteBlackListItem
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
+import androidx.compose.ui.tooling.preview.Preview
 private enum class WhiteBlackListDialogState {
     SELECTION,
     BLACKLIST,
@@ -62,7 +68,7 @@ fun WhiteBlackListDialog(
             icon = {
                 Icon(
                     imageVector = Icons.Default.AdminPanelSettings,
-                    contentDescription = null
+                    contentDescription = stringResource(Res.string.wb_list_admin_icon_desc)
                 )
             },
             title = {
@@ -71,15 +77,15 @@ fun WhiteBlackListDialog(
                         IconButton(onClick = { state = WhiteBlackListDialogState.SELECTION }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "back"
+                                contentDescription = stringResource(Res.string.dialog_back_button_desc)
                             )
                         }
                     }
                     Text(
                         text = when (state) {
-                            WhiteBlackListDialogState.SELECTION -> "黑白名单管理"
-                            WhiteBlackListDialogState.BLACKLIST -> "黑名单"
-                            WhiteBlackListDialogState.WHITELIST -> "白名单"
+                            WhiteBlackListDialogState.SELECTION -> stringResource(Res.string.wb_list_dialog_title)
+                            WhiteBlackListDialogState.BLACKLIST -> stringResource(Res.string.wb_list_dialog_blacklist)
+                            WhiteBlackListDialogState.WHITELIST -> stringResource(Res.string.wb_list_dialog_whitelist)
                         }
                     )
                 }
@@ -109,7 +115,7 @@ fun WhiteBlackListDialog(
                             }
 
                             Text(
-                                text = "* 由于车站服务器未提供批量查询接口，出于APP性能考虑，在具体名单界面不获取展示用户信息，请点击头像查看具体用户。",
+                                text = stringResource(Res.string.wb_list_dialog_helper_text),
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(horizontal = 12.dp)
                             )
@@ -191,7 +197,7 @@ fun PreviewWhiteBlackListDialog() {
         onRemoveFromWhiteList = {},
         onViewUserInfo = {},
         placeholder = {
-            Text("暂无数据")
+            Text(stringResource(Res.string.wb_list_dialog_no_data))
         }
     )
 }

@@ -23,7 +23,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
+import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
 
 @Composable
 fun ChatBubble(
@@ -34,7 +35,7 @@ fun ChatBubble(
     val bubbleColor = if (isMyMessage) {
         MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.secondary
+        MaterialTheme.colorScheme.inversePrimary
     }
 
     Column(
@@ -62,10 +63,11 @@ fun ChatBubble(
                         color = bubbleColor
                     )
 
+                    val backgroundLeftX = if (isMyMessage) 0f else triangleWidth
                     drawRoundRect(
                         color = bubbleColor,
-                        topLeft = Offset(triangleWidth, 0f),
-                        size = Size(size.width - triangleWidth * 2, size.height),
+                        topLeft = Offset(backgroundLeftX, 0f),
+                        size = Size(size.width - triangleWidth, size.height),
                         cornerRadius = CornerRadius(cornerRadius, cornerRadius),
                     )
                 }
@@ -103,7 +105,7 @@ fun DrawScope.drawTriangle(
 @Preview()
 @Composable
 fun ChatBubblePreview() {
-    MaterialTheme {
+    BandoriTheme {
         Column(
             modifier = Modifier
                 .fillMaxSize()

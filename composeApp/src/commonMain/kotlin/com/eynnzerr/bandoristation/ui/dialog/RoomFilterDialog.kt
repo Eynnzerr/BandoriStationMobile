@@ -47,7 +47,7 @@ import bandoristationm.composeapp.generated.resources.room_filter_reset_button
 import com.eynnzerr.bandoristation.model.room.RoomFilter
 import com.eynnzerr.bandoristation.model.UserInfo
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun RoomFilterDialog(

@@ -5,12 +5,18 @@ This is a Multiplatform client app targeting Android, iOS, Desktop, designed for
 
 *BandoriStation Mobile* is based on **Compose Multiplatform**, with a MVI clean architecture, conforming to Material3 design style. It shares the same server with [BandoriStation](https://github.com/maborosh/BandoriStation).
 
-[Chinese Video Introduction](https://www.bilibili.com/video/BV1rjNzzkEWT/?share_source=copy_web&vd_source=24de01f99fa9ffa018cdcaea27980a1e) is availible.
+[Chinese Video Introduction](https://www.bilibili.com/video/BV1rjNzzkEWT/?share_source=copy_web&vd_source=24de01f99fa9ffa018cdcaea27980a1e) is available.
 
 ## Features
 
 - Same experience as the [website of BandoriStation](bandoristation.com).
-- More to discover.
+- Multiplatofrm support.
+- Responsive & Dynamic & Material3 expressive theme.
+- Auto reconnection after being disconnected.
+- Room history and data analysis.
+- Room number encryption support.
+- Group chat support.
+- More personalized & extended features.
 
 ## Previews
 
@@ -27,4 +33,4 @@ This is a Multiplatform client app targeting Android, iOS, Desktop, designed for
 
 [BandoriStation](https://github.com/maborosh/BandoriStation) for providing such a brilliant platform for players to find teammates and communicate.
 
-Contributions are welcomed!
+Contributions are welcome!

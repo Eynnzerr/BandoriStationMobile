@@ -26,11 +26,15 @@ import androidx.compose.ui.unit.dp
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.dialog_cancel
 import bandoristationm.composeapp.generated.resources.dialog_confirm
+import bandoristationm.composeapp.generated.resources.invitation_code_copied_icon_desc
+import bandoristationm.composeapp.generated.resources.invitation_code_copy_icon_desc
+import bandoristationm.composeapp.generated.resources.invitation_code_dialog_label
+import bandoristationm.composeapp.generated.resources.invitation_code_icon_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_helper_text
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_title
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun InvitationCodeDialog(
@@ -56,7 +60,7 @@ fun InvitationCodeDialog(
             icon = {
                 Icon(
                     imageVector = Icons.Outlined.GroupAdd,
-                    contentDescription = null
+                    contentDescription = stringResource(Res.string.invitation_code_icon_desc)
                 )
             },
             title = {
@@ -70,7 +74,7 @@ fun InvitationCodeDialog(
                     OutlinedTextField(
                         value = code,
                         onValueChange = { code = it },
-                        label = { Text("邀请码") },
+                        label = { Text(stringResource(Res.string.invitation_code_dialog_label)) },
                         singleLine = true,
                         trailingIcon = {
                             IconButton(onClick = {
@@ -79,7 +83,7 @@ fun InvitationCodeDialog(
                             }) {
                                 Icon(
                                     imageVector = if (isCopied) Icons.Filled.Check else Icons.Filled.ContentCopy,
-                                    contentDescription = null
+                                    contentDescription = if (isCopied) stringResource(Res.string.invitation_code_copied_icon_desc) else stringResource(Res.string.invitation_code_copy_icon_desc)
                                 )
                             }
                         }

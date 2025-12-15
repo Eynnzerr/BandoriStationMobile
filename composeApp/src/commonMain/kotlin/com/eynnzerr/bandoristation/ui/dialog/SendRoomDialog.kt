@@ -50,7 +50,7 @@ import bandoristationm.composeapp.generated.resources.send_room_dialog_send_butt
 import bandoristationm.composeapp.generated.resources.send_room_dialog_title
 import com.eynnzerr.bandoristation.utils.AppLogger
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * 房间信息对话框组件

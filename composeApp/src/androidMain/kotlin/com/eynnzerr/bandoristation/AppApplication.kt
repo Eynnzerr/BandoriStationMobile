@@ -3,7 +3,7 @@ package com.eynnzerr.bandoristation
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import com.eynnzerr.bandoristation.installCrashHandler
+import com.eynnzerr.bandoristation.handler.installCrashHandler
 
 class AppApplication : Application() {
     override fun onCreate() {

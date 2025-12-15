@@ -50,7 +50,7 @@ import bandoristationm.composeapp.generated.resources.edit_password_visibility_t
 import bandoristationm.composeapp.generated.resources.edit_password_visibility_toggle_show
 import bandoristationm.composeapp.generated.resources.help_dialog_title
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 enum class LoginScreenState {
     INITIAL,

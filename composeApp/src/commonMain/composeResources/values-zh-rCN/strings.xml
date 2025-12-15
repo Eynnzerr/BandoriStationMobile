@@ -222,4 +222,71 @@
 
     <!-- Tutorial Screen   -->
     <string name="tutorial_screen_title">教学</string>
+
+    <!-- Chat Group -->
+    <string name="chat_group_list_title">聊天群组一览</string>
+    <string name="create_chat_room">创建聊天室</string>
+    <string name="close_button_desc">关闭</string>
+    <string name="enter_chat_room">进入聊天室</string>
+
+    <!-- Tutorial -->
+    <string name="loading">加载中...</string>
+    <string name="tutorial_introduction_title">1. APP 介绍</string>
+    <string name="tutorial_next_step">下一步</string>
+    <string name="tutorial_account_settings_title">2. 账号设置</string>
+    <string name="tutorial_previous_step">上一步</string>
+    <string name="tutorial_finish">完成</string>
+    <string name="tutorial_logout">退出登录</string>
+    <string name="tutorial_login_register">登录 / 注册</string>
+    <string name="tutorial_register_encryption">注册加密服务</string>
+    <string name="tutorial_login_required">*（需要登录）</string>
+    <string name="tutorial_station_server">车站服务器</string>
+    <string name="tutorial_encryption_server">加密服务器</string>
+    <string name="tutorial_server_connected">%1$s: 已连接</string>
+    <string name="tutorial_server_disconnected">%1$s: 未连接</string>
+    <string name="tutorial_not_logged_in">未登录</string>
+    <string name="tutorial_help_icon_desc">帮助</string>
+
+    <!-- Home Screen -->
+    <string name="home_settings_icon_desc">设置</string>
+    <string name="home_help_icon_desc">帮助</string>
+    <string name="home_refresh_icon_desc">刷新</string>
+    <string name="home_filter_icon_desc">筛选</string>
+    <string name="home_add_fab_desc">添加</string>
+    <string name="home_upload_room">上传房间</string>
+    <string name="home_group_chat">群聊</string>
+    <string name="home_scroll_to_top">回到顶部</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_no_data">暂无</string>
+    <string name="settings_encryption_valid_days">%1$d天</string>
+    <string name="settings_extended_features">扩展功能</string>
+    <string name="settings_basic_settings">基本设置</string>
+    <string name="settings_other">其它</string>
+    <string name="settings_back_button_desc">返回</string>
+    <string name="settings_error_icon_desc">错误</string>
+
+    <!-- Chat Group Item -->
+    <string name="chat_group_owner">房主: %1$s</string>
+    <string name="chat_group_join">加入\n%1$d / 8</string>
+
+    <!-- White/Black List Dialog -->
+    <string name="dialog_back_button_desc">返回</string>
+    <string name="wb_list_dialog_title">黑白名单管理</string>
+    <string name="wb_list_dialog_blacklist">黑名单</string>
+    <string name="wb_list_dialog_whitelist">白名单</string>
+    <string name="wb_list_dialog_helper_text">* 由于车站服务器未提供批量查询接口，出于APP性能考虑，在具体名单界面不获取展示用户信息，请点击头像查看具体用户。</string>
+    <string name="wb_list_dialog_no_data">暂无数据</string>
+    <string name="wb_list_admin_icon_desc">管理</string>
+
+    <!-- Create Chat Group Dialog -->
+    <string name="create_chat_group_dialog_title">新建聊天房间</string>
+    <string name="create_chat_group_dialog_label">邀请码</string>
+    <string name="create_chat_group_icon_desc">创建聊天组</string>
+
+    <!-- Invitation Code Dialog -->
+    <string name="invitation_code_dialog_label">邀请码</string>
+    <string name="invitation_code_icon_desc">邀请码</string>
+    <string name="invitation_code_copy_icon_desc">复制</string>
+    <string name="invitation_code_copied_icon_desc">已复制</string>
 </resources>

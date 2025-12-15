@@ -1,8 +1,13 @@
 package com.eynnzerr.bandoristation.ui.component.chat
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
@@ -16,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
 import com.eynnzerr.bandoristation.utils.mockChatList
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ChatPiece(
@@ -24,36 +29,49 @@ fun ChatPiece(
     isMyMessage: Boolean = true,
     onClickAvatar: () -> Unit = {},
 ) {
-    if (isMyMessage) {
-        ChatBubble(
-            text = chatMessage.content,
-            isMyMessage = true,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-    } else {
-        Row(
-            verticalAlignment = Alignment.Top,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
+    val horizontalArrangement = if (isMyMessage) Arrangement.End else Arrangement.Start
+    val columnHorizontalAlignment = if (isMyMessage) Alignment.End else Alignment.Start
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = horizontalArrangement,
+        verticalAlignment = Alignment.Top
+    ) {
+        if (!isMyMessage) {
             UserAvatar(
                 avatarName = chatMessage.userInfo.avatar ?: "",
                 size = 56.dp,
                 onClick = onClickAvatar,
             )
-            Column(
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                Text(
-                    modifier = Modifier.padding(start = 8.dp, bottom = 4.dp),
-                    text = chatMessage.userInfo.username ?: "",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-                ChatBubble(
-                    text = chatMessage.content.trimEnd(),
-                    isMyMessage = false,
-                )
-            }
+            Spacer(Modifier.width(8.dp))
+        }
+
+        Column(
+            modifier = Modifier.weight(1f), // Add weight to push avatar to side
+            horizontalAlignment = columnHorizontalAlignment
+        ) {
+            Text(
+                text = chatMessage.userInfo.username ?: "",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                modifier = if (isMyMessage) Modifier.padding(end = 8.dp) else Modifier.padding(start = 8.dp)
+            )
+            Spacer(Modifier.height(4.dp))
+            ChatBubble(
+                text = chatMessage.content.trimEnd(),
+                isMyMessage = isMyMessage,
+            )
+        }
+
+        if (isMyMessage) {
+            Spacer(Modifier.width(8.dp))
+            UserAvatar(
+                avatarName = chatMessage.userInfo.avatar ?: "",
+                size = 56.dp,
+                onClick = onClickAvatar,
+            )
         }
     }
 }

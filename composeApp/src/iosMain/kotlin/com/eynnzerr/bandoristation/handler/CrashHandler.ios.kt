@@ -1,6 +1,7 @@
-package com.eynnzerr.bandoristation
+package com.eynnzerr.bandoristation.handler
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.ui.crash.CrashReportPage
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.cinterop.CPointer

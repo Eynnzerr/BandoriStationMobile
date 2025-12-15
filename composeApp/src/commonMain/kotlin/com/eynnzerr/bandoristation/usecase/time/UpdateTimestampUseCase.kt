@@ -18,9 +18,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock.System
 import kotlinx.serialization.Serializable
 import kotlin.concurrent.Volatile
+import kotlin.time.Clock
 
 class UpdateTimestampUseCase(
     private val dispatcher: CoroutineDispatcher,
@@ -47,7 +47,7 @@ class UpdateTimestampUseCase(
         }
 
         CoroutineScope(dispatcher).launch {
-            dataStore.data.map { p -> p[PreferenceKeys.SERVER_TIME] ?: System.now().toEpochMilliseconds() }.collect {
+            dataStore.data.map { p -> p[PreferenceKeys.SERVER_TIME] ?: Clock.System.now().toEpochMilliseconds() }.collect {
                 serverCurrentTime = it
             }
         }
@@ -62,13 +62,13 @@ class UpdateTimestampUseCase(
             // fallback
             if (serverCurrentTime == 0L) {
                 AppLogger.d(TAG, "cannot receive serverCurrentTime. Fallback.")
-                serverCurrentTime = System.now().toEpochMilliseconds()
+                serverCurrentTime = Clock.System.now().toEpochMilliseconds()
             }
 
             var lastEmittedTime = serverCurrentTime
             while (true) {
                 if (serverCurrentTime > lastEmittedTime) {
-                    val offset = (System.now().toEpochMilliseconds() - serverCurrentTime) % 1000
+                    val offset = (Clock.System.now().toEpochMilliseconds() - serverCurrentTime) % 1000
                     lastEmittedTime = serverCurrentTime + offset
                 }
                 emit(UseCaseResult.Success(lastEmittedTime))

@@ -5,8 +5,8 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowLeft
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 fun SettingDropdownItem(
     modifier: Modifier = Modifier,
     enable: Boolean = true,
-    selected: Boolean = false,
     title: String,
     desc: String? = null,
     icon: ImageVector? = null,
@@ -33,12 +32,11 @@ fun SettingDropdownItem(
             title = title,
             modifier = modifier,
             enable = enable,
-            selected = selected,
             desc = desc,
             icon = icon,
             action = {
                 Icon(
-                    imageVector = if (expanded) Icons.Filled.ArrowDropDown else Icons.AutoMirrored.Filled.ArrowLeft,
+                    imageVector = if (expanded) Icons.Filled.KeyboardArrowDown else Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = ""
                 )
             },

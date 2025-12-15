@@ -222,4 +222,71 @@
 
     <!-- Tutorial Screen   -->
     <string name="tutorial_screen_title">Tutorial</string>
+
+    <!-- Chat Group -->
+    <string name="chat_group_list_title">Chat Group List</string>
+    <string name="create_chat_room">Create Chat Room</string>
+    <string name="close_button_desc">Close</string>
+    <string name="enter_chat_room">Enter Chat Room</string>
+
+    <!-- Tutorial -->
+    <string name="loading">Loading...</string>
+    <string name="tutorial_introduction_title">1. APP Introduction</string>
+    <string name="tutorial_next_step">Next</string>
+    <string name="tutorial_account_settings_title">2. Account Settings</string>
+    <string name="tutorial_previous_step">Back</string>
+    <string name="tutorial_finish">Finish</string>
+    <string name="tutorial_logout">Logout</string>
+    <string name="tutorial_login_register">Login / Register</string>
+    <string name="tutorial_register_encryption">Register Encryption Service</string>
+    <string name="tutorial_login_required">*(Login required)</string>
+    <string name="tutorial_station_server">Station Server</string>
+    <string name="tutorial_encryption_server">Encryption Server</string>
+    <string name="tutorial_server_connected">%1$s: Connected</string>
+    <string name="tutorial_server_disconnected">%1$s: Disconnected</string>
+    <string name="tutorial_not_logged_in">Not logged in</string>
+    <string name="tutorial_help_icon_desc">Help</string>
+
+    <!-- Home Screen -->
+    <string name="home_settings_icon_desc">Settings</string>
+    <string name="home_help_icon_desc">Help</string>
+    <string name="home_refresh_icon_desc">Refresh</string>
+    <string name="home_filter_icon_desc">Filter</string>
+    <string name="home_add_fab_desc">Add</string>
+    <string name="home_upload_room">Upload Room</string>
+    <string name="home_group_chat">Group Chat</string>
+    <string name="home_scroll_to_top">Scroll to top</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_no_data">No data</string>
+    <string name="settings_encryption_valid_days">%1$d days</string>
+    <string name="settings_extended_features">Extended Features</string>
+    <string name="settings_basic_settings">Basic Settings</string>
+    <string name="settings_other">Other</string>
+    <string name="settings_back_button_desc">Back</string>
+    <string name="settings_error_icon_desc">Error</string>
+
+    <!-- Chat Group Item -->
+    <string name="chat_group_owner">Owner: %1$s</string>
+    <string name="chat_group_join">Join\n%1$d / 8</string>
+
+    <!-- White/Black List Dialog -->
+    <string name="dialog_back_button_desc">Back</string>
+    <string name="wb_list_dialog_title">Manage White/Black List</string>
+    <string name="wb_list_dialog_blacklist">Blacklist</string>
+    <string name="wb_list_dialog_whitelist">Whitelist</string>
+    <string name="wb_list_dialog_helper_text">* Due to the lack of a batch query interface on the station server, user information is not displayed on the specific list interface for performance reasons. Please click on the avatar to view specific users.</string>
+    <string name="wb_list_dialog_no_data">No data</string>
+    <string name="wb_list_admin_icon_desc">Admin</string>
+
+    <!-- Create Chat Group Dialog -->
+    <string name="create_chat_group_dialog_title">New Chat Room</string>
+    <string name="create_chat_group_dialog_label">Invitation Code</string>
+    <string name="create_chat_group_icon_desc">Create chat group</string>
+
+    <!-- Invitation Code Dialog -->
+    <string name="invitation_code_dialog_label">Invitation Code</string>
+    <string name="invitation_code_icon_desc">Invitation code</string>
+    <string name="invitation_code_copy_icon_desc">Copy</string>
+    <string name="invitation_code_copied_icon_desc">Copied</string>
 </resources>

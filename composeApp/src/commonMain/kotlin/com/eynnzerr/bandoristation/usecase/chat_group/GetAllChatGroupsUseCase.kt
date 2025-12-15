@@ -1,0 +1,40 @@
+package com.eynnzerr.bandoristation.usecase.chat_group
+
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import com.eynnzerr.bandoristation.data.AppRepository
+import com.eynnzerr.bandoristation.data.remote.NetworkUrl
+import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
+import com.eynnzerr.bandoristation.model.ApiRequest
+import com.eynnzerr.bandoristation.model.UseCaseResult
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupDetails
+import com.eynnzerr.bandoristation.preferences.readEncryptionToken
+import com.eynnzerr.bandoristation.usecase.base.UseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+
+class GetAllChatGroupsUseCase(
+    private val repository: AppRepository,
+    private val dataStore: DataStore<Preferences>,
+): UseCase<Unit, List<ChatGroupDetails>, String>(Dispatchers.IO) {
+
+    override suspend fun execute(parameters: Unit): UseCaseResult<List<ChatGroupDetails>, String> {
+        val token = dataStore.readEncryptionToken()
+
+        repository.sendEncryptionRequest(
+            path = NetworkUrl.GET_ALL_GROUPS,
+            request = ApiRequest.Empty(),
+            token = token,
+        ).handle(
+            onSuccess = { response ->
+                val wrapper = NetResponseHelper.parseApiResponse<List<ChatGroupDetails>>(response)
+                return wrapper?.let {
+                    UseCaseResult.Success(it)
+                } ?: UseCaseResult.Error("Failed to parse ${NetworkUrl.GET_ALL_GROUPS} Response.")
+            },
+            onFailure = {
+                return UseCaseResult.Error(it)
+            }
+        )
+    }
+}
