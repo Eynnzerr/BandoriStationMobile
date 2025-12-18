@@ -283,6 +283,15 @@ sealed class ApiRequest(
     )
 
     @Serializable
+    data class RemoveMemberRequest(
+        val userId: String
+    ) : ApiRequest(
+        group = "Chat",
+        function = "remove_member"
+    )
+
+
+    @Serializable
     class Empty : ApiRequest(
         group = "",
         function = ""

@@ -47,6 +47,17 @@ import com.eynnzerr.bandoristation.usecase.roomhistory.EditRoomHistoryUseCase
 import com.eynnzerr.bandoristation.usecase.roomhistory.FetchAllHistoryUseCase
 import com.eynnzerr.bandoristation.usecase.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.usecase.GetLatestReleaseUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.ChatGroupAggregator
+import com.eynnzerr.bandoristation.usecase.chat_group.CreateChatGroupUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.GetAllChatGroupsUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.JoinChatGroupUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.LeaveChatGroupUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.ListenChatGroupChangeUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.ListenChatGroupMessageUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.ListenChatGroupSyncUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.ListenErrorUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.RemoveMemberUseCase
+import com.eynnzerr.bandoristation.usecase.chat_group.SendChatGroupMessageUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.AddToBlacklistUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.AddToWhitelistUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.EncryptionAggregator
@@ -340,4 +351,17 @@ fun provideUseCaseModule() = module {
     singleOf(::GetBlackWhiteListUseCase)
     singleOf(::GetEncryptionSocketStateUseCase)
     singleOf(::EncryptionAggregator)
+
+    // Chat group UseCases
+    singleOf(::CreateChatGroupUseCase)
+    singleOf(::GetAllChatGroupsUseCase)
+    singleOf(::JoinChatGroupUseCase)
+    singleOf(::LeaveChatGroupUseCase)
+    singleOf(::ListenChatGroupChangeUseCase)
+    singleOf(::ListenChatGroupMessageUseCase)
+    singleOf(::ListenChatGroupSyncUseCase)
+    singleOf(::SendChatGroupMessageUseCase)
+    singleOf(::RemoveMemberUseCase)
+    singleOf(::ListenErrorUseCase)
+    singleOf(::ChatGroupAggregator)
 }

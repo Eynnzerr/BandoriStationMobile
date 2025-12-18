@@ -23,4 +23,8 @@ object NetworkUrl {
     const val CREATE_CHAT = "chat/create"
     const val JOIN_CHAT = "chat/join"
     const val GET_ALL_GROUPS = "chat/all_groups"
+    const val GET_GROUP = "chat/group_of_user"
+    const val LEAVE_CHAT = "chat/leave"
+    const val REMOVE_MEMBER = "chat/remove_member"
+    const val DISBAND = "chat/disband"
 }

@@ -7,6 +7,8 @@ import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
 import com.eynnzerr.bandoristation.model.GithubRelease
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupMessage
+import com.eynnzerr.bandoristation.model.chat_group.SendChatMessageRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import kotlinx.coroutines.flow.Flow
@@ -65,6 +67,7 @@ interface RemoteDataSource {
 
     // Encryption Business
     suspend fun requestRoomAccess(request: RoomAccessRequest)
-
     suspend fun respondRoomAccess(response: RoomAccessResponse)
+
+    suspend fun sendChatGroupMessage(message: SendChatMessageRequest)
 }

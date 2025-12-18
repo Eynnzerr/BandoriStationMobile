@@ -7,6 +7,8 @@ import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupMessage
+import com.eynnzerr.bandoristation.model.chat_group.SendChatMessageRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
@@ -186,7 +188,12 @@ class RemoteDataSourceImpl(
         )
     }
 
-
+    override suspend fun sendChatGroupMessage(message: SendChatMessageRequest) {
+        encryptionSocketClient.sendRequestWithRetry(
+            action = EncryptionSocketActions.SEND_CHAT_MESSAGE,
+            data = message
+        )
+    }
 }
 
 private const val TAG = "RemoteDataSourceImpl"

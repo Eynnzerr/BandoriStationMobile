@@ -52,7 +52,7 @@ import com.eynnzerr.bandoristation.navigation.ext.navigateTo
 import com.eynnzerr.bandoristation.ui.component.app.AppTopBar
 import com.eynnzerr.bandoristation.ui.component.chat.ArrowHorizontalPosition
 import com.eynnzerr.bandoristation.ui.component.chat.ChatPiece
-import com.eynnzerr.bandoristation.ui.component.chat.TimePiece
+import com.eynnzerr.bandoristation.ui.component.chat.SystemPiece
 import com.eynnzerr.bandoristation.ui.component.chat.UnreadBubble
 import com.eynnzerr.bandoristation.ui.dialog.UserProfileDialog
 import com.eynnzerr.bandoristation.ui.ext.appBarScroll
@@ -251,7 +251,7 @@ fun ChatScreen(
                     ) {
                         if (chatMessage.userInfo.userId == null) {
                             // System Message like date separator
-                            TimePiece(
+                            SystemPiece(
                                 chatMessage = chatMessage,
                             )
                         } else {

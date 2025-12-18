@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -33,7 +34,7 @@ import bandoristationm.composeapp.generated.resources.close_button_desc
 import bandoristationm.composeapp.generated.resources.create_chat_room
 import bandoristationm.composeapp.generated.resources.enter_chat_room
 import com.eynnzerr.bandoristation.model.chat_group.ChatGroupDetails
-import com.eynnzerr.bandoristation.model.chat_group.OwnerInfo
+import com.eynnzerr.bandoristation.model.chat_group.SimpleUserInfo
 import com.eynnzerr.bandoristation.ui.component.chat_group.ChatGroupItem
 import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
 import org.jetbrains.compose.resources.stringResource
@@ -43,6 +44,8 @@ import org.jetbrains.compose.resources.stringResource
 fun GroupListScreen(
     onClose: () -> Unit,
     onCreateClick: () -> Unit,
+    onJoin: (String) -> Unit,
+    onRefresh: () -> Unit,
     chatGroups: List<ChatGroupDetails>,
 ) {
     Scaffold(
@@ -61,10 +64,10 @@ fun GroupListScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = onClose
+                        onClick = onRefresh
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            imageVector = Icons.Filled.Refresh,
                             contentDescription = stringResource(Res.string.enter_chat_room),
                         )
                     }
@@ -103,7 +106,10 @@ fun GroupListScreen(
                 count = chatGroups.size,
                 key = { index -> chatGroups[index].id },
             ) {
-                ChatGroupItem(chatGroups[it])
+                ChatGroupItem(
+                    details = chatGroups[it],
+                    onJoin = onJoin
+                )
             }
         }
     }
@@ -116,7 +122,7 @@ private fun ScreenPreview() {
         ChatGroupDetails(
             id = "$it",
             name = "聊天室${it}",
-            owner = OwnerInfo(
+            owner = SimpleUserInfo(
                 id = "123",
                 name = "test-${it}",
                 avatar = ""
@@ -131,6 +137,8 @@ private fun ScreenPreview() {
             onClose = {},
             onCreateClick = {},
             chatGroups = groups,
+            onJoin = {},
+            onRefresh = {}
         )
     }
 }

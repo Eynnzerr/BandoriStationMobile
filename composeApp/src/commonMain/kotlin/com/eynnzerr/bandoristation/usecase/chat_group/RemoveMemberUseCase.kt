@@ -4,34 +4,30 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.eynnzerr.bandoristation.data.AppRepository
 import com.eynnzerr.bandoristation.data.remote.NetworkUrl
-import com.eynnzerr.bandoristation.data.remote.websocket.NetResponseHelper
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
-import com.eynnzerr.bandoristation.model.chat_group.AllChatGroups
-import com.eynnzerr.bandoristation.model.chat_group.ChatGroupDetails
 import com.eynnzerr.bandoristation.preferences.readEncryptionToken
 import com.eynnzerr.bandoristation.usecase.base.UseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
-class GetAllChatGroupsUseCase(
+class RemoveMemberUseCase(
     private val repository: AppRepository,
     private val dataStore: DataStore<Preferences>,
-): UseCase<Unit, List<ChatGroupDetails>, String>(Dispatchers.IO) {
+): UseCase<String, String, String>(Dispatchers.IO) {
 
-    override suspend fun execute(parameters: Unit): UseCaseResult<List<ChatGroupDetails>, String> {
+    override suspend fun execute(parameters: String): UseCaseResult<String, String> {
         val token = dataStore.readEncryptionToken()
 
         repository.sendEncryptionRequest(
-            path = NetworkUrl.GET_ALL_GROUPS,
-            request = ApiRequest.Empty(),
+            path = NetworkUrl.REMOVE_MEMBER,
+            request = ApiRequest.RemoveMemberRequest(
+                userId = parameters
+            ),
             token = token,
         ).handle(
             onSuccess = { response ->
-                val wrapper = NetResponseHelper.parseApiResponse<AllChatGroups>(response)
-                return wrapper?.let {
-                    UseCaseResult.Success(it.chatGroups)
-                } ?: UseCaseResult.Error("Failed to parse ${NetworkUrl.GET_ALL_GROUPS} Response.")
+                return UseCaseResult.Success("已移除该成员。")
             },
             onFailure = {
                 return UseCaseResult.Error(it)

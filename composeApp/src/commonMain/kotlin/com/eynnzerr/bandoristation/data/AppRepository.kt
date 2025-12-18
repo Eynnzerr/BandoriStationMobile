@@ -7,6 +7,8 @@ import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.ApiResponse
 import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.WebSocketResponse
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupMessage
+import com.eynnzerr.bandoristation.model.chat_group.SendChatMessageRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomHistory
@@ -78,6 +80,6 @@ class AppRepository(
 
     // Encryption Business
     suspend fun requestRoomAccess(request: RoomAccessRequest) = remoteDataSource.requestRoomAccess(request)
-
     suspend fun respondRoomAccess(response: RoomAccessResponse) = remoteDataSource.respondRoomAccess(response)
+    suspend fun sendChatGroupMessage(message: SendChatMessageRequest) = remoteDataSource.sendChatGroupMessage(message)
 }

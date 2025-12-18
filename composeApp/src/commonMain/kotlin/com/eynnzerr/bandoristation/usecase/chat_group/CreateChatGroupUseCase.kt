@@ -9,7 +9,6 @@ import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.preferences.readBasicUserInfo
 import com.eynnzerr.bandoristation.preferences.readEncryptionToken
-import com.eynnzerr.bandoristation.preferences.writeCurrentChatGroupId
 import com.eynnzerr.bandoristation.usecase.base.UseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -36,7 +35,6 @@ class CreateChatGroupUseCase(
             onSuccess = { response ->
                 val wrapper = NetResponseHelper.parseApiResponse<CreateChatResponse>(response)
                 return wrapper?.let {
-                    dataStore.writeCurrentChatGroupId(it.groupId)
                     UseCaseResult.Success(it.groupId)
                 } ?: UseCaseResult.Error("Failed to parse ${NetworkUrl.CREATE_CHAT} response.")
             },

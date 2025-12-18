@@ -50,7 +50,7 @@ class WebSocketClient(
 
     // 响应流
     private val _responseFlow = MutableSharedFlow<WebSocketResponse<JsonElement>>(
-        replay = 0,
+        replay = 5,
         extraBufferCapacity = 10
     )
     val responseFlow = _responseFlow.asSharedFlow()
@@ -144,12 +144,10 @@ class WebSocketClient(
                             }
                         }
                     }
-                    AppLogger.d(name, "exit for-loop of connect().")
                 } catch (e: Exception) {
                     AppLogger.d(name, "WebSocketClient Websocket Error: $e")
                     e.printStackTrace()
                 } finally {
-                    AppLogger.d(name, "WebSocketClient enter finally block of connect().")
                     heartbeatJob?.cancel()
                     connectMutex.withLock {
                         _connectionState.value = ConnectionState.Disconnected

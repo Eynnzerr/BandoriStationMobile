@@ -35,19 +35,24 @@ import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.usecase.time.GetServerTimeUseCase
 import com.eynnzerr.bandoristation.data.remote.websocket.WebSocketClient
 import com.eynnzerr.bandoristation.feature.home.HomeEffect.*
+import com.eynnzerr.bandoristation.feature.home.HomeIntent.*
 import com.eynnzerr.bandoristation.model.room.RoomFilter
 import com.eynnzerr.bandoristation.model.room.RoomHistory
 import com.eynnzerr.bandoristation.model.room.RoomInfo
 import com.eynnzerr.bandoristation.model.SourceInfo
 import com.eynnzerr.bandoristation.model.UserInfo
 import com.eynnzerr.bandoristation.getPlatform
-import com.eynnzerr.bandoristation.model.ApiRequest
+import com.eynnzerr.bandoristation.model.ApiRequest.*
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupChange
+import com.eynnzerr.bandoristation.model.chat_group.GROUP_NOT_EXIST
+import com.eynnzerr.bandoristation.model.chat_group.GroupChangeStatus
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
 import com.eynnzerr.bandoristation.model.room.RoomUploadInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
+import com.eynnzerr.bandoristation.usecase.chat_group.ChatGroupAggregator
 import com.eynnzerr.bandoristation.usecase.encryption.EncryptionAggregator
 import com.eynnzerr.bandoristation.utils.AppLogger
 import com.eynnzerr.bandoristation.utils.generateUUID
@@ -77,6 +82,7 @@ class HomeViewModel(
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val followUserUseCase: FollowUserUseCase,
     private val encryptionAggregator: EncryptionAggregator,
+    private val chatGroupAggregator: ChatGroupAggregator,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<HomeState, HomeIntent, HomeEffect>(
     initialState = HomeState.initial()
@@ -214,6 +220,14 @@ class HomeViewModel(
         }
 
         viewModelScope.launch {
+            chatGroupAggregator.listenError().collect { result ->
+                if (result is UseCaseResult.Success) {
+                    sendEffect(ShowSnackbar(result.data))
+                }
+            }
+        }
+
+        viewModelScope.launch {
             encryptionAggregator.listenRoomAccessRequest().collect { result ->
                 when (result) {
                     is UseCaseResult.Loading -> Unit
@@ -273,6 +287,30 @@ class HomeViewModel(
 
                         pendingRequestMap.remove(response.requestId)
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            chatGroupAggregator.listenChatGroupChange().collect { result ->
+                if (result is UseCaseResult.Success) {
+                    sendEvent(HomeIntent.UpdateChatGroupList(result.data))
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            chatGroupAggregator.listenChatGroupSync().collect { result ->
+                if (result is UseCaseResult.Success) {
+                    sendEvent(HomeIntent.SyncChatGroup(result.data))
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            chatGroupAggregator.listenChatGroupMessage().collect { result ->
+                if (result is UseCaseResult.Success) {
+                    sendEvent(HomeIntent.AppendNewChat(result.data))
                 }
             }
         }
@@ -547,7 +585,7 @@ class HomeViewModel(
 
             is HomeIntent.OnSubmitInviteCode -> {
                 viewModelScope.launch {
-                    val request = ApiRequest.VerifyInviteCodeRequest(
+                    val request = VerifyInviteCodeRequest(
                         targetUserId = event.targetUser,
                         inviteCode = event.code,
                     )
@@ -623,6 +661,143 @@ class HomeViewModel(
                         internalState.update {
                             it.copy(accessRequestQueue = it.accessRequestQueue.drop(1))
                         }
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.UpdateChatGroupList -> {
+                val (update, operation) = event.update
+                val new = when (operation) {
+                    GroupChangeStatus.UPSERTED -> {
+                        val updatedMap = update.associateBy { it.id }
+                        val updatedExisting = state.value.chatGroups.map { updatedMap[it.id] ?: it }
+                        val existingIds = state.value.chatGroups.map { it.id }.toSet()
+                        val newItems = update.filter { it.id !in existingIds }
+
+                        updatedExisting + newItems
+                    }
+                    GroupChangeStatus.REMOVED -> {
+                        val idToRemove = update.map { it.id }.toSet()
+                        state.value.chatGroups.filter { it.id !in idToRemove }
+                    }
+                }
+
+                state.value.copy(
+                    chatGroups = new,
+                ) to null
+            }
+
+            is HomeIntent.SyncChatGroup -> {
+                state.value.copy(
+                    isInChat = event.syncData.groupId != GROUP_NOT_EXIST,
+                    groupName = event.syncData.name,
+                    groupMessages = event.syncData.recentMessages,
+                    isGroupOwner = event.syncData.ownerId.toLongOrNull() == state.value.userId
+                ) to null
+            }
+
+            is HomeIntent.AppendNewChat -> {
+                state.value.copy(
+                    groupMessages = state.value.groupMessages + event.chatMessage
+                ) to null
+            }
+
+            is HomeIntent.CreateChatGroup -> {
+                viewModelScope.launch {
+                    when (val result = chatGroupAggregator.createChatGroup(event.name)) {
+                        is UseCaseResult.Success -> {
+                            internalState.update { it.copy(
+                                isInChat = true,
+                                isGroupOwner = true,
+                                groupMessages = emptyList(),
+                                groupName = event.name,
+                            ) }
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                    internalState.update {
+                        it.copy(
+                            isInChat = true
+                        )
+                    }
+                }
+
+                null to null
+            }
+
+            is HomeIntent.SendChat -> {
+                viewModelScope.launch {
+                    chatGroupAggregator.sendChatGroupMessage(event.content)
+                }
+
+                null to null
+            }
+
+            is HomeIntent.JoinChatGroup -> {
+                viewModelScope.launch {
+                    when (val result = chatGroupAggregator.joinChatGroup(event.ownerId)) {
+                        is UseCaseResult.Success -> {
+                            sendEvent(SyncChatGroup(result.data))
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.LeaveChatGroup -> {
+                viewModelScope.launch {
+                    when (val result = chatGroupAggregator.leaveChatGroup()) {
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar(result.data))
+                            internalState.update { it.copy(isInChat = false) } // ugly
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is HomeIntent.RefreshChatGroupList -> {
+                viewModelScope.launch {
+                    when (val result = chatGroupAggregator.getAllChatGroups()) {
+                        is UseCaseResult.Success -> {
+                            sendEvent(UpdateChatGroupList(
+                                ChatGroupChange(
+                                    chatGroups = result.data,
+                                    changeStatus = GroupChangeStatus.UPSERTED,
+                                    )
+                                ))
+                            }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
+                    }
+                }
+                null to null
+            }
+
+            is RemoveUserFromGroup -> {
+                viewModelScope.launch {
+                    when (val result = chatGroupAggregator.removeMember(event.userId)) {
+                        is UseCaseResult.Success -> {
+                            sendEffect(ShowSnackbar(result.data))
+                        }
+                        is UseCaseResult.Error -> {
+                            sendEffect(ShowSnackbar(result.error))
+                        }
+                        is UseCaseResult.Loading -> Unit
                     }
                 }
                 null to null
