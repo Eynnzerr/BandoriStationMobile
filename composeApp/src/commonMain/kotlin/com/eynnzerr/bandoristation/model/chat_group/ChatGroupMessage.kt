@@ -9,5 +9,10 @@ data class ChatGroupMessage(
     val content: String,
     val username: String,
     val avatar: String,
-    val createdAt: String
+    val createdAt: String,
+    val type: GroupMessageType = GroupMessageType.TEXT,
 )
+
+enum class GroupMessageType {
+    TEXT, SYSTEM
+}

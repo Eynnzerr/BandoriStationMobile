@@ -280,7 +280,7 @@
 
     <!-- Create Chat Group Dialog -->
     <string name="create_chat_group_dialog_title">New Chat Room</string>
-    <string name="create_chat_group_dialog_label">Invitation Code</string>
+    <string name="create_chat_group_dialog_label">Room Title</string>
     <string name="create_chat_group_icon_desc">Create chat group</string>
 
     <!-- Invitation Code Dialog -->

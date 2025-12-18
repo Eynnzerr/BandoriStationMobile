@@ -3,11 +3,8 @@ package com.eynnzerr.bandoristation.model.chat_group
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ChatGroupDetails(
+data class SimpleUserInfo(
     val id: String,
     val name: String,
-    val owner: SimpleUserInfo,
-    val memberCount: Long,
-    val createdAt: String,
-    val lastActivityAt: String
+    val avatar: String
 )

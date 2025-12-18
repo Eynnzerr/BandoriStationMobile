@@ -4,8 +4,12 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.flow.first
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.milliseconds
 
 suspend fun DataStore<Preferences>.readToken() = data.first()[PreferenceKeys.USER_TOKEN] ?: ""
+
+suspend fun DataStore<Preferences>.readUserIdAsString() = data.first()[PreferenceKeys.USER_ID]?.toString() ?: ""
 
 suspend fun DataStore<Preferences>.readBasicUserInfo(): Triple<String, String, String> {
     return with(data.first()) {
@@ -25,10 +29,12 @@ suspend fun DataStore<Preferences>.writeEncryptionToken(token: String) {
     }
 }
 
-suspend fun DataStore<Preferences>.readCurrentChatGroupId() = data.first()[PreferenceKeys.CURRENT_CHAT_GROUP] ?: ""
-
-suspend fun DataStore<Preferences>.writeCurrentChatGroupId(id: String) {
-    edit { p ->
-        p[PreferenceKeys.CURRENT_CHAT_GROUP] = id
+suspend fun DataStore<Preferences>.readIfEncryptionEnabled(): Boolean {
+    val now = Clock.System.now().toEpochMilliseconds()
+    val (expireTimestamp, token) = with(data.first()) {
+        (this[PreferenceKeys.REGISTER_EXPIRE_TIME] ?: now) to this[PreferenceKeys.ENCRYPTION_TOKEN]
     }
+
+    val encryptionValidDays = (expireTimestamp - now).milliseconds.inWholeDays
+    return token != null && encryptionValidDays > 0
 }

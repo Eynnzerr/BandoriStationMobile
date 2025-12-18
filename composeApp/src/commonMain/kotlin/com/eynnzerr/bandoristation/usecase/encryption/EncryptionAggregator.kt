@@ -3,6 +3,7 @@ package com.eynnzerr.bandoristation.usecase.encryption
 import com.eynnzerr.bandoristation.model.ApiRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.model.room.RoomAccessResponse
+import com.eynnzerr.bandoristation.usecase.base.UseCaseAggregator
 
 class EncryptionAggregator(
     private val listenRoomAccessRequest: ListenRoomAccessRequestUseCase,
@@ -15,7 +16,7 @@ class EncryptionAggregator(
     private val verifyInviteCode: VerifyInviteCodeUseCase,
     private val addToWhitelistUseCase: AddToWhitelistUseCase,
     private val addToBlacklistUseCase: AddToBlacklistUseCase,
-) {
+) : UseCaseAggregator {
     fun listenRoomAccessRequest() = listenRoomAccessRequest.invoke(Unit)
 
     fun listenRoomAccessResponse() = listenRoomAccessResponse.invoke(Unit)

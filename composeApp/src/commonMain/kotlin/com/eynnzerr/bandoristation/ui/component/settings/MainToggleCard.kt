@@ -53,7 +53,7 @@ fun MainCard(
                 )
 
                 Text(
-                    text = "注册以使用车牌加密、群组聊天等扩展功能",
+                    text = "车牌加密、群组聊天",
                     style = MaterialTheme.typography.bodyMediumEmphasized,
                 )
             }

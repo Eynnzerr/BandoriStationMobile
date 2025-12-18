@@ -7,10 +7,10 @@ object NetworkUrl {
     const val HTTPS_SERVER = "https://server.bandoristation.com"
     const val API_SERVER = "https://api.bandoristation.com"
 
-    const val ENCRYPTION_WS = "wss://eynnzerr.top/bandori/ws/connect"
-    const val ENCRYPTION_SERVER = "https://eynnzerr.top/bandori/api/"
-//    const val ENCRYPTION_WS = "ws://192.168.120.66:18080/bandori/ws/connect"
-//    const val ENCRYPTION_SERVER = "http://192.168.120.66:18080/bandori/api/"
+    // const val ENCRYPTION_WS = "wss://eynnzerr.top/bandori/ws/connect"
+    // const val ENCRYPTION_SERVER = "https://eynnzerr.top/bandori/api/"
+    const val ENCRYPTION_WS = "ws://192.168.120.66:18080/bandori/ws/connect"
+    const val ENCRYPTION_SERVER = "http://192.168.120.66:18080/bandori/api/"
     const val REGISTER = "register"
     const val ROOM_UPLOAD = "room/upload"
     const val VERIFY_INVITE_CODE = "room/verify-invite-code"
@@ -23,4 +23,8 @@ object NetworkUrl {
     const val CREATE_CHAT = "chat/create"
     const val JOIN_CHAT = "chat/join"
     const val GET_ALL_GROUPS = "chat/all_groups"
+    const val GET_GROUP = "chat/group_of_user"
+    const val LEAVE_CHAT = "chat/leave"
+    const val REMOVE_MEMBER = "chat/remove_member"
+    const val DISBAND = "chat/disband"
 }

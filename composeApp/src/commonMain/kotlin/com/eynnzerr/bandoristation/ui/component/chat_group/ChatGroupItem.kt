@@ -11,13 +11,16 @@ import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.chat_group_join
 import bandoristationm.composeapp.generated.resources.chat_group_owner
 import com.eynnzerr.bandoristation.model.chat_group.ChatGroupDetails
-import com.eynnzerr.bandoristation.model.chat_group.OwnerInfo
+import com.eynnzerr.bandoristation.model.chat_group.SimpleUserInfo
 import com.eynnzerr.bandoristation.ui.component.UserAvatar
 import com.eynnzerr.bandoristation.ui.theme.BandoriTheme
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun ChatGroupItem(details: ChatGroupDetails) {
+fun ChatGroupItem(
+    details: ChatGroupDetails,
+    onJoin: (String) -> Unit,
+) {
     ListItem(
         headlineContent = { Text(details.name) },
         supportingContent = { Text(stringResource(Res.string.chat_group_owner, details.owner.name)) },
@@ -30,7 +33,7 @@ fun ChatGroupItem(details: ChatGroupDetails) {
         },
         trailingContent = {
             TextButton(
-                onClick = {},
+                onClick = { onJoin(details.owner.id) },
                 enabled = details.memberCount < 8,
             ) {
                 Text(stringResource(Res.string.chat_group_join, details.memberCount))
@@ -46,7 +49,7 @@ private fun ChatGroupItemPreview() {
         ChatGroupItem(ChatGroupDetails(
             id = "123",
             name = "聊天室一",
-            owner = OwnerInfo(
+            owner = SimpleUserInfo(
                 id = "123",
                 name = "test",
                 avatar = ""
@@ -54,6 +57,6 @@ private fun ChatGroupItemPreview() {
             memberCount = 8,
             createdAt = "2023-08-01",
             lastActivityAt = "2023-08-01"
-        ))
+        )) {}
     }
 }

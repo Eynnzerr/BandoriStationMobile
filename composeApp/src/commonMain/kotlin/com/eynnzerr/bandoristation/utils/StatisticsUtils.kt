@@ -13,9 +13,9 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
 enum class TimeGranularity(val displayName: String) {
-    DAILY("最近30天"),
-    MONTHLY("最近12个月"),
-    YEARLY("按年统计")
+    DAILY("近30天"),
+    MONTHLY("近12月"),
+    YEARLY("仅年")
 }
 
 private val dailyFormat = LocalDate.Format {

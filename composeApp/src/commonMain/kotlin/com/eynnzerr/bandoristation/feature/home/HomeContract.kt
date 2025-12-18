@@ -12,9 +12,12 @@ import com.eynnzerr.bandoristation.navigation.Screen
 import org.jetbrains.compose.resources.StringResource
 import bandoristationm.composeapp.generated.resources.Res
 import bandoristationm.composeapp.generated.resources.home_screen_title
+import com.eynnzerr.bandoristation.model.ChatMessage
 import com.eynnzerr.bandoristation.model.account.AccountInfo
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupChange
 import com.eynnzerr.bandoristation.model.chat_group.ChatGroupDetails
 import com.eynnzerr.bandoristation.model.chat_group.ChatGroupMessage
+import com.eynnzerr.bandoristation.model.chat_group.ChatGroupSyncData
 import com.eynnzerr.bandoristation.model.room.RoomAccessRequest
 import com.eynnzerr.bandoristation.ui.dialog.RequestRoomState
 import kotlin.time.Clock
@@ -46,7 +49,9 @@ data class HomeState (
     val encryptedRoomNumber: String? = null,
     // for chat group logic
     val isInChat: Boolean = false,
+    val isGroupOwner: Boolean = false,
     val chatGroups: List<ChatGroupDetails> = emptyList(),
+    val groupName: String = "",
     val groupMessages: List<ChatGroupMessage> = emptyList(),
 ) : UIState {
     companion object {
@@ -92,7 +97,15 @@ sealed class HomeIntent: UIEvent {
         val addToWhiteList: Boolean = false,
     ): HomeIntent()
 
-
+    data class UpdateChatGroupList(val update: ChatGroupChange): HomeIntent()
+    class RefreshChatGroupList: HomeIntent()
+    data class SyncChatGroup(val syncData: ChatGroupSyncData): HomeIntent()
+    data class AppendNewChat(val chatMessage: ChatGroupMessage): HomeIntent()
+    data class CreateChatGroup(val name: String): HomeIntent()
+    data class JoinChatGroup(val ownerId: String): HomeIntent()
+    class LeaveChatGroup: HomeIntent()
+    data class SendChat(val content: String): HomeIntent()
+    data class RemoveUserFromGroup(val userId: String): HomeIntent()
 }
 
 sealed class HomeEffect: UIEffect {

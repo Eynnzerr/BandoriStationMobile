@@ -12,11 +12,18 @@ import androidx.compose.ui.unit.sp
 import com.eynnzerr.bandoristation.model.ChatMessage
 
 @Composable
-fun TimePiece(
+fun SystemPiece(
     chatMessage: ChatMessage,
 ) {
+    SystemPiece(chatMessage.content)
+}
+
+@Composable
+fun SystemPiece(
+    content: String,
+) {
     Text(
-        text = chatMessage.content,
+        text = content.trim(),
         textAlign = TextAlign.Center,
         modifier = Modifier
             .fillMaxWidth()
