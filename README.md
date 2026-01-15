@@ -25,6 +25,7 @@ This is a Multiplatform client app targeting Android, iOS, Desktop, designed for
   <img src="./imgs/img-2.jpg" width="256"/>
   <img src="./imgs/img-3.jpg" width="256"/>
   <img src="./imgs/img-4.jpg" width="256"/>
+  <img src="./imgs/img-5.jpg" width="256"/>
   <img src="./imgs/img-6.jpg" width="256"/>
 </div>
 
