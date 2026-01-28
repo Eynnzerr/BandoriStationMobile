@@ -6,13 +6,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.feature.settings.SettingEffect.*
-import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
-import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.usecase.account.GetUserInfoUseCase
-import com.eynnzerr.bandoristation.usecase.clientName
 import com.eynnzerr.bandoristation.usecase.encryption.GetBlackWhiteListUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.RegisterEncryptionUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.RemoveFromBlacklistUseCase
@@ -25,7 +22,6 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.milliseconds
 
 class SettingViewModel(
-    private val setUpClientUseCase: SetUpClientUseCase,
     private val registerEncryptionUseCase: RegisterEncryptionUseCase,
     private val updateInviteCodeUseCase: UpdateInviteCodeUseCase,
     private val removeFromBlacklistUseCase: RemoveFromBlacklistUseCase,
@@ -58,14 +54,6 @@ class SettingViewModel(
                 )
             }
         }
-    }
-
-    override suspend fun onStartStateFlow() {
-        setUpClientUseCase(ClientSetInfo(
-            client = clientName,
-            sendRoomNumber = false,
-            sendChat = false,
-        ))
     }
 
     override fun reduce(event: SettingEvent): Pair<SettingState?, SettingEffect?> {

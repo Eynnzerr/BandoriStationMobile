@@ -6,7 +6,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.usecase.SetAccessPermissionUseCase
-import com.eynnzerr.bandoristation.usecase.SetUpClientUseCase
 import com.eynnzerr.bandoristation.usecase.account.GetEditProfileDataUseCase
 import com.eynnzerr.bandoristation.usecase.account.GetSelfInfoUseCase
 import com.eynnzerr.bandoristation.usecase.account.LoginUseCase
@@ -18,8 +17,6 @@ import com.eynnzerr.bandoristation.usecase.account.VerifyEmailUseCase
 import com.eynnzerr.bandoristation.usecase.account.ResetPasswordSendVCodeUseCase
 import com.eynnzerr.bandoristation.usecase.account.ResetPasswordVerifyEmailUseCase
 import com.eynnzerr.bandoristation.usecase.account.ResetPasswordUseCase
-import com.eynnzerr.bandoristation.usecase.datastore.SetPreferenceUseCase
-import com.eynnzerr.bandoristation.usecase.datastore.SetPreferenceUseCase.Params
 import com.eynnzerr.bandoristation.usecase.roomhistory.RoomHistoryAggregator
 import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
 import com.eynnzerr.bandoristation.usecase.social.GetFollowerBriefUseCase
@@ -27,7 +24,6 @@ import com.eynnzerr.bandoristation.usecase.social.GetFollowingBriefUseCase
 import com.eynnzerr.bandoristation.feature.account.AccountEffect.*
 import com.eynnzerr.bandoristation.feature.account.AccountIntent.*
 import com.eynnzerr.bandoristation.model.ApiRequest
-import com.eynnzerr.bandoristation.model.ClientSetInfo
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.UseCaseResult
 import com.eynnzerr.bandoristation.model.account.LoginError
@@ -35,7 +31,6 @@ import com.eynnzerr.bandoristation.model.account.LoginParams
 import com.eynnzerr.bandoristation.model.account.SignupParams
 import com.eynnzerr.bandoristation.preferences.PreferenceKeys
 import com.eynnzerr.bandoristation.ui.dialog.LoginScreenState
-import com.eynnzerr.bandoristation.usecase.clientName
 import com.eynnzerr.bandoristation.utils.AppLogger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -44,7 +39,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AccountViewModel(
-    private val setUpClientUseCase: SetUpClientUseCase,
     private val loginUseCase: LoginUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val getSelfInfoUseCase: GetSelfInfoUseCase,
@@ -106,14 +100,6 @@ class AccountViewModel(
                 }
             }
         }
-    }
-
-    override suspend fun onStartStateFlow() {
-        setUpClientUseCase(ClientSetInfo(
-            client = clientName,
-            sendRoomNumber = false,
-            sendChat = false,
-        ))
     }
 
     override fun reduce(event: AccountIntent): Pair<AccountState?, AccountEffect?> {
