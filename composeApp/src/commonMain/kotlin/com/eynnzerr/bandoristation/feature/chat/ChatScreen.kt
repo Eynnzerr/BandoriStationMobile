@@ -129,13 +129,11 @@ fun ChatScreen(
         }
     }
 
-    // automatically scroll to bottom if last chat is self sent.
+    // automatically scroll to bottom if last chat is self sent, or already at bottom.
+    var wasAtBottom by remember { mutableStateOf(false) }
     LaunchedEffect(state.chats) {
-        val lastChat = state.chats.lastOrNull()
-        lastChat?.let {
-            if (it.userInfo.userId == state.selfId) {
-                viewModel.sendEffect(ChatEffect.ScrollToLatest())
-            }
+        if (wasAtBottom || state.chats.lastOrNull()?.userInfo?.userId == state.selfId) {
+            viewModel.sendEffect(ChatEffect.ScrollToLatest())
         }
     }
 
@@ -158,6 +156,8 @@ fun ChatScreen(
         if (state.initialized && isAtBottom) {
             viewModel.sendEvent(ChatIntent.ClearUnreadCount())
         }
+
+        wasAtBottom = isAtBottom
     }
 
     UserProfileDialog(

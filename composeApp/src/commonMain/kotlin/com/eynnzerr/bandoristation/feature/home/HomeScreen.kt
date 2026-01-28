@@ -589,8 +589,8 @@ fun HomeScreen(
                                 icon = { Icon(Icons.Rounded.ArrowUpward, contentDescription = null, modifier = Modifier.size(18.dp)) },
                                 onClick = { viewModel.sendEffect(HomeEffect.ScrollToFirst()) },
                                 shape = MaterialTheme.shapes.extraLarge,
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
                                 modifier = Modifier
                                     .heightIn(max = 40.dp)
