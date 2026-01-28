@@ -108,14 +108,6 @@ class AccountViewModel(
         }
     }
 
-    override suspend fun onStartStateFlow() {
-        setUpClientUseCase(ClientSetInfo(
-            client = clientName,
-            sendRoomNumber = false,
-            sendChat = false,
-        ))
-    }
-
     override fun reduce(event: AccountIntent): Pair<AccountState?, AccountEffect?> {
        return when (event) {
            is UpdateAccountInfo -> {

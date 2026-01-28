@@ -60,14 +60,6 @@ class SettingViewModel(
         }
     }
 
-    override suspend fun onStartStateFlow() {
-        setUpClientUseCase(ClientSetInfo(
-            client = clientName,
-            sendRoomNumber = false,
-            sendChat = false,
-        ))
-    }
-
     override fun reduce(event: SettingEvent): Pair<SettingState?, SettingEffect?> {
         return when (event) {
             is SettingEvent.UpdateBandTheme -> {
