@@ -42,6 +42,8 @@
     <string name="settings_auto_filter_pjsk_desc">自动屏蔽PJSK的车（车牌少于六位数）</string>
     <string name="settings_show_player_data_title">保存上车历史</string>
     <string name="settings_show_player_data_desc">自动保存上车历史用于个人统计</string>
+    <string name="settings_auto_pull_new_rooms_title">自动拉取新房间数据</string>
+    <string name="settings_auto_pull_new_rooms_desc">接收不到新房间数据时请开启此选项</string>
     <string name="settings_active_filter_rules_title">主动筛选规则</string>
     <string name="settings_active_filter_rules_desc">设置用于房间筛选的正则表达式规则</string>
     <string name="edit_profile">编辑资料</string>

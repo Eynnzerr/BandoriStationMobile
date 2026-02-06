@@ -265,7 +265,7 @@ fun SettingItemPreview() {
 
                 SettingItem(
                     title = stringResource(Res.string.settings_version_title),
-                    desc = "Android 35: 1.0.4-debug",
+                    desc = "Android 35: 1.0.5-debug",
                     icon = Icons.Outlined.Update,
                     onClick = {}
                 )

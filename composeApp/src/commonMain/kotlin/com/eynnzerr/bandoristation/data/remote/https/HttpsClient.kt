@@ -16,6 +16,8 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import com.eynnzerr.bandoristation.model.GithubRelease
 import com.eynnzerr.bandoristation.utils.isNetworkAvailable
 
@@ -118,6 +120,38 @@ class HttpsClient(
         }
     }
 
+    suspend fun queryLatestRooms(latestTime: Long): ApiResponse {
+        if (!isNetworkAvailable()) {
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("No Internet")
+            )
+        }
+
+        val endpoint = if (apiUrl.endsWith("/")) apiUrl else "$apiUrl/"
+        val request = QueryRoomNumberRequest(
+            function = "query_room_number",
+            latestTime = latestTime
+        )
+        // AppLogger.d(TAG, "Send queryLatestRooms request: ${json.encodeToString(request)}")
+
+        try {
+            val response: HttpResponse = client.post(endpoint) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            // AppLogger.d(TAG, "queryLatestRooms status: ${response.status.value}; raw body: ${response.bodyAsText()}")
+            return response.body()
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Error querying latest rooms: ${e.message}")
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("Network error: ${e.message}")
+            )
+        }
+    }
+
     suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease {
         if (!isNetworkAvailable()) {
             return GithubRelease()
@@ -166,5 +200,11 @@ class HttpsClient(
         }
     }
 }
+
+@Serializable
+private data class QueryRoomNumberRequest(
+    val function: String,
+    @SerialName("latest_time") val latestTime: Long,
+)
 
 private const val TAG = "HttpsClient"

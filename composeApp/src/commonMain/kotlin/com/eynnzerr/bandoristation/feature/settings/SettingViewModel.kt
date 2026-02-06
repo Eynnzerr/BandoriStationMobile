@@ -46,6 +46,7 @@ class SettingViewModel(
                     isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false,
                     isShowingPlayerInfo = p[PreferenceKeys.SHOW_PLAER_BRIEF] ?: false,
                     isRecordingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true,
+                    isAutoPullingNewRooms = p[PreferenceKeys.AUTO_PULL_NEW_ROOMS] ?: false,
                     autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 10L,
                     isEncryptionEnabled = p[PreferenceKeys.ENCRYPTION_TOKEN] != null && encryptionValidDays > 0,
                     encryptionValidDays = encryptionValidDays,
@@ -89,6 +90,13 @@ class SettingViewModel(
             is SettingEvent.UpdateRecordRoomHistory -> {
                 viewModelScope.launch {
                     dataStore.edit { p -> p[PreferenceKeys.RECORD_ROOM_HISTORY] = event.isRecording }
+                }
+                null to null
+            }
+
+            is SettingEvent.UpdateAutoPullNewRooms -> {
+                viewModelScope.launch {
+                    dataStore.edit { p -> p[PreferenceKeys.AUTO_PULL_NEW_ROOMS] = event.enabled }
                 }
                 null to null
             }

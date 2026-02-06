@@ -14,6 +14,7 @@ data class SettingState(
     val isClearingOutdatedRoom: Boolean = false,
     val isShowingPlayerInfo: Boolean = false,
     val isRecordingRoomHistory: Boolean = true,
+    val isAutoPullingNewRooms: Boolean = false,
     val autoUploadInterval: Long = 10,
     val versionName: String = "",
     val isEncryptionEnabled: Boolean = false,
@@ -37,6 +38,7 @@ sealed class SettingEvent : UIEvent {
     data class UpdateClearOutdatedRoom(val isClearing: Boolean): SettingEvent()
     data class UpdateShowPlayerInfo(val isShowing: Boolean): SettingEvent()
     data class UpdateRecordRoomHistory(val isRecording: Boolean): SettingEvent()
+    data class UpdateAutoPullNewRooms(val enabled: Boolean): SettingEvent()
     data class UpdateAutoUploadInterval(val interval: Long): SettingEvent()
     data class UpdateEnableEncryption(val enabled: Boolean): SettingEvent()
     class RegisterEncryption: SettingEvent()

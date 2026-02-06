@@ -132,6 +132,9 @@ class RemoteDataSourceImpl(
     override suspend fun sendApiRequest(request: ApiRequest)
         = httpsClient.sendApiRequest(request)
 
+    override suspend fun queryLatestRooms(latestTime: Long)
+        = httpsClient.queryLatestRooms(latestTime)
+
     override suspend fun fetchLatestRelease(owner: String, repo: String) =
         httpsClient.fetchLatestRelease(owner, repo)
 

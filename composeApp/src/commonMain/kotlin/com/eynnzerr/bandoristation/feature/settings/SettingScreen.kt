@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.School
@@ -67,6 +68,8 @@ import bandoristationm.composeapp.generated.resources.settings_show_player_data_
 import bandoristationm.composeapp.generated.resources.settings_show_player_data_desc
 import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_title
 import bandoristationm.composeapp.generated.resources.settings_auto_upload_interval_desc
+import bandoristationm.composeapp.generated.resources.settings_auto_pull_new_rooms_title
+import bandoristationm.composeapp.generated.resources.settings_auto_pull_new_rooms_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_title
 import bandoristationm.composeapp.generated.resources.settings_encrypt_list_desc
@@ -317,6 +320,19 @@ fun SettingScreen(
                         Switch(
                             checked = state.isRecordingRoomHistory,
                             onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateRecordRoomHistory(it)) }
+                        )
+                    },
+                    onClick = {}
+                )
+
+                SettingItem(
+                    title = stringResource(Res.string.settings_auto_pull_new_rooms_title),
+                    desc = stringResource(Res.string.settings_auto_pull_new_rooms_desc),
+                    icon = Icons.Outlined.Refresh,
+                    action = {
+                        Switch(
+                            checked = state.isAutoPullingNewRooms,
+                            onCheckedChange = { viewModel.sendEvent(SettingEvent.UpdateAutoPullNewRooms(it)) }
                         )
                     },
                     onClick = {}
