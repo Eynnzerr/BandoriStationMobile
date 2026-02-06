@@ -18,3 +18,9 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 client_api_guide.md
+
+# local worktree artifacts
+GEMINI.md
+composeApp/bandori_station.preferences_pb
+composeApp/release/
+composeApp/schemas/
