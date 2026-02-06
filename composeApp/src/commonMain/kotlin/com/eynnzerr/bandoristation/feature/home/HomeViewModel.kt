@@ -24,6 +24,7 @@ import com.eynnzerr.bandoristation.usecase.room.GetRoomListUseCase
 import com.eynnzerr.bandoristation.usecase.time.UpdateTimestampUseCase
 import com.eynnzerr.bandoristation.usecase.room.UploadRoomUseCase
 import com.eynnzerr.bandoristation.usecase.room.GetRoomFilterUseCase
+import com.eynnzerr.bandoristation.usecase.room.QueryLatestRoomsUseCase
 import com.eynnzerr.bandoristation.usecase.room.RequestRecentRoomsUseCase
 import com.eynnzerr.bandoristation.usecase.room.UpdateRoomFilterUseCase
 import com.eynnzerr.bandoristation.usecase.roomhistory.AddRoomHistoryUseCase
@@ -70,6 +71,7 @@ class HomeViewModel(
     private val receiveNoticeUseCase: ReceiveNoticeUseCase,
     private val getServerTimeUseCase: GetServerTimeUseCase,
     private val requestRecentRoomsUseCase: RequestRecentRoomsUseCase,
+    private val queryLatestRoomsUseCase: QueryLatestRoomsUseCase,
     private val getRoomListUseCase: GetRoomListUseCase,
     private val updateTimestampUseCase: UpdateTimestampUseCase,
     private val checkUnreadChatUseCase: CheckUnreadChatUseCase,
@@ -90,8 +92,11 @@ class HomeViewModel(
     var isFilteringPJSK = true
     var isClearingOutdatedRoom = false
     var isSavingRoomHistory = true
+    var isAutoPullingNewRooms = false
     var autoUploadInterval: Long = 5L
     private var autoUploadJob: Job? = null
+    private var autoPullRoomsJob: Job? = null
+    private var latestQueriedRoomTime: Long = 0L
     private var waitingRequestId: String? = null // 当在对话框点击申请后，随即记录当前requestId。即这个字段始终跟踪最后在对话框中申请的id
     private val pendingRequestMap = mutableMapOf<String, RoomInfo>() // 当前正在等待批准的全部申请 requestId to roomInfo
 
@@ -194,6 +199,15 @@ class HomeViewModel(
                 isClearingOutdatedRoom = p[PreferenceKeys.CLEAR_OUTDATED_ROOM] ?: false
                 isSavingRoomHistory = p[PreferenceKeys.RECORD_ROOM_HISTORY] ?: true
                 autoUploadInterval = p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] ?: 5L
+                val shouldAutoPull = p[PreferenceKeys.AUTO_PULL_NEW_ROOMS] ?: false
+                if (shouldAutoPull != isAutoPullingNewRooms) {
+                    isAutoPullingNewRooms = shouldAutoPull
+                    if (shouldAutoPull) {
+                        startAutoPullLatestRooms()
+                    } else {
+                        stopAutoPullLatestRooms()
+                    }
+                }
 
                 internalState.update {
                     it.copy(
@@ -356,7 +370,8 @@ class HomeViewModel(
             is HomeIntent.AppendRoomList -> {
                 val originalList = state.value.rooms
                 val filteredRooms = event.rooms.filterNot(state.value.roomFilter, isFilteringPJSK)
-                state.value.copy(rooms = originalList + filteredRooms) to null
+                val mergedRooms = (originalList + filteredRooms).distinctBy { it.dedupKey() }
+                state.value.copy(rooms = mergedRooms) to null
             }
 
             is HomeIntent.UpdateMessageBadge -> {
@@ -808,6 +823,52 @@ class HomeViewModel(
     override fun onCleared() {
         super.onCleared()
         autoUploadJob?.cancel()
+        autoPullRoomsJob?.cancel()
+    }
+
+    private fun startAutoPullLatestRooms() {
+        if (autoPullRoomsJob?.isActive == true) {
+            return
+        }
+
+        autoPullRoomsJob = viewModelScope.launch {
+            if (latestQueriedRoomTime <= 0L) {
+                latestQueriedRoomTime = getCurrentLatestTime()
+            }
+
+            while (isActive) {
+                when (val result = queryLatestRoomsUseCase(latestQueriedRoomTime)) {
+                    is UseCaseResult.Success -> {
+                        val fetchedRooms = result.data
+                        if (fetchedRooms.isNotEmpty()) {
+                            latestQueriedRoomTime = maxOf(
+                                latestQueriedRoomTime,
+                                fetchedRooms.maxOfOrNull { it.time ?: 0L } ?: latestQueriedRoomTime
+                            )
+                            sendEvent(AppendRoomList(fetchedRooms))
+                        }
+                    }
+                    is UseCaseResult.Error -> {
+                        AppLogger.d(TAG, "Failed to pull latest rooms: ${result.error}")
+                    }
+                    is UseCaseResult.Loading -> Unit
+                }
+                delay(AUTO_PULL_INTERVAL_MILLIS)
+            }
+        }
+    }
+
+    private fun stopAutoPullLatestRooms() {
+        autoPullRoomsJob?.cancel()
+        autoPullRoomsJob = null
+    }
+
+    private fun getCurrentLatestTime(): Long {
+        val latestFromState = state.value.rooms.maxOfOrNull { it.time ?: 0L } ?: 0L
+        if (latestFromState > 0L) {
+            return latestFromState
+        }
+        return (state.value.serverTimestampMillis - AUTO_PULL_INITIAL_LOOKBACK_MILLIS).coerceAtLeast(0L)
     }
 
     fun List<RoomInfo>.filterNot(filter: RoomFilter, isFilteringPJSK: Boolean = true): List<RoomInfo> {
@@ -833,6 +894,12 @@ class HomeViewModel(
             notMatchType && notMatchKeyword && notMatchUserId && notMatchNumberLength
         }
     }
+
+    private fun RoomInfo.dedupKey(): String {
+        return "${time ?: 0L}|${number ?: ""}|${rawMessage ?: ""}|${userInfo?.userId ?: 0L}"
+    }
 }
 
 private const val TAG = "HomeViewModel"
+private const val AUTO_PULL_INTERVAL_MILLIS = 5000L
+private const val AUTO_PULL_INITIAL_LOOKBACK_MILLIS = 2000L

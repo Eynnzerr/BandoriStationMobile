@@ -23,6 +23,7 @@ object PreferenceKeys {
     val CLEAR_OUTDATED_ROOM = booleanPreferencesKey("clear_outdated_room") // whether to auto clear outdated tooms
     val SHOW_PLAER_BRIEF = booleanPreferencesKey("show_player_brief") // whether to display player brief info in room cards
     val RECORD_ROOM_HISTORY = booleanPreferencesKey("record_room_history") // whether to record room join history
+    val AUTO_PULL_NEW_ROOMS = booleanPreferencesKey("auto_pull_new_rooms") // whether to periodically pull latest rooms from API
     val AUTO_UPLOAD_INTERVAL = longPreferencesKey("auto_upload_interval") // interval(seconds) for auto uploading room info
     val ENABLE_ENCRYPTION = booleanPreferencesKey("enable_encryption") // enable room number encryption
     val ENCRYPTION_INVITE_CODE = stringPreferencesKey("encryption_invite_code") // invite code required for viewing user's room number
