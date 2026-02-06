@@ -59,7 +59,9 @@ jobs:
       - name: Set build variables
         run: |
           BUILD_TYPE=${{ github.event.inputs.build_type || 'release' }}
-          BUILD_TYPE_CAPITALIZED=$(echo "$BUILD_TYPE" | sed 's/./\U&/')
+          FIRST_CHAR=$(printf '%s' "$BUILD_TYPE" | cut -c1 | tr '[:lower:]' '[:upper:]')
+          REST_CHARS=$(printf '%s' "$BUILD_TYPE" | cut -c2-)
+          BUILD_TYPE_CAPITALIZED="${FIRST_CHAR}${REST_CHARS}"
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
           
           echo "BUILD_TYPE=$BUILD_TYPE" >> $GITHUB_ENV
@@ -124,13 +126,23 @@ jobs:
           
           FRAMEWORK_DIR="composeApp/build/bin"
           XCFRAMEWORK_NAME="ComposeApp.xcframework"
+          SIMULATOR_UNIVERSAL_FRAMEWORK="$FRAMEWORK_DIR/iosSimulatorUniversal/${BUILD_TYPE}Framework/ComposeApp.framework"
           
-          rm -rf "$XCFRAMEWORK_NAME"
+          rm -rf "$XCFRAMEWORK_NAME" "$SIMULATOR_UNIVERSAL_FRAMEWORK"
+          mkdir -p "$(dirname "$SIMULATOR_UNIVERSAL_FRAMEWORK")"
+
+          cp -R "$FRAMEWORK_DIR/iosSimulatorArm64/${BUILD_TYPE}Framework/ComposeApp.framework" "$SIMULATOR_UNIVERSAL_FRAMEWORK"
+          lipo -create \
+            "$FRAMEWORK_DIR/iosX64/${BUILD_TYPE}Framework/ComposeApp.framework/ComposeApp" \
+            "$FRAMEWORK_DIR/iosSimulatorArm64/${BUILD_TYPE}Framework/ComposeApp.framework/ComposeApp" \
+            -output "$SIMULATOR_UNIVERSAL_FRAMEWORK/ComposeApp"
+
+          echo "✅ Created universal simulator framework binary"
+          lipo -info "$SIMULATOR_UNIVERSAL_FRAMEWORK/ComposeApp"
           
           xcodebuild -create-xcframework \
             -framework "$FRAMEWORK_DIR/iosArm64/${BUILD_TYPE}Framework/ComposeApp.framework" \
-            -framework "$FRAMEWORK_DIR/iosX64/${BUILD_TYPE}Framework/ComposeApp.framework" \
-            -framework "$FRAMEWORK_DIR/iosSimulatorArm64/${BUILD_TYPE}Framework/ComposeApp.framework" \
+            -framework "$SIMULATOR_UNIVERSAL_FRAMEWORK" \
             -output "$XCFRAMEWORK_NAME"
           
           echo "✅ XCFramework created successfully"
