@@ -22,7 +22,8 @@ fun formatTimestamp(timestamp: Long): String {
     }
 }
 
-fun formatTimeDifference(currentTimeMillis: Long, pastTimeMillis: Long) = formatTimestamp(currentTimeMillis - pastTimeMillis)
+fun formatTimeDifference(currentTimeMillis: Long, pastTimeMillis: Long) =
+    formatTimestamp((currentTimeMillis - pastTimeMillis).coerceAtLeast(0L))
 
 fun formatTimestampAsDate(timestamp: Long): String {
     val instant = Instant.fromEpochMilliseconds(timestamp)
