@@ -152,6 +152,35 @@ class HttpsClient(
         }
     }
 
+    suspend fun getOnlineNumber(): ApiResponse {
+        if (!isNetworkAvailable()) {
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("No Internet")
+            )
+        }
+
+        val request = GetOnlineNumberRequest(
+            function = "getOnlineNumber"
+        )
+
+        try {
+            val response: HttpResponse = client.post(apiUrl) {
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }
+
+            AppLogger.d(TAG, "getOnlineNumber status: ${response.status.value}; raw body: ${response.bodyAsText()}")
+            return response.body()
+        } catch (e: Exception) {
+            AppLogger.e(TAG, "Error querying online number: ${e.message}")
+            return ApiResponse(
+                status = "failure",
+                response = ApiResponseContent.StringContent("Network error: ${e.message}")
+            )
+        }
+    }
+
     suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease {
         if (!isNetworkAvailable()) {
             return GithubRelease()
@@ -205,6 +234,11 @@ class HttpsClient(
 private data class QueryRoomNumberRequest(
     val function: String,
     @SerialName("latest_time") val latestTime: Long,
+)
+
+@Serializable
+private data class GetOnlineNumberRequest(
+    val function: String,
 )
 
 private const val TAG = "HttpsClient"

@@ -135,6 +135,9 @@ class RemoteDataSourceImpl(
     override suspend fun queryLatestRooms(latestTime: Long)
         = httpsClient.queryLatestRooms(latestTime)
 
+    override suspend fun getOnlineNumber()
+        = httpsClient.getOnlineNumber()
+
     override suspend fun fetchLatestRelease(owner: String, repo: String) =
         httpsClient.fetchLatestRelease(owner, repo)
 

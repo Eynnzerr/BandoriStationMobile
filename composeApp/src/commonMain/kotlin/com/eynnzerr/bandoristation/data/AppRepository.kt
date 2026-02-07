@@ -47,6 +47,7 @@ class AppRepository(
     ) = remoteDataSource.sendAuthenticHttpsRequest(request, token)
     suspend fun sendApiRequest(request: ApiRequest) = remoteDataSource.sendApiRequest(request)
     suspend fun queryLatestRooms(latestTime: Long) = remoteDataSource.queryLatestRooms(latestTime)
+    suspend fun getOnlineNumber() = remoteDataSource.getOnlineNumber()
 
     suspend fun fetchLatestRelease(owner: String, repo: String) =
         remoteDataSource.fetchLatestRelease(owner, repo)

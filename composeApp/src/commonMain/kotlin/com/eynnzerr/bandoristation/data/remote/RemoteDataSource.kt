@@ -46,6 +46,7 @@ interface RemoteDataSource {
 
     suspend fun sendApiRequest(request: ApiRequest): ApiResponse
     suspend fun queryLatestRooms(latestTime: Long): ApiResponse
+    suspend fun getOnlineNumber(): ApiResponse
 
     suspend fun fetchLatestRelease(owner: String, repo: String): GithubRelease
 

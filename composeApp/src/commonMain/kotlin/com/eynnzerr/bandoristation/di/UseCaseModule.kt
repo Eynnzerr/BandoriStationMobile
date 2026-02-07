@@ -34,6 +34,7 @@ import com.eynnzerr.bandoristation.usecase.account.ResetPasswordSendVCodeUseCase
 import com.eynnzerr.bandoristation.usecase.account.ResetPasswordVerifyEmailUseCase
 import com.eynnzerr.bandoristation.usecase.account.ResetPasswordUseCase
 import com.eynnzerr.bandoristation.usecase.room.GetRoomFilterUseCase
+import com.eynnzerr.bandoristation.usecase.room.GetOnlineNumberUseCase
 import com.eynnzerr.bandoristation.usecase.room.QueryLatestRoomsUseCase
 import com.eynnzerr.bandoristation.usecase.room.RequestRecentRoomsUseCase
 import com.eynnzerr.bandoristation.usecase.room.UpdateRoomFilterUseCase
@@ -275,6 +276,13 @@ fun provideUseCaseModule() = module {
             repository = get(),
             dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
             dataStore = get(),
+        )
+    }
+
+    single {
+        GetOnlineNumberUseCase(
+            repository = get(),
+            dispatcher = get(named(DispatcherQualifiers.IO_DISPATCHER)),
         )
     }
 

@@ -57,6 +57,11 @@
     <string name="settings_tutorial_title">术语教程</string>
     <string name="settings_tutorial_desc">关于车头常用术语的简易教程</string>
     <string name="settings_version_title">版本</string>
+    <string name="settings_online_users_title">当前在线人数</string>
+    <string name="settings_online_users_loading">正在获取在线人数...</string>
+    <string name="settings_online_users_unavailable">在线人数暂不可用</string>
+    <string name="settings_online_users_count">当前在线人数：%1$d</string>
+    <string name="settings_online_users_refresh_failed">在线人数刷新失败。</string>
     <string name="settings_encrypt_title">车牌加密</string>
     <string name="settings_encrypt_desc">他人查看车牌需取得你的同意</string>
     <string name="settings_encrypt_login_title">加密服务注册</string>
