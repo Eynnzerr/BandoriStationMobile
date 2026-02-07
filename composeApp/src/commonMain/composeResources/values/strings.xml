@@ -57,6 +57,11 @@
     <string name="settings_tutorial_title">Terminology Tutorial</string>
     <string name="settings_tutorial_desc">A simple tutorial on common terms for room leaders</string>
     <string name="settings_version_title">Version</string>
+    <string name="settings_online_users_title">Current Online Users</string>
+    <string name="settings_online_users_loading">Loading online users...</string>
+    <string name="settings_online_users_unavailable">Online users unavailable</string>
+    <string name="settings_online_users_count">Current online users: %1$d</string>
+    <string name="settings_online_users_refresh_failed">Failed to refresh online users.</string>
     <string name="settings_encrypt_title">Encryption</string>
     <string name="settings_encrypt_desc">Others must be approved to view your room number</string>
     <string name="settings_encrypt_login_title">Registration</string>

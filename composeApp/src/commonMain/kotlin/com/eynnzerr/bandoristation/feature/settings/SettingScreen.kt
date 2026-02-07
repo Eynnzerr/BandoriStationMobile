@@ -19,6 +19,7 @@ import androidx.compose.material.icons.outlined.Block
 import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material.icons.outlined.GroupAdd
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.SaveAlt
 import androidx.compose.material.icons.outlined.Schedule
@@ -55,6 +56,10 @@ import bandoristationm.composeapp.generated.resources.settings_basic_settings
 import bandoristationm.composeapp.generated.resources.settings_encryption_valid_days
 import bandoristationm.composeapp.generated.resources.settings_error_icon_desc
 import bandoristationm.composeapp.generated.resources.settings_extended_features
+import bandoristationm.composeapp.generated.resources.settings_online_users_count
+import bandoristationm.composeapp.generated.resources.settings_online_users_loading
+import bandoristationm.composeapp.generated.resources.settings_online_users_title
+import bandoristationm.composeapp.generated.resources.settings_online_users_unavailable
 import bandoristationm.composeapp.generated.resources.settings_no_data
 import bandoristationm.composeapp.generated.resources.settings_other
 import bandoristationm.composeapp.generated.resources.settings_screen_title
@@ -74,6 +79,7 @@ import bandoristationm.composeapp.generated.resources.settings_encrypt_code_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_code_title
 import bandoristationm.composeapp.generated.resources.settings_encrypt_list_desc
 import bandoristationm.composeapp.generated.resources.settings_encrypt_list_title
+import bandoristationm.composeapp.generated.resources.home_refresh_icon_desc
 import bandoristationm.composeapp.generated.resources.settings_tutorial_title
 import bandoristationm.composeapp.generated.resources.settings_tutorial_desc
 import bandoristationm.composeapp.generated.resources.settings_version_title
@@ -92,6 +98,7 @@ import com.eynnzerr.bandoristation.ui.ext.appBarScroll
 import com.eynnzerr.bandoristation.ui.theme.bandThemeList
 import com.eynnzerr.bandoristation.utils.rememberFlowWithLifecycle
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -132,6 +139,15 @@ fun SettingScreen(
                     coroutineScope.launch {
                         snackbarHostState.showSnackbar(
                             message = action.text,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+
+                is SettingEffect.ShowResourceSnackbar -> {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = getString(action.textRes),
                             duration = SnackbarDuration.Short
                         )
                     }
@@ -198,6 +214,18 @@ fun SettingScreen(
                         )
                     }
                 },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            viewModel.sendEvent(FetchOnlineNumber())
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Refresh,
+                            contentDescription = stringResource(Res.string.home_refresh_icon_desc)
+                        )
+                    }
+                }
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -371,6 +399,20 @@ fun SettingScreen(
             )
 
             SettingsGroup {
+                SettingItem(
+                    title = stringResource(Res.string.settings_online_users_title),
+                    desc = when {
+                        state.onlineNumber != null ->
+                            stringResource(Res.string.settings_online_users_count, state.onlineNumber ?: 0)
+                        state.isOnlineNumberLoading ->
+                            stringResource(Res.string.settings_online_users_loading)
+                        else ->
+                            stringResource(Res.string.settings_online_users_unavailable)
+                    },
+                    icon = Icons.Outlined.People,
+                    onClick = { viewModel.sendEvent(FetchOnlineNumber()) }
+                )
+
                 SettingItem(
                     title = stringResource(Res.string.settings_tutorial_title),
                     desc = stringResource(Res.string.settings_tutorial_desc),

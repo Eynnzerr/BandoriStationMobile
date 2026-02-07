@@ -4,6 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.viewModelScope
+import bandoristationm.composeapp.generated.resources.Res
+import bandoristationm.composeapp.generated.resources.settings_online_users_refresh_failed
 import com.eynnzerr.bandoristation.base.BaseViewModel
 import com.eynnzerr.bandoristation.feature.settings.SettingEffect.*
 import com.eynnzerr.bandoristation.model.UseCaseResult
@@ -15,6 +17,7 @@ import com.eynnzerr.bandoristation.usecase.encryption.RegisterEncryptionUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.RemoveFromBlacklistUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.RemoveFromWhitelistUseCase
 import com.eynnzerr.bandoristation.usecase.encryption.UpdateInviteCodeUseCase
+import com.eynnzerr.bandoristation.usecase.room.GetOnlineNumberUseCase
 import com.eynnzerr.bandoristation.usecase.social.FollowUserUseCase
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,11 +32,14 @@ class SettingViewModel(
     private val getBlackWhiteListUseCase: GetBlackWhiteListUseCase,
     private val getUserInfoUseCase: GetUserInfoUseCase,
     private val followUserUseCase: FollowUserUseCase,
+    private val getOnlineNumberUseCase: GetOnlineNumberUseCase,
     private val dataStore: DataStore<Preferences>,
 ) : BaseViewModel<SettingState, SettingEvent, SettingEffect>(
     initialState = SettingState.initial()
 ) {
     override suspend fun onInitialize() {
+        sendEvent(SettingEvent.FetchOnlineNumber())
+
         dataStore.data.collect { p ->
             val currentTimestamp = Clock.System.now().toEpochMilliseconds()
             val registerExpireTimestamp = p[PreferenceKeys.REGISTER_EXPIRE_TIME] ?: currentTimestamp
@@ -104,6 +110,28 @@ class SettingViewModel(
             is SettingEvent.UpdateAutoUploadInterval -> {
                 viewModelScope.launch {
                     dataStore.edit { p -> p[PreferenceKeys.AUTO_UPLOAD_INTERVAL] = event.interval }
+                }
+                null to null
+            }
+
+            is SettingEvent.FetchOnlineNumber -> {
+                internalState.update { it.copy(isOnlineNumberLoading = true) }
+                viewModelScope.launch {
+                    when (val response = getOnlineNumberUseCase.invoke(Unit)) {
+                        is UseCaseResult.Loading -> Unit
+                        is UseCaseResult.Error -> {
+                            internalState.update { it.copy(isOnlineNumberLoading = false) }
+                            sendEffect(ShowResourceSnackbar(Res.string.settings_online_users_refresh_failed))
+                        }
+                        is UseCaseResult.Success -> {
+                            internalState.update {
+                                it.copy(
+                                    onlineNumber = response.data,
+                                    isOnlineNumberLoading = false
+                                )
+                            }
+                        }
+                    }
                 }
                 null to null
             }

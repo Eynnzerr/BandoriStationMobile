@@ -7,6 +7,7 @@ import com.eynnzerr.bandoristation.feature.home.HomeIntent
 import com.eynnzerr.bandoristation.getPlatform
 import com.eynnzerr.bandoristation.model.account.AccountInfo
 import com.eynnzerr.bandoristation.model.account.AccountSummary
+import org.jetbrains.compose.resources.StringResource
 
 data class SettingState(
     val themeName: String = "",
@@ -16,6 +17,8 @@ data class SettingState(
     val isRecordingRoomHistory: Boolean = true,
     val isAutoPullingNewRooms: Boolean = false,
     val autoUploadInterval: Long = 10,
+    val onlineNumber: Int? = null,
+    val isOnlineNumberLoading: Boolean = false,
     val versionName: String = "",
     val isEncryptionEnabled: Boolean = false,
     val encryptionValidDays: Long = 0,
@@ -40,6 +43,7 @@ sealed class SettingEvent : UIEvent {
     data class UpdateRecordRoomHistory(val isRecording: Boolean): SettingEvent()
     data class UpdateAutoPullNewRooms(val enabled: Boolean): SettingEvent()
     data class UpdateAutoUploadInterval(val interval: Long): SettingEvent()
+    class FetchOnlineNumber: SettingEvent()
     data class UpdateEnableEncryption(val enabled: Boolean): SettingEvent()
     class RegisterEncryption: SettingEvent()
     data class UpdateInviteCode(val code: String): SettingEvent()
@@ -55,4 +59,5 @@ sealed class SettingEffect : UIEffect {
     data class ControlListDialog(val isShowing: Boolean): SettingEffect()
     data class ControlProfileDialog(val isShowing: Boolean): SettingEffect()
     data class ShowSnackbar(val text: String): SettingEffect()
+    data class ShowResourceSnackbar(val textRes: StringResource): SettingEffect()
 }
