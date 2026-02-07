@@ -97,6 +97,7 @@ class HomeViewModel(
     private var autoUploadJob: Job? = null
     private var autoPullRoomsJob: Job? = null
     private var latestQueriedRoomTime: Long = 0L
+    private var lastServerTimeRequestAt: Long = 0L
     private var waitingRequestId: String? = null // 当在对话框点击申请后，随即记录当前requestId。即这个字段始终跟踪最后在对话框中申请的id
     private val pendingRequestMap = mutableMapOf<String, RoomInfo>() // 当前正在等待批准的全部申请 requestId to roomInfo
 
@@ -168,9 +169,14 @@ class HomeViewModel(
                         AppLogger.d(TAG, "Successfully fetched room list. length: ${result.data.size}")
                         sendEvent(HomeIntent.AppendRoomList(result.data))
 
-                        // correct server timestamp if local server time falls behind latest server room time for 1.5s and more.
-                        result.data.lastOrNull()?.let { lastRoom ->
-                            if ((lastRoom.time ?: Clock.System.now().toEpochMilliseconds()) - state.value.serverTimestampMillis > 1500L) {
+                        // Correct timestamp if local server time falls behind latest room time for 1.5s+.
+                        result.data.maxOfOrNull { it.time ?: 0L }?.let { latestRoomTime ->
+                            val now = Clock.System.now().toEpochMilliseconds()
+                            if (
+                                latestRoomTime - state.value.serverTimestampMillis > 1500L &&
+                                now - lastServerTimeRequestAt >= SERVER_TIME_REQUEST_MIN_INTERVAL_MILLIS
+                            ) {
+                                lastServerTimeRequestAt = now
                                 getServerTimeUseCase(Unit)
                             }
                         }
@@ -397,7 +403,7 @@ class HomeViewModel(
                             time = previousRoom.time ?: 0,
                             userInfo = previousRoom.userInfo ?: UserInfo(),
                             loginId = 0,
-                            duration = currentTimestamp - state.value.joinedTimestampMillis,
+                            duration = (currentTimestamp - state.value.joinedTimestampMillis).coerceAtLeast(0L),
                         ))
                     }
                 }
@@ -903,3 +909,4 @@ class HomeViewModel(
 private const val TAG = "HomeViewModel"
 private const val AUTO_PULL_INTERVAL_MILLIS = 5000L
 private const val AUTO_PULL_INITIAL_LOOKBACK_MILLIS = 2000L
+private const val SERVER_TIME_REQUEST_MIN_INTERVAL_MILLIS = 10_000L
